@@ -1,0 +1,118 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.sida.mdw.mdw"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+8-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml
+9        android:targetSdkVersion="34" />
+9-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml
+10
+11    <uses-feature
+11-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:4:5-7:36
+12        android:name="android.hardware.telephony"
+12-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:5:9-50
+13        android:required="false" />
+13-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:6:9-33
+14
+15    <uses-permission android:name="android.permission.INTERNET" />
+15-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:9:5-67
+15-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:9:22-64
+16    <uses-permission android:name="android.permission.CALL_PHONE" />
+16-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:10:5-69
+16-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:10:22-66
+17
+18    <queries>
+18-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:12:5-18:15
+19
+20        <!-- If your app checks for call support -->
+21        <intent>
+21-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:14:9-17:18
+22            <action android:name="android.intent.action.VIEW" />
+22-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:15:13-65
+22-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:15:21-62
+23
+24            <data android:scheme="tel" />
+24-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:16:13-42
+24-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:16:19-39
+25        </intent>
+26    </queries>
+27
+28    <application
+29        android:name="android.app.Application"
+29-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:20:9-42
+30        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+30-->[androidx.core:core:1.6.0] /Users/rupamkarmakar/.gradle/caches/transforms-3/d08c73bfb05384f2e52578171dbd141e/transformed/core-1.6.0/AndroidManifest.xml:24:18-86
+31        android:icon="@mipmap/ic_launcher"
+31-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:21:9-43
+32        android:label="mdw" >
+32-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:22:9-28
+33        <activity
+33-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:23:9-42:20
+34            android:name="com.sida.mdw.mdw.MainActivity"
+34-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:24:13-41
+35            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+35-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:25:13-163
+36            android:exported="true"
+36-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:26:13-36
+37            android:hardwareAccelerated="true"
+37-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:27:13-47
+38            android:launchMode="singleTop"
+38-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:28:13-43
+39            android:theme="@style/LaunchTheme"
+39-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:29:13-47
+40            android:windowSoftInputMode="adjustResize" >
+40-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:30:13-55
+41
+42            <!--
+43                 Specifies an Android theme to apply to this Activity as soon as
+44                 the Android process has started. This theme is visible to the user
+45                 while the Flutter UI initializes. After that, this theme continues
+46                 to determine the Window background behind the Flutter UI.
+47            -->
+48            <meta-data
+48-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:35:13-37:57
+49                android:name="io.flutter.embedding.android.NormalTheme"
+49-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:36:17-72
+50                android:resource="@style/NormalTheme" />
+50-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:37:17-54
+51
+52            <intent-filter>
+52-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:38:13-41:29
+53                <action android:name="android.intent.action.MAIN" />
+53-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:39:17-69
+53-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:39:25-66
+54
+55                <category android:name="android.intent.category.LAUNCHER" />
+55-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:40:17-77
+55-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:40:27-74
+56            </intent-filter>
+57        </activity>
+58        <!--
+59             Don't delete the meta-data below.
+60             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java
+61        -->
+62        <meta-data
+62-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:45:9-47:33
+63            android:name="flutterEmbedding"
+63-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:46:13-44
+64            android:value="2" />
+64-->/Users/rupamkarmakar/Documents/Development/MDW/android/app/src/main/AndroidManifest.xml:47:13-30
+65
+66        <uses-library
+66-->[androidx.window:window:1.0.0-beta04] /Users/rupamkarmakar/.gradle/caches/transforms-3/076eb9235982ee06112d76594ea8585f/transformed/jetified-window-1.0.0-beta04/AndroidManifest.xml:25:9-27:40
+67            android:name="androidx.window.extensions"
+67-->[androidx.window:window:1.0.0-beta04] /Users/rupamkarmakar/.gradle/caches/transforms-3/076eb9235982ee06112d76594ea8585f/transformed/jetified-window-1.0.0-beta04/AndroidManifest.xml:26:13-54
+68            android:required="false" />
+68-->[androidx.window:window:1.0.0-beta04] /Users/rupamkarmakar/.gradle/caches/transforms-3/076eb9235982ee06112d76594ea8585f/transformed/jetified-window-1.0.0-beta04/AndroidManifest.xml:27:13-37
+69        <uses-library
+69-->[androidx.window:window:1.0.0-beta04] /Users/rupamkarmakar/.gradle/caches/transforms-3/076eb9235982ee06112d76594ea8585f/transformed/jetified-window-1.0.0-beta04/AndroidManifest.xml:28:9-30:40
+70            android:name="androidx.window.sidecar"
+70-->[androidx.window:window:1.0.0-beta04] /Users/rupamkarmakar/.gradle/caches/transforms-3/076eb9235982ee06112d76594ea8585f/transformed/jetified-window-1.0.0-beta04/AndroidManifest.xml:29:13-51
+71            android:required="false" />
+71-->[androidx.window:window:1.0.0-beta04] /Users/rupamkarmakar/.gradle/caches/transforms-3/076eb9235982ee06112d76594ea8585f/transformed/jetified-window-1.0.0-beta04/AndroidManifest.xml:30:13-37
+72    </application>
+73
+74</manifest>

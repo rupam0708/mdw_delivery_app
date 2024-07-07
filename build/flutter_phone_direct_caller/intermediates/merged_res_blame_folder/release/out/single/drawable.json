@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-merged_res-10:/drawable/notification_bg.xml",
+        "source": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-core-1.6.0-3:/drawable/notification_bg.xml"
+    },
+    {
+        "merged": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-merged_res-10:/drawable/notification_bg_low.xml",
+        "source": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-core-1.6.0-3:/drawable/notification_bg_low.xml"
+    },
+    {
+        "merged": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-merged_res-10:/drawable/notification_icon_background.xml",
+        "source": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-core-1.6.0-3:/drawable/notification_icon_background.xml"
+    },
+    {
+        "merged": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-merged_res-10:/drawable/notification_tile_bg.xml",
+        "source": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-core-1.6.0-3:/drawable/notification_tile_bg.xml"
+    }
+]
