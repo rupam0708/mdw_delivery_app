@@ -1,0 +1,12 @@
+com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-jetified-annotation-experimental-1.1.0-0 /Users/rupamkarmakar/.gradle/caches/transforms-3/02315cc9f75263553d2042718fc375ee/transformed/jetified-annotation-experimental-1.1.0/res
+com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-jetified-window-1.0.0-beta04-1 /Users/rupamkarmakar/.gradle/caches/transforms-3/076eb9235982ee06112d76594ea8585f/transformed/jetified-window-1.0.0-beta04/res
+com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-jetified-window-java-1.0.0-beta04-2 /Users/rupamkarmakar/.gradle/caches/transforms-3/99750bb863b6fe460a7b5da8686e778d/transformed/jetified-window-java-1.0.0-beta04/res
+com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-core-1.6.0-3 /Users/rupamkarmakar/.gradle/caches/transforms-3/d08c73bfb05384f2e52578171dbd141e/transformed/core-1.6.0/res
+com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-main-4 /Users/rupamkarmakar/.pub-cache/hosted/pub.dev/flutter_phone_direct_caller-2.1.1/android/src/main/res
+com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-release-5 /Users/rupamkarmakar/.pub-cache/hosted/pub.dev/flutter_phone_direct_caller-2.1.1/android/src/release/res
+com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-pngs-6 /Users/rupamkarmakar/Documents/Development/MDW/build/flutter_phone_direct_caller/generated/res/pngs/release
+com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-resValues-7 /Users/rupamkarmakar/Documents/Development/MDW/build/flutter_phone_direct_caller/generated/res/resValues/release
+com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-rs-8 /Users/rupamkarmakar/Documents/Development/MDW/build/flutter_phone_direct_caller/generated/res/rs/release
+com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-mergeReleaseResources-9 /Users/rupamkarmakar/Documents/Development/MDW/build/flutter_phone_direct_caller/intermediates/incremental/release/mergeReleaseResources/merged.dir
+com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-mergeReleaseResources-10 /Users/rupamkarmakar/Documents/Development/MDW/build/flutter_phone_direct_caller/intermediates/incremental/release/mergeReleaseResources/stripped.dir
+com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-merged_res-11 /Users/rupamkarmakar/Documents/Development/MDW/build/flutter_phone_direct_caller/intermediates/merged_res/release

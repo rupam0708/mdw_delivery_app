@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-merged_res-10:/layout/notification_action.xml",
+        "source": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-core-1.6.0-3:/layout/notification_action.xml"
+    },
+    {
+        "merged": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-merged_res-10:/layout/notification_action_tombstone.xml",
+        "source": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-core-1.6.0-3:/layout/notification_action_tombstone.xml"
+    },
+    {
+        "merged": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-merged_res-10:/layout/notification_template_part_time.xml",
+        "source": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-core-1.6.0-3:/layout/notification_template_part_time.xml"
+    },
+    {
+        "merged": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-merged_res-10:/layout/notification_template_part_chronometer.xml",
+        "source": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-core-1.6.0-3:/layout/notification_template_part_chronometer.xml"
+    },
+    {
+        "merged": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-merged_res-10:/layout/notification_template_icon_group.xml",
+        "source": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-core-1.6.0-3:/layout/notification_template_icon_group.xml"
+    },
+    {
+        "merged": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-merged_res-10:/layout/custom_dialog.xml",
+        "source": "com.yanisalfian.flutterphonedirectcaller.flutter_phone_direct_caller-core-1.6.0-3:/layout/custom_dialog.xml"
+    }
+]
