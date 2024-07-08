@@ -1,8 +1,10 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
+import 'package:mdw/screens/main_screen.dart';
 import 'package:mdw/screens/onboarding_screen.dart';
 import 'package:mdw/services/app_function_services.dart';
+import 'package:mdw/services/storage_services.dart';
 import 'package:mdw/styles.dart';
 import 'package:mdw/utils/snack_bar_utils.dart';
 
@@ -15,7 +17,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _emailTextController, _passwordTextController;
-  bool obscure = true;
+  bool obscure = true, loading = false;
 
   @override
   void initState() {
@@ -29,6 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBar(
+        centerTitle: true,
         title: Text(
           "Login to your account",
           style: TextStyle(
@@ -97,45 +100,82 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 height: MediaQuery.of(context).size.height / 5,
               ),
-              CustomBtn(
-                onTap: (() {
-                  if (!EmailValidator.validate(
-                      _emailTextController.text.trim())) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      AppSnackBar().customizedAppSnackBar(
-                          message: "Please enter a valid email.",
-                          context: context),
-                    );
-                  } else if (AppFunctions.passwordValidator(
-                          _passwordTextController.text.trim()) !=
-                      null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      AppSnackBar().customizedAppSnackBar(
-                          message: AppFunctions.passwordValidator(
-                                  _passwordTextController.text.trim()) ??
-                              "",
-                          context: context),
-                    );
-                  } else {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: ((ctx) => CodeVerificationScreen(
-                              head: "Attendance",
-                              upperText:
-                                  "Ask your admin to enter his code to confirm your attendance.",
-                              type: 0,
-                              btnText: "Confirm Attendance",
-                            )),
-                      ),
-                    );
-                  }
-                }),
-                text: "Login to my account",
-              ),
+              if (!loading)
+                CustomBtn(
+                  onTap: (() async {
+                    setState(() {
+                      loading = true;
+                    });
+                    if (!EmailValidator.validate(
+                        _emailTextController.text.trim())) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        AppSnackBar().customizedAppSnackBar(
+                            message: "Please enter a valid email.",
+                            context: context),
+                      );
+                    } else if (AppFunctions.passwordValidator(
+                            _passwordTextController.text.trim()) !=
+                        null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        AppSnackBar().customizedAppSnackBar(
+                            message: AppFunctions.passwordValidator(
+                                    _passwordTextController.text.trim()) ??
+                                "",
+                            context: context),
+                      );
+                    } else {
+                      await StorageServices.setSignInStatus(true)
+                          .whenComplete(() async {
+                        bool attendanceStatus =
+                            await AppFunctions.getAttendanceStatus();
+                        if (attendanceStatus) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: ((ctx) => MainScreen()),
+                            ),
+                          );
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: ((ctx) => const CodeVerificationScreen(
+                                    head: "Attendance",
+                                    upperText:
+                                        "Ask your admin to enter his code to confirm your attendance.",
+                                    type: 0,
+                                    btnText: "Confirm Attendance",
+                                  )),
+                            ),
+                          );
+                        }
+                      });
+                    }
+                    setState(() {
+                      loading = false;
+                    });
+                  }),
+                  text: "Login to my account",
+                ),
+              if (loading) CustomLoadingIndicator(),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class CustomLoadingIndicator extends StatelessWidget {
+  const CustomLoadingIndicator({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: CircularProgressIndicator(
+        color: AppColors.green,
       ),
     );
   }
