@@ -45,6 +45,7 @@ dependencies:
   intl:
   flutter_phone_direct_caller:
   permission_handler:
+  shared_preferences:
 
 dev_dependencies:
   flutter_test:

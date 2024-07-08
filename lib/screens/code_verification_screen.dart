@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mdw/screens/login_screen.dart';
 import 'package:mdw/screens/main_screen.dart';
 import 'package:mdw/screens/onboarding_screen.dart';
+import 'package:mdw/services/storage_services.dart';
 import 'package:mdw/styles.dart';
 import 'package:mdw/utils/snack_bar_utils.dart';
 import 'package:pinput/pinput.dart';
@@ -22,7 +24,7 @@ class CodeVerificationScreen extends StatefulWidget {
 }
 
 class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
-  bool isPinVerified = false;
+  bool isPinVerified = false, loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -55,30 +57,41 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
               SizedBox(
                 height: 30,
               ),
-              CustomBtn(
-                onTap: (() {
-                  if (!isPinVerified) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      AppSnackBar().customizedAppSnackBar(
-                        message: "Please enter the valid pin.",
-                        context: context,
-                      ),
-                    );
-                  } else {
-                    if (widget.type == 0) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: ((ctx) => MainScreen()),
+              if (!loading)
+                CustomBtn(
+                  onTap: (() async {
+                    setState(() {
+                      loading = true;
+                    });
+                    if (!isPinVerified) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        AppSnackBar().customizedAppSnackBar(
+                          message: "Please enter the valid pin.",
+                          context: context,
                         ),
                       );
                     } else {
-                      Navigator.pop(context);
+                      if (widget.type == 0) {
+                        await StorageServices.setAttendanceStatus(true)
+                            .whenComplete(() {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: ((ctx) => MainScreen()),
+                            ),
+                          );
+                        });
+                      } else {
+                        Navigator.pop(context);
+                      }
                     }
-                  }
-                }),
-                text: widget.btnText,
-              ),
+                    setState(() {
+                      loading = false;
+                    });
+                  }),
+                  text: widget.btnText,
+                ),
+              if (loading) CustomLoadingIndicator(),
             ],
           ),
         ),

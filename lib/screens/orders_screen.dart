@@ -96,7 +96,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                       if (await Permission
                                           .phone.serviceStatus.isEnabled) {
                                         await AppFunctions.callNumber(
-                                            "8583006460");
+                                            "+918583006460");
                                       } else {
                                         Permission.phone.request();
                                       }

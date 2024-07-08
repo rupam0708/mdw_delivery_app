@@ -1,5 +1,6 @@
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:intl/intl.dart';
+import 'package:mdw/services/storage_services.dart';
 
 import '../models/feedback_model.dart';
 
@@ -85,5 +86,33 @@ class AppFunctions {
 
   static Future<bool?> callNumber(String number) async {
     return await FlutterPhoneDirectCaller.callNumber(number);
+  }
+
+  static bool shouldShowAttendanceScreen() {
+    DateTime now = DateTime.now();
+    DateTime nineAM = DateTime(now.year, now.month, now.day, 9);
+    DateTime twoPM = DateTime(now.year, now.month, now.day, 14);
+    DateTime threePM = DateTime(now.year, now.month, now.day, 15);
+    DateTime eightPM = DateTime(now.year, now.month, now.day, 20);
+
+    if (now.isAfter(nineAM) && now.isBefore(twoPM)) {
+      return false;
+    } else if (now.isAfter(threePM) && now.isBefore(eightPM)) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  static Future<bool> getSignInStatus() async {
+    return await StorageServices.getSignInStatus();
+  }
+
+  static Future<bool> getAttendanceStatus() async {
+    bool attendanceStatus = await StorageServices.getSignInStatus();
+    if (!attendanceStatus) {
+      attendanceStatus = AppFunctions.shouldShowAttendanceScreen();
+    }
+    return attendanceStatus;
   }
 }
