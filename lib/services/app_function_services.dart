@@ -1,6 +1,11 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:mdw/services/storage_services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/feedback_model.dart';
 
@@ -114,5 +119,40 @@ class AppFunctions {
       attendanceStatus = AppFunctions.shouldShowAttendanceScreen();
     }
     return attendanceStatus;
+  }
+
+  static Future<void> launchMap(BuildContext context, lat, lng) async {
+    var url = '';
+    var urlAppleMaps = '';
+    List<Placemark> placemarks1 = await placemarkFromCoordinates(lat, lng);
+    String origin =
+        "${placemarks1[0].name},+${placemarks1[0].street},+${placemarks1[0].subAdministrativeArea},+${placemarks1[0].locality},+${placemarks1[0].thoroughfare}+${placemarks1[0].postalCode},+${placemarks1[0].country}";
+    origin = origin.replaceAll(" ", "+");
+    Uri uri;
+    if (Platform.isAndroid) {
+      // url = "https://www.google.com/maps/search/?api=1&query=${lat},${lng}";
+      url = "https://www.google.com/maps/search/?api=1&query=$origin";
+      uri = Uri.parse(url);
+    } else {
+      // urlAppleMaps = 'https://maps.apple.com/?q=$lat,$lng';
+      urlAppleMaps = 'https://maps.apple.com/?q=$origin';
+      url = "comgooglemaps://?saddr=&daddr=$lat,$lng&directionsmode=driving";
+      uri = Uri.parse(urlAppleMaps);
+      // if (await canLaunchUrl(uri)) {
+      //   await launchUrl(uri);
+      // } else {
+      //   throw 'Could not launch $url';
+      // }
+    }
+
+    //https://www.google.com/maps/dir/Kutul+Sahi+Rd,+Ramkrishna+Pally,+Barasat,+Kolkata,+West+Bengal+700127,+India/TECHNO+INTERNATIONAL+NEW+TOWN,+TECHNO+INDIA+COLLEGE+OF+TECHNOLOGY,+DG+Block(Newtown),+Action+Area+1D,+Newtown,+New+Town,+West+Bengal/@22.6411377,88.4219832,13z/data=!3m1!4b1!4m14!4m13!1m5!1m1!1s0x39f8a1ff00ac4627:0x8f29211ae5f443b2!2m2!1d88.4920747!2d22.7042965!1m5!1m1!1s0x3a0275325006855b:0x6f82539ddd62a603!2m2!1d88.4757711!2d22.5783614!3e0?entry=ttu
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else if (await canLaunchUrl(Uri.parse(urlAppleMaps))) {
+      await launchUrl(Uri.parse(urlAppleMaps));
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }

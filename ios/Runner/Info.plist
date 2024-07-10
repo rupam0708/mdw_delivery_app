@@ -3,9 +3,12 @@
 <plist version="1.0">
 	<dict>
 		<key>LSApplicationQueriesSchemes</key>
-		<array>
-			<string>tel</string>
-		</array>
+        <array>
+          <string>sms</string>
+          <string>tel</string>
+        </array>
+		<key>NSLocationWhenInUseUsageDescription</key>
+        <string>This app needs access to location when open.</string>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
