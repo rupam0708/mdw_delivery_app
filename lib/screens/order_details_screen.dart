@@ -1,7 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
+import 'package:mdw/screens/login_screen.dart';
+import 'package:mdw/services/app_function_services.dart';
 import 'package:mdw/styles.dart';
 
 import 'onboarding_screen.dart';
@@ -22,7 +26,61 @@ class OrderDetailsScreen extends StatefulWidget {
 }
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
-  bool isPinVerified = false;
+  bool isPinVerified = false, isLoading = false;
+  Position? position;
+  List<Placemark>? placemarks;
+
+  Future<Position?> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+    return await Geolocator.getCurrentPosition();
+  }
+
+  Future<List<Placemark>> _getPositionDetails(Position pos) async {
+    return await placemarkFromCoordinates(pos.latitude, pos.longitude);
+  }
+
+  getDate() async {
+    setState(() {
+      isLoading = true;
+    });
+    position = await _determinePosition();
+    if (position != null) {
+      placemarks = await _getPositionDetails(position!);
+    }
+    // if (placemarks != null) {
+    //   log(placemarks.toString());
+    // }
+    Future.delayed(Duration.zero, (() {
+      setState(() {
+        isLoading = false;
+      });
+    }));
+  }
+
+  @override
+  void initState() {
+    getDate();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +98,78 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             CustomUpperPortion(
               head: "View details of the order\nOrder #${widget.orderID}",
             ),
+            SizedBox(
+              height: 15,
+            ),
+            if (position != null && !isLoading)
+              Container(
+                height: 175,
+                width: MediaQuery.of(context).size.width,
+                margin: EdgeInsets.only(left: 20, right: 20),
+                padding:
+                    EdgeInsets.only(left: 15, right: 15, top: 15, bottom: 15),
+                decoration: BoxDecoration(
+                  color: AppColors.containerColor,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 3,
+                      blurRadius: 10,
+                      offset: Offset(0, 2), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        image: DecorationImage(
+                          image: AssetImage("assets/map.png"),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            AppColors.transparent,
+                            AppColors.black.withOpacity(0.2),
+                            AppColors.black.withOpacity(0.3),
+                            AppColors.black.withOpacity(0.6),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Center(
+                      child: SizedBox(
+                        height: 40,
+                        child: CustomBtn(
+                          verticalPadding: 10,
+                          onTap: (() {
+                            if (position != null) {
+                              AppFunctions.launchMap(context,
+                                      position!.latitude, position!.longitude)
+                                  .whenComplete(() {});
+                            }
+                          }),
+                          text: "View On Map",
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (position == null && isLoading) CustomLoadingIndicator(),
             SizedBox(
               height: 15,
             ),

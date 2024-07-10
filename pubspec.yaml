@@ -48,6 +48,9 @@ dependencies:
   shared_preferences:
   flutter_native_splash:
   flutter_launcher_icons:
+  geolocator:
+  geocoding:
+  url_launcher:
 
 dev_dependencies:
   flutter_test:
