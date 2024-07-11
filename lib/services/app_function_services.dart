@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:mdw/services/storage_services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -121,12 +120,13 @@ class AppFunctions {
     return attendanceStatus;
   }
 
-  static Future<void> launchMap(BuildContext context, lat, lng) async {
+  static Future<void> launchMap(BuildContext context, String place) async {
     var url = '';
     var urlAppleMaps = '';
-    List<Placemark> placemarks1 = await placemarkFromCoordinates(lat, lng);
-    String origin =
-        "${placemarks1[0].name},+${placemarks1[0].street},+${placemarks1[0].subAdministrativeArea},+${placemarks1[0].locality},+${placemarks1[0].thoroughfare}+${placemarks1[0].postalCode},+${placemarks1[0].country}";
+    // List<Placemark> placemarks1 = await placemarkFromCoordinates(lat, lng);
+    // log(placemarks1.toString());
+    String origin = place;
+    // "${placemarks1[0].name},+${placemarks1[0].street},+${placemarks1[0].subAdministrativeArea},+${placemarks1[0].locality},+${placemarks1[0].thoroughfare}+${placemarks1[0].postalCode},+${placemarks1[0].country}";
     origin = origin.replaceAll(" ", "+");
     Uri uri;
     if (Platform.isAndroid) {
@@ -136,7 +136,7 @@ class AppFunctions {
     } else {
       // urlAppleMaps = 'https://maps.apple.com/?q=$lat,$lng';
       urlAppleMaps = 'https://maps.apple.com/?q=$origin';
-      url = "comgooglemaps://?saddr=&daddr=$lat,$lng&directionsmode=driving";
+      url = "comgooglemaps://?saddr=&daddr=$origin&directionsmode=driving";
       uri = Uri.parse(urlAppleMaps);
       // if (await canLaunchUrl(uri)) {
       //   await launchUrl(uri);
