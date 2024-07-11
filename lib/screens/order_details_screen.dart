@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
-import 'package:mdw/screens/login_screen.dart';
 import 'package:mdw/services/app_function_services.dart';
 import 'package:mdw/styles.dart';
 
@@ -30,7 +29,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   Position? position;
   List<Placemark>? placemarks;
 
-  Future<Position?> _determinePosition() async {
+  Future<bool> getPermission() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -51,6 +50,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
+
+    return true;
+  }
+
+  Future<Position?> _determinePosition() async {
     return await Geolocator.getCurrentPosition();
   }
 
@@ -78,7 +82,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   @override
   void initState() {
-    getDate();
     super.initState();
   }
 
@@ -101,75 +104,22 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             SizedBox(
               height: 15,
             ),
-            if (position != null && !isLoading)
-              Container(
-                height: 175,
-                width: MediaQuery.of(context).size.width,
-                margin: EdgeInsets.only(left: 20, right: 20),
-                padding:
-                    EdgeInsets.only(left: 15, right: 15, top: 15, bottom: 15),
-                decoration: BoxDecoration(
-                  color: AppColors.containerColor,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 3,
-                      blurRadius: 10,
-                      offset: Offset(0, 2), // changes position of shadow
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        image: DecorationImage(
-                          image: AssetImage("assets/map.png"),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            AppColors.transparent,
-                            AppColors.black.withOpacity(0.2),
-                            AppColors.black.withOpacity(0.3),
-                            AppColors.black.withOpacity(0.6),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Center(
-                      child: SizedBox(
-                        height: 40,
-                        child: CustomBtn(
-                          verticalPadding: 10,
-                          onTap: (() {
-                            if (position != null) {
-                              AppFunctions.launchMap(context,
-                                      position!.latitude, position!.longitude)
-                                  .whenComplete(() {});
-                            }
-                          }),
-                          text: "View On Map",
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+            SizedBox(
+              height: 40,
+              child: CustomBtn(
+                horizontalMargin: 15,
+                horizontalPadding: 0,
+                verticalPadding: 10,
+                onTap: (() async {
+                  log("message");
+                  await getPermission();
+                  await AppFunctions.launchMap(context,
+                          "Techno International New Town, Kolkata, India")
+                      .whenComplete(() {});
+                }),
+                text: "View On Map",
               ),
-            if (position == null && isLoading) CustomLoadingIndicator(),
+            ),
             SizedBox(
               height: 15,
             ),
