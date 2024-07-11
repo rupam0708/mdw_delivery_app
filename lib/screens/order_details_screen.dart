@@ -6,7 +6,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
 import 'package:mdw/services/app_function_services.dart';
 import 'package:mdw/styles.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+import '../services/location_service.dart';
 import 'onboarding_screen.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
@@ -28,6 +30,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   bool isPinVerified = false, isLoading = false;
   Position? position;
   List<Placemark>? placemarks;
+  final LocationService locationService = LocationService();
 
   Future<bool> getPermission() async {
     bool serviceEnabled;
@@ -35,6 +38,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
+      permission = await Geolocator.requestPermission();
       return Future.error('Location services are disabled.');
     }
 
@@ -42,17 +46,25 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
+        openAppSettings();
         return Future.error('Location permissions are denied');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
+      openAppSettings();
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
 
     return true;
   }
+
+  // Future<void> getLocationPermission() async {
+  //   Permission permission = Permission.location;
+  //   PermissionStatus  status = await permission.status;
+  //   if(status.i)
+  // }
 
   Future<Position?> _determinePosition() async {
     return await Geolocator.getCurrentPosition();
@@ -112,7 +124,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 verticalPadding: 10,
                 onTap: (() async {
                   log("message");
-                  await getPermission();
+                  // await locationService.requestLocationPermission(context);
                   await AppFunctions.launchMap(context,
                           "Techno International New Town, Kolkata, India")
                       .whenComplete(() {});
