@@ -51,6 +51,10 @@ dependencies:
   geolocator:
   geocoding:
   url_launcher:
+  image_picker:
+  camera:
+  http:
+  win32: ^5.5.3
 
 dev_dependencies:
   flutter_test:

@@ -159,6 +159,8 @@ class CustomBtn extends StatelessWidget {
     this.verticalPadding,
     this.horizontalPadding,
     this.width,
+    this.height,
+    this.child,
   });
 
   final VoidCallback onTap;
@@ -167,7 +169,9 @@ class CustomBtn extends StatelessWidget {
       horizontalMargin,
       verticalPadding,
       horizontalPadding,
-      width;
+      width,
+      height;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -176,6 +180,7 @@ class CustomBtn extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: horizontalMargin ?? 45),
         width: width,
+        height: height,
         padding: EdgeInsets.symmetric(
             vertical: verticalPadding ?? 15,
             horizontal: horizontalPadding ?? 0),
@@ -189,16 +194,17 @@ class CustomBtn extends StatelessWidget {
             ],
           ),
         ),
-        child: Center(
-          child: Text(
-            text,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: AppColors.white,
-              fontSize: fontSize,
+        child: child ??
+            Center(
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.white,
+                  fontSize: fontSize,
+                ),
+              ),
             ),
-          ),
-        ),
       ),
     );
   }

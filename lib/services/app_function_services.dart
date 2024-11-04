@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:mdw/services/storage_services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -154,5 +155,48 @@ class AppFunctions {
     } else {
       throw 'Could not launch $url';
     }
+  }
+
+  static Future<List<XFile>> captureImages() async {
+    ImagePicker imagePicker = ImagePicker();
+    return await imagePicker.pickMultiImage(imageQuality: 60);
+  }
+
+  static String getMonthAbbreviation(int month) {
+    const List<String> monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ];
+
+    if (month < 1 || month > 12) {
+      throw ArgumentError('Invalid month: $month. Must be between 1 and 12.');
+    }
+
+    return monthNames[month - 1];
+  }
+
+  static String getTwoDigitYear(int year) {
+    if (year < 1000 || year > 9999) {
+      throw ArgumentError('Invalid year: $year. Must be a 4-digit number.');
+    }
+
+    // Convert the year to a string and take the last two characters
+    String yearStr = year.toString();
+    return yearStr.substring(yearStr.length - 2);
+  }
+
+  static String formatCurrencyByComma(double amount) {
+    final formatter = NumberFormat('#,##0');
+    return formatter.format(amount);
   }
 }

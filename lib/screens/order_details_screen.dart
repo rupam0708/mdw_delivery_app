@@ -1,8 +1,11 @@
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mdw/screens/camera_screen.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
 import 'package:mdw/services/app_function_services.dart';
 import 'package:mdw/styles.dart';
@@ -31,6 +34,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   Position? position;
   List<Placemark>? placemarks;
   final LocationService locationService = LocationService();
+  List<XFile> selectedImages = [];
 
   Future<bool> getPermission() async {
     bool serviceEnabled;
@@ -102,40 +106,160 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBar(
+        backgroundColor: AppColors.white,
         title: CustomAppBarTitle(
           title: "Order Details",
         ),
       ),
       body: SafeArea(
-          child: SingleChildScrollView(
-        child: Column(
-          children: [
-            CustomUpperPortion(
+          child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: CustomUpperPortion(
               head: "View details of the order\nOrder #${widget.orderID}",
             ),
-            SizedBox(
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
               height: 15,
             ),
-            SizedBox(
-              height: 40,
-              child: CustomBtn(
-                horizontalMargin: 15,
-                horizontalPadding: 0,
-                verticalPadding: 10,
-                onTap: (() async {
-                  log("message");
-                  // await locationService.requestLocationPermission(context);
-                  await AppFunctions.launchMap(context,
-                          "Techno International New Town, Kolkata, India")
-                      .whenComplete(() {});
-                }),
-                text: "View On Map",
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              height: 180,
+              margin: EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: AppColors.containerColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: AssetImage(
+                          "assets/map.png",
+                        ),
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Container(
+                      height: 40,
+                      child: CustomBtn(
+                        width: MediaQuery.of(context).size.width / 2.2,
+                        horizontalMargin: 15,
+                        horizontalPadding: 0,
+                        verticalPadding: 10,
+                        onTap: (() async {
+                          log("message");
+                          // await locationService.requestLocationPermission(context);
+                          await AppFunctions.launchMap(context,
+                                  "Techno International New Town, Kolkata, India")
+                              .whenComplete(() {});
+                        }),
+                        text: "View On Map",
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
               height: 15,
             ),
-            Container(
+          ),
+          SliverToBoxAdapter(
+            child: CustomBtn(
+              onTap: (() async {
+                // selectedImages.addAll(await AppFunctions.captureImages());
+                // Retrieve the list of available cameras
+                final List<CameraDescription> cameras =
+                    await availableCameras();
+
+                // Navigate to CameraPage and wait for the result
+                final List<XFile>? result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CameraPage(cameras: cameras),
+                  ),
+                );
+
+                if (result != null) {
+                  selectedImages.addAll(result);
+                  setState(() {});
+                }
+              }),
+              width: MediaQuery.of(context).size.width,
+              horizontalMargin: 20,
+              text: "Upload Product Picture",
+            ),
+          ),
+          if (selectedImages.isNotEmpty)
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 15,
+              ),
+            ),
+          if (selectedImages.isNotEmpty)
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverGrid.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 2,
+                ),
+                itemCount: selectedImages.length,
+                itemBuilder: ((ctx, idx) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: FileImage(
+                          File(selectedImages[idx].path),
+                        ),
+                      ),
+                    ),
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.black.withOpacity(0.3),
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(20),
+                          ),
+                        ),
+                        child: GestureDetector(
+                          onTap: (() {
+                            setState(() {
+                              selectedImages.removeAt(idx);
+                            });
+                          }),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.delete_rounded,
+                              color: AppColors.red,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 20,
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Container(
               width: MediaQuery.of(context).size.width,
               margin: EdgeInsets.only(left: 20, right: 20),
               padding:
@@ -258,11 +382,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 ],
               ),
             ),
-            SizedBox(
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
               height: 40,
             ),
-          ],
-        ),
+          ),
+        ],
       )),
     );
   }

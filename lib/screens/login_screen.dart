@@ -1,4 +1,3 @@
-import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
 import 'package:mdw/screens/main_screen.dart';
@@ -63,12 +62,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   CustomTextField(
                     textEditingController: _emailTextController,
-                    head: "Email Address",
-                    hint: "Enter email",
+                    head: "Username",
+                    hint: "Enter Username",
                     keyboard: TextInputType.emailAddress,
-                    validator: (value) => EmailValidator.validate(value!)
-                        ? null
-                        : "Please enter a valid email",
+                    // validator: (value) => EmailValidator.validate(value!)
+                    //     ? null
+                    //     : "Please enter a valid email",
                   ),
                   SizedBox(
                     height: 15,
@@ -106,14 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     setState(() {
                       loading = true;
                     });
-                    if (!EmailValidator.validate(
-                        _emailTextController.text.trim())) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        AppSnackBar().customizedAppSnackBar(
-                            message: "Please enter a valid email.",
-                            context: context),
-                      );
-                    } else if (AppFunctions.passwordValidator(
+                    if (AppFunctions.passwordValidator(
                             _passwordTextController.text.trim()) !=
                         null) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -151,6 +143,51 @@ class _LoginScreenState extends State<LoginScreen> {
                         }
                       });
                     }
+                    // if (!EmailValidator.validate(
+                    //     _emailTextController.text.trim())) {
+                    //   ScaffoldMessenger.of(context).showSnackBar(
+                    //     AppSnackBar().customizedAppSnackBar(
+                    //         message: "Please enter a valid email.",
+                    //         context: context),
+                    //   );
+                    // } else if (AppFunctions.passwordValidator(
+                    //         _passwordTextController.text.trim()) !=
+                    //     null) {
+                    //   ScaffoldMessenger.of(context).showSnackBar(
+                    //     AppSnackBar().customizedAppSnackBar(
+                    //         message: AppFunctions.passwordValidator(
+                    //                 _passwordTextController.text.trim()) ??
+                    //             "",
+                    //         context: context),
+                    //   );
+                    // } else {
+                    //   await StorageServices.setSignInStatus(true)
+                    //       .whenComplete(() async {
+                    //     bool attendanceStatus =
+                    //         await AppFunctions.getAttendanceStatus();
+                    //     if (attendanceStatus) {
+                    //       Navigator.pushReplacement(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //           builder: ((ctx) => MainScreen()),
+                    //         ),
+                    //       );
+                    //     } else {
+                    //       Navigator.pushReplacement(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //           builder: ((ctx) => const CodeVerificationScreen(
+                    //                 head: "Attendance",
+                    //                 upperText:
+                    //                     "Ask your admin to enter his code to confirm your attendance.",
+                    //                 type: 0,
+                    //                 btnText: "Confirm Attendance",
+                    //               )),
+                    //         ),
+                    //       );
+                    //     }
+                    //   });
+                    // }
                     setState(() {
                       loading = false;
                     });

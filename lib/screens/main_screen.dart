@@ -17,12 +17,19 @@ class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int index = 0;
 
+  void _changeIndex(int newIndex) {
+    setState(() {
+      index = newIndex;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
       key: _scaffoldKey,
       appBar: AppBar(
+        backgroundColor: AppColors.white,
         leading: IconButton(
           onPressed: (() {
             _scaffoldKey.currentState?.openDrawer();
@@ -109,17 +116,27 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ),
       ),
-      body: Builder(builder: ((ctx) {
-        switch (index) {
-          case 0:
-            return OrdersScreen();
-          case 1:
-            return ProfileScreen();
-          case 2:
-            return FeedbackScreen();
-        }
-        return Container();
-      })),
+      body: PopScope(
+        canPop: index == 0 ? true : false,
+        onPopInvoked: ((val) {
+          if (index != 0) {
+            _changeIndex(0);
+          } else {
+            return;
+          }
+        }),
+        child: Builder(builder: ((ctx) {
+          switch (index) {
+            case 0:
+              return OrdersScreen();
+            case 1:
+              return ProfileScreen(onChangeIndex: _changeIndex);
+            case 2:
+              return FeedbackScreen();
+          }
+          return Container();
+        })),
+      ),
     );
   }
 }

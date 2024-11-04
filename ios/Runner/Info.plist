@@ -7,6 +7,12 @@
           <string>sms</string>
           <string>tel</string>
         </array>
+		<key>NSMicrophoneUsageDescription</key>
+        <string>This app needs access to microphone for capturing audio.</string>
+		<key>NSCameraUsageDescription</key>
+        <string>This app needs access to camera for capturing image.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+        <string>This app needs access to photo library.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
         <string>This app needs access to location when open.</string>
 		<key>CFBundleDevelopmentRegion</key>

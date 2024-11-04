@@ -1,5 +1,6 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:mdw/constant.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
 import 'package:mdw/services/app_function_services.dart';
 import 'package:mdw/styles.dart';
@@ -25,6 +26,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           color: AppColors.green,
           onRefresh: (() async {}),
           child: CustomScrollView(
+            physics: AppConstant.physics,
             slivers: [
               SliverToBoxAdapter(
                 child: CustomUpperPortion(
