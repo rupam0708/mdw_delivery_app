@@ -55,6 +55,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           return Padding(
                             padding: const EdgeInsets.only(top: 10, bottom: 17),
                             child: CustomOrderContainer(
+                              id: "#0CAC6C64",
                               index: index,
                               onTapContainer: openContainer,
                               // onTapContainer: (() {
@@ -148,12 +149,13 @@ class CustomOrderContainer extends StatelessWidget {
     this.maxLines,
     this.buttons,
     this.height,
+    required this.id,
   });
 
   final VoidCallback onTapContainer;
   final int? index, maxLines;
   final Widget? middleWidget, buttons;
-  final String name, phone, address;
+  final String name, phone, address, id;
   final double? height;
 
   @override
@@ -161,91 +163,181 @@ class CustomOrderContainer extends StatelessWidget {
     return GestureDetector(
       onTap: onTapContainer,
       child: Container(
-        margin: EdgeInsets.only(top: index == 0 ? 0 : 20, left: 20, right: 20),
-        padding: EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 25),
-        width: MediaQuery.of(context).size.width,
-        height: height ?? 200,
-        decoration: BoxDecoration(
-          color: AppColors.containerColor,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 3,
-              blurRadius: 10,
-              offset: Offset(0, 2), // changes position of shadow
-            ),
-          ],
+        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: EdgeInsets.only(
+          top: 15,
         ),
+        decoration: AppColors.customDecoration,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Text(
-                "Order #2568",
-                style: TextStyle(
-                  color: AppColors.black.withOpacity(0.5),
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              height: 1,
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                color: AppColors.white,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Expanded(
-              child: Column(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name,
-                    style: TextStyle(
-                      fontSize: 13,
-                    ),
-                  ),
-                  Text(
-                    phone,
-                    style: TextStyle(
-                      fontSize: 13,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      address,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: maxLines,
-                      style: TextStyle(
-                        fontSize: 13,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: TextStyle(
+                          color: AppColors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
                       ),
-                    ),
-                  ),
-                  if (middleWidget == null)
-                    SizedBox(
-                      height: 15,
-                    ),
-                  if (middleWidget != null)
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: middleWidget!,
+                      Text(
+                        "ID: $id",
+                        style: TextStyle(
+                          color: AppColors.black,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                  SizedBox(
-                    child: buttons,
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_month_rounded,
+                        color: AppColors.iconColor,
+                        size: 20,
+                      ),
+                      SizedBox(width: 5),
+                      Text(
+                        "01/01/2025",
+                        style: TextStyle(
+                          color: AppColors.black,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            )
+            ),
+            SizedBox(height: 15),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                children: [
+                  Container(
+                    height: 10,
+                    width: 10,
+                    decoration: BoxDecoration(
+                      color: AppColors.green,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.green.withOpacity(0.6),
+                          // Shadow color
+                          spreadRadius: 2,
+                          // Spread radius
+                          blurRadius: 5,
+                          // Blur radius
+                          offset: Offset(0, 0), // Offset in X and Y direction
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 15),
+                  Text(
+                    address,
+                    style: TextStyle(
+                      color: AppColors.black,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 10),
+            CustomDivider(),
+            SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "15.36km",
+                    style: TextStyle(
+                      color: AppColors.black,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time_filled_rounded,
+                        color: AppColors.iconColor,
+                        size: 20,
+                      ),
+                      SizedBox(width: 5),
+                      Text(
+                        "17 mins",
+                        style: TextStyle(
+                          color: AppColors.black,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 10),
+            Container(
+              height: 45,
+              decoration: BoxDecoration(
+                color: AppColors.rupeesContainerColor,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(15),
+                  bottomRight: Radius.circular(15),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.payments_rounded,
+                    color: AppColors.green,
+                    size: 25,
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    "\$1500",
+                    style: TextStyle(
+                      color: AppColors.green,
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class CustomDivider extends StatelessWidget {
+  const CustomDivider({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      height: 1,
+      decoration: BoxDecoration(
+        color: AppColors.containerBorderColor,
+        borderRadius: BorderRadius.circular(10),
       ),
     );
   }

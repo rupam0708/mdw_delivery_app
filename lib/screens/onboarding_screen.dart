@@ -185,15 +185,7 @@ class CustomBtn extends StatelessWidget {
             vertical: verticalPadding ?? 15,
             horizontal: horizontalPadding ?? 0),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          gradient: const LinearGradient(
-            colors: [
-              AppColors.lightGreen,
-              AppColors.green,
-              AppColors.lightGreen,
-            ],
-          ),
-        ),
+            borderRadius: BorderRadius.circular(15), color: AppColors.btnColor),
         child: child ??
             Center(
               child: Text(

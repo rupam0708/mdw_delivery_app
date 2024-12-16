@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:mdw/screens/code_verification_screen.dart';
-import 'package:mdw/screens/main_screen.dart';
+import 'package:http/http.dart' as http;
 import 'package:mdw/screens/onboarding_screen.dart';
 import 'package:mdw/services/app_function_services.dart';
+import 'package:mdw/services/app_keys.dart';
 import 'package:mdw/services/storage_services.dart';
 import 'package:mdw/styles.dart';
 import 'package:mdw/utils/snack_bar_utils.dart';
+
+import 'code_verification_screen.dart';
+import 'main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,12 +20,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  late TextEditingController _emailTextController, _passwordTextController;
+  late TextEditingController _usernameTextController, _passwordTextController;
   bool obscure = true, loading = false;
 
   @override
   void initState() {
-    _emailTextController = TextEditingController();
+    _usernameTextController = TextEditingController();
     _passwordTextController = TextEditingController();
     super.initState();
   }
@@ -61,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Column(
                 children: [
                   CustomTextField(
-                    textEditingController: _emailTextController,
+                    textEditingController: _usernameTextController,
                     head: "Username",
                     hint: "Enter Username",
                     keyboard: TextInputType.emailAddress,
@@ -105,43 +110,73 @@ class _LoginScreenState extends State<LoginScreen> {
                     setState(() {
                       loading = true;
                     });
-                    if (AppFunctions.passwordValidator(
-                            _passwordTextController.text.trim()) !=
-                        null) {
+                    if (_usernameTextController.text.isNotEmpty &&
+                        _passwordTextController.text.isNotEmpty) {
+                      if (AppFunctions.passwordValidator(
+                              _passwordTextController.text.trim()) !=
+                          null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          AppSnackBar().customizedAppSnackBar(
+                              message: AppFunctions.passwordValidator(
+                                      _passwordTextController.text.trim()) ??
+                                  "",
+                              context: context),
+                        );
+                      } else {
+                        final http.Response res = await http.post(
+                            Uri.parse(AppKeys.apiUrlKey + AppKeys.loginKey),
+                            headers: {
+                              "content-type": "application/json",
+                            },
+                            body: jsonEncode({
+                              'riderId': _usernameTextController.text.trim(),
+                              'riderPassword':
+                                  _passwordTextController.text.trim(),
+                            }));
+                        final Map<String, dynamic> resJson =
+                            jsonDecode(res.body);
+                        // log(resJson.toString());
+
+                        if (resJson["success"] == 1) {
+                          await StorageServices.setLoginUserDetails(resJson)
+                              .whenComplete(() async {
+                            await StorageServices.setSignInStatus(true)
+                                .whenComplete(() async {
+                              bool attendanceStatus =
+                                  await AppFunctions.getAttendanceStatus();
+                              if (attendanceStatus) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: ((ctx) => MainScreen()),
+                                  ),
+                                );
+                              } else {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: ((ctx) =>
+                                        const CodeVerificationScreen(
+                                          head: "Attendance",
+                                          upperText:
+                                              "Ask your admin to enter his code to confirm your attendance.",
+                                          type: 0,
+                                          btnText: "Confirm Attendance",
+                                        )),
+                                  ),
+                                );
+                              }
+                            });
+                          });
+                        }
+                      }
+                    } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         AppSnackBar().customizedAppSnackBar(
-                            message: AppFunctions.passwordValidator(
-                                    _passwordTextController.text.trim()) ??
-                                "",
-                            context: context),
+                          message: "Please fill the Username and Password",
+                          context: context,
+                        ),
                       );
-                    } else {
-                      await StorageServices.setSignInStatus(true)
-                          .whenComplete(() async {
-                        bool attendanceStatus =
-                            await AppFunctions.getAttendanceStatus();
-                        if (attendanceStatus) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: ((ctx) => MainScreen()),
-                            ),
-                          );
-                        } else {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: ((ctx) => const CodeVerificationScreen(
-                                    head: "Attendance",
-                                    upperText:
-                                        "Ask your admin to enter his code to confirm your attendance.",
-                                    type: 0,
-                                    btnText: "Confirm Attendance",
-                                  )),
-                            ),
-                          );
-                        }
-                      });
                     }
                     // if (!EmailValidator.validate(
                     //     _emailTextController.text.trim())) {
