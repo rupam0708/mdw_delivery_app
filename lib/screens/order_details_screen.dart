@@ -1,11 +1,9 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:mdw/screens/camera_screen.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
 import 'package:mdw/services/app_function_services.dart';
 import 'package:mdw/styles.dart';
@@ -107,288 +105,219 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       backgroundColor: AppColors.white,
       appBar: AppBar(
         backgroundColor: AppColors.white,
+        centerTitle: false,
         title: CustomAppBarTitle(
-          title: "Order Details",
+          title: "#0CAC6C64",
         ),
       ),
       body: SafeArea(
-          child: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: CustomUpperPortion(
-              head: "View details of the order\nOrder #${widget.orderID}",
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 15,
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Container(
-              height: 180,
-              margin: EdgeInsets.symmetric(horizontal: 20),
-              padding: EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                color: AppColors.containerColor,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: AssetImage(
-                          "assets/map.png",
+          child: Padding(
+        padding: const EdgeInsets.only(left: 15, right: 15),
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    width: 1,
+                    color: AppColors.containerBorderColor,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(top: 7),
+                      height: 10,
+                      width: 10,
+                      decoration: BoxDecoration(
+                        color: AppColors.green,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.green.withOpacity(0.6),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(0, 0),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 15),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "01 Jan 2025, 02:14 PM",
+                          style: TextStyle(
+                            color: AppColors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                  Center(
-                    child: Container(
-                      height: 40,
-                      child: CustomBtn(
-                        width: MediaQuery.of(context).size.width / 2.2,
-                        horizontalMargin: 15,
-                        horizontalPadding: 0,
-                        verticalPadding: 10,
-                        onTap: (() async {
-                          log("message");
-                          // await locationService.requestLocationPermission(context);
-                          await AppFunctions.launchMap(context,
-                                  "Techno International New Town, Kolkata, India")
-                              .whenComplete(() {});
-                        }),
-                        text: "View On Map",
-                      ),
-                    ),
-                  ),
-                ],
+                        SizedBox(height: 10),
+                        Text(
+                          "Random Name",
+                          style: TextStyle(
+                            color: AppColors.black,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Text(
+                          "00000 00000",
+                          style: TextStyle(
+                            color: AppColors.black,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Text(
+                          "Random Address",
+                          style: TextStyle(
+                            color: AppColors.black,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
               ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 15,
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: CustomBtn(
-              onTap: (() async {
-                // selectedImages.addAll(await AppFunctions.captureImages());
-                // Retrieve the list of available cameras
-                final List<CameraDescription> cameras =
-                    await availableCameras();
-
-                // Navigate to CameraPage and wait for the result
-                final List<XFile>? result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CameraPage(cameras: cameras),
-                  ),
-                );
-
-                if (result != null) {
-                  selectedImages.addAll(result);
-                  setState(() {});
-                }
-              }),
-              width: MediaQuery.of(context).size.width,
-              horizontalMargin: 20,
-              text: "Upload Product Picture",
-            ),
-          ),
-          if (selectedImages.isNotEmpty)
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 15,
               ),
             ),
-          if (selectedImages.isNotEmpty)
-            SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              sliver: SliverGrid.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 2,
+            SliverToBoxAdapter(
+              child: Container(
+                height: 45,
+                child: CustomBtn(
+                  horizontalMargin: 0,
+                  horizontalPadding: 0,
+                  verticalPadding: 10,
+                  onTap: (() async {
+                    log("message");
+                    // await locationService.requestLocationPermission(context);
+                    await AppFunctions.launchMap(context,
+                            "Techno International New Town, Kolkata, India")
+                        .whenComplete(() {});
+                  }),
+                  text: "View On Map",
                 ),
-                itemCount: selectedImages.length,
-                itemBuilder: ((ctx, idx) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: FileImage(
-                          File(selectedImages[idx].path),
-                        ),
-                      ),
-                    ),
-                    child: Align(
-                      alignment: Alignment.topRight,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.black.withOpacity(0.3),
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(20),
-                          ),
-                        ),
-                        child: GestureDetector(
-                          onTap: (() {
-                            setState(() {
-                              selectedImages.removeAt(idx);
-                            });
-                          }),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Icon(
-                              Icons.delete_rounded,
-                              color: AppColors.red,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
               ),
             ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 20,
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 20,
+              ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              margin: EdgeInsets.only(left: 20, right: 20),
-              padding:
-                  EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 25),
-              decoration: BoxDecoration(
-                color: AppColors.containerColor,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 3,
-                    blurRadius: 10,
-                    offset: Offset(0, 2), // changes position of shadow
+            SliverToBoxAdapter(
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                padding:
+                    EdgeInsets.only(left: 15, right: 15, top: 15, bottom: 25),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppColors.containerBorderColor,
+                    width: 1,
                   ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Center(
-                    child: Text(
-                      "Order #2568",
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Product Details",
                       style: TextStyle(
-                        color: AppColors.black.withOpacity(0.5),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.green,
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    height: 1,
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
+                    SizedBox(
+                      height: 10,
                     ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        widget.name,
-                        style: TextStyle(
-                          fontSize: 13,
-                        ),
-                      ),
-                      Text(
-                        widget.phone,
-                        style: TextStyle(
-                          fontSize: 13,
-                        ),
-                      ),
-                      Text(
-                        widget.address,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Column(
-                    children:
-                        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-                            .map(
-                              (e) => Padding(
-                                padding: EdgeInsets.only(top: e == 1 ? 0 : 5),
-                                child: Row(
-                                  children: [
-                                    SizedBox(
-                                      height: 30,
-                                      width: 30,
-                                      child: Center(child: Text(e.toString())),
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    SizedBox(
-                                      height: 30,
-                                      child: Center(child: Text("Product $e")),
-                                    ),
-                                  ],
-                                ),
+                    Column(
+                      children: [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15
+                      ]
+                          .map(
+                            (e) => Padding(
+                              padding: EdgeInsets.only(top: e == 1 ? 0 : 5),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    height: 30,
+                                    width: 30,
+                                    child: Center(child: Text(e.toString())),
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  SizedBox(
+                                    height: 30,
+                                    child: Center(child: Text("Product $e")),
+                                  ),
+                                ],
                               ),
-                            )
-                            .toList(),
-                  ),
-                  SizedBox(
-                    height: 40,
-                  ),
-                  CustomBtn(
-                    onTap: (() {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: ((ctx) => CodeVerificationScreen(
-                                head: "Code Verification",
-                                upperText:
-                                    "Enter the code to confirm the delivery\nof the order.",
-                                type: 1,
-                                btnText: "Confirm Order",
-                              )),
-                        ),
-                      ).whenComplete(() {
-                        log("Refreshed");
-                      });
-                    }),
-                    text: "Enter Code",
-                    horizontalMargin: 0,
-                    verticalPadding: 7,
-                    fontSize: 12,
-                    horizontalPadding: 15,
-                    width: MediaQuery.of(context).size.width / 2.5,
-                  ),
-                ],
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 40,
+            SliverToBoxAdapter(
+              child: CustomBtn(
+                height: 45,
+                onTap: (() {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: ((ctx) => CodeVerificationScreen(
+                            head: "Code Verification",
+                            upperText:
+                                "Enter the code to confirm the delivery\nof the order.",
+                            type: 1,
+                            btnText: "Confirm Order",
+                          )),
+                    ),
+                  ).whenComplete(() {
+                    log("Refreshed");
+                  });
+                }),
+                text: "Enter Code",
+                horizontalMargin: 0,
+                verticalPadding: 7,
+                fontSize: 12,
+                horizontalPadding: 15,
+              ),
             ),
-          ),
-        ],
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 40,
+              ),
+            ),
+          ],
+        ),
       )),
     );
   }
