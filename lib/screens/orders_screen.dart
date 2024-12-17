@@ -1,22 +1,58 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:mdw/constant.dart';
+import 'package:mdw/models/orders_model.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
-import 'package:mdw/services/app_function_services.dart';
+import 'package:mdw/services/app_keys.dart';
 import 'package:mdw/styles.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-import 'onboarding_screen.dart';
+import '../models/prev_orders_model.dart';
 import 'order_details_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
-  const OrdersScreen({super.key});
+  const OrdersScreen({super.key, this.type});
+
+  final int? type;
 
   @override
   State<OrdersScreen> createState() => _OrdersScreenState();
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
+  OrdersListModel? ordersList;
+  PrevOrdersListModel? prevOrdersList;
+  bool empty = false;
+
+  @override
+  void initState() {
+    getData();
+    super.initState();
+  }
+
+  getData() async {
+    if (widget.type != null && widget.type == 1) {
+      await getOrders(AppKeys.prevKey);
+    } else if (widget.type == null) {
+      await getOrders(AppKeys.todayKey);
+    }
+  }
+
+  Future<void> getOrders(String whichOrders) async {
+    http.Response res = await http
+        .get(Uri.parse(AppKeys.apiUrlKey + AppKeys.ordersKey + whichOrders));
+    if (res.statusCode == 200) {
+      if (widget.type == null) {
+        ordersList = await OrdersListModel.fromRawJson(res.body);
+      } else if (widget.type != null && widget.type == 1) {
+        prevOrdersList = await PrevOrdersListModel.fromRawJson(res.body);
+      }
+    } else {
+      empty = true;
+    }
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +60,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
       body: SafeArea(
         child: RefreshIndicator(
           color: AppColors.green,
-          onRefresh: (() async {}),
+          onRefresh: (() async {
+            if (widget.type != null && widget.type == 1) {
+              await getOrders(AppKeys.prevKey);
+            } else if (widget.type == null) {
+              await getOrders(AppKeys.todayKey);
+            }
+          }),
           child: CustomScrollView(
             physics: AppConstant.physics,
             slivers: [
@@ -37,98 +79,124 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   height: 15,
                 ),
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    return OpenContainer(
-                        transitionDuration: const Duration(
-                          milliseconds: 400,
-                        ),
-                        tappable: false,
-                        closedElevation: 0,
-                        openElevation: 0,
-                        closedColor: AppColors.transparent,
-                        middleColor: AppColors.transparent,
-                        openColor: AppColors.transparent,
-                        transitionType: ContainerTransitionType.fade,
-                        closedBuilder: ((closedCtx, openContainer) {
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 10, bottom: 17),
-                            child: CustomOrderContainer(
-                              id: "#0CAC6C64",
-                              index: index,
-                              onTapContainer: openContainer,
-                              // onTapContainer: (() {
-                              //   Navigator.push(
-                              //     context,
-                              //     MaterialPageRoute(
-                              //       builder: ((ctx) =>
-                              //           OrderDetailsScreen(orderID: "2568")),
-                              //     ),
-                              //   );
-                              // }),
-                              // onTapDetails: (() {
-                              //   Navigator.push(
-                              //     context,
-                              //     MaterialPageRoute(
-                              //       builder: ((ctx) =>
-                              //           OrderDetailsScreen(orderID: "2568")),
-                              //     ),
-                              //   );
-                              // }),
-                              name: "Sample Name",
-                              phone: "Phone Number",
-                              address: "Address",
-                              maxLines: 2,
-                              buttons: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  CustomBtn(
-                                    onTap: openContainer,
-                                    text: "View Details",
-                                    horizontalMargin: 0,
-                                    verticalPadding: 5,
-                                    fontSize: 12,
-                                    horizontalPadding: 15,
-                                    width:
-                                        MediaQuery.of(context).size.width / 3.5,
-                                  ),
-                                  CustomBtn(
-                                    onTap: (() async {
-                                      if (await Permission
-                                          .phone.serviceStatus.isEnabled) {
-                                        await AppFunctions.callNumber(
-                                            "+919230976362");
-                                      } else {
-                                        Permission.phone.request();
-                                      }
-                                    }),
-                                    text: "Call",
-                                    horizontalMargin: 0,
-                                    verticalPadding: 5,
-                                    fontSize: 12,
-                                    horizontalPadding: 15,
-                                    width:
-                                        MediaQuery.of(context).size.width / 3.5,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
-                        openBuilder: ((openCtx, _) {
-                          return OrderDetailsScreen(
-                            orderID: "2568",
-                            name: "Sample Name",
-                            phone: "Phone Number",
-                            address: "Address",
-                          );
-                        }));
-                  },
-                  childCount: 5,
+              if (ordersList == null && prevOrdersList == null)
+                SliverToBoxAdapter(
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppColors.green),
+                  ),
                 ),
-              )
+              if (ordersList != null)
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return OpenContainer(
+                          transitionDuration: const Duration(
+                            milliseconds: 400,
+                          ),
+                          tappable: false,
+                          closedElevation: 0,
+                          openElevation: 0,
+                          closedColor: AppColors.transparent,
+                          middleColor: AppColors.transparent,
+                          openColor: AppColors.transparent,
+                          transitionType: ContainerTransitionType.fade,
+                          onClosed: ((result) async {
+                            if (widget.type != null && widget.type == 1) {
+                              await getOrders(AppKeys.prevKey);
+                            } else if (widget.type == null) {
+                              await getOrders(AppKeys.todayKey);
+                            }
+                          }),
+                          closedBuilder: ((closedCtx, openContainer) {
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 10, bottom: 17),
+                              child: CustomOrderContainer(
+                                id: ordersList!.orders[index].orderId
+                                    .toUpperCase(),
+                                index: index,
+                                onTapContainer: openContainer,
+                                amount: ordersList!.orders[index].amount,
+                                name: ordersList!.orders[index].customer.name,
+                                phone: ordersList!
+                                    .orders[index].customer.phoneNumber
+                                    .toString(),
+                                address:
+                                    "${ordersList!.orders[index].customer.address.toString()}",
+                                maxLines: 2,
+                                date:
+                                    "${ordersList!.orders[index].orderDate.day}/${ordersList!.orders[index].orderDate.month}/${ordersList!.orders[index].orderDate.year}",
+                                distance: ordersList!.orders[index].status,
+                                time: ordersList!.orders[index].turnaroundTime,
+                              ),
+                            );
+                          }),
+                          openBuilder: ((openCtx, _) {
+                            return OrderDetailsScreen(
+                              order: ordersList!.orders[index],
+                            );
+                          }));
+                    },
+                    childCount: ordersList!.orders.length,
+                  ),
+                ),
+              if (prevOrdersList != null)
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return OpenContainer(
+                          transitionDuration: const Duration(
+                            milliseconds: 400,
+                          ),
+                          tappable: false,
+                          closedElevation: 0,
+                          openElevation: 0,
+                          closedColor: AppColors.transparent,
+                          middleColor: AppColors.transparent,
+                          openColor: AppColors.transparent,
+                          transitionType: ContainerTransitionType.fade,
+                          onClosed: ((result) async {
+                            if (widget.type != null && widget.type == 1) {
+                              await getOrders(AppKeys.prevKey);
+                            } else if (widget.type == null) {
+                              await getOrders(AppKeys.todayKey);
+                            }
+                          }),
+                          closedBuilder: ((closedCtx, openContainer) {
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 10, bottom: 17),
+                              child: CustomOrderContainer(
+                                id: prevOrdersList!.orders[index].orderId
+                                    .toUpperCase(),
+                                index: index,
+                                onTapContainer: openContainer,
+                                amount: prevOrdersList!.orders[index].amount,
+                                name:
+                                    prevOrdersList!.orders[index].customer.name,
+                                phone: prevOrdersList!
+                                    .orders[index].customer.phoneNumber
+                                    .toString(),
+                                address:
+                                    "${prevOrdersList!.orders[index].customer.address.toString()}",
+                                maxLines: 2,
+                                date:
+                                    "${prevOrdersList!.orders[index].orderDate.day}/${prevOrdersList!.orders[index].orderDate.month}/${prevOrdersList!.orders[index].orderDate.year}",
+                                distance: prevOrdersList!.orders[index].status,
+                                time: prevOrdersList!
+                                    .orders[index].turnaroundTime,
+                              ),
+                            );
+                          }),
+                          openBuilder: ((openCtx, _) {
+                            return OrderDetailsScreen(
+                              prevOrder: prevOrdersList!.orders[index],
+                            );
+                          }));
+                    },
+                    childCount: prevOrdersList!.orders.length,
+                  ),
+                )
             ],
           ),
         ),
@@ -150,12 +218,16 @@ class CustomOrderContainer extends StatelessWidget {
     this.buttons,
     this.height,
     required this.id,
+    required this.date,
+    required this.time,
+    required this.distance,
+    required this.amount,
   });
 
   final VoidCallback onTapContainer;
   final int? index, maxLines;
   final Widget? middleWidget, buttons;
-  final String name, phone, address, id;
+  final String name, phone, address, id, date, time, distance, amount;
   final double? height;
 
   @override
@@ -205,7 +277,7 @@ class CustomOrderContainer extends StatelessWidget {
                       ),
                       SizedBox(width: 5),
                       Text(
-                        "01/01/2025",
+                        date,
                         style: TextStyle(
                           color: AppColors.black,
                           fontSize: 12,
@@ -260,7 +332,7 @@ class CustomOrderContainer extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "15.36km",
+                    distance,
                     style: TextStyle(
                       color: AppColors.black,
                       fontSize: 13,
@@ -276,7 +348,7 @@ class CustomOrderContainer extends StatelessWidget {
                       ),
                       SizedBox(width: 5),
                       Text(
-                        "17 mins",
+                        time,
                         style: TextStyle(
                           color: AppColors.black,
                           fontSize: 13,
@@ -308,7 +380,7 @@ class CustomOrderContainer extends StatelessWidget {
                   ),
                   SizedBox(width: 10),
                   Text(
-                    "\$1500",
+                    "\₹$amount",
                     style: TextStyle(
                       color: AppColors.green,
                       fontSize: 17,

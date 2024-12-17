@@ -43,7 +43,6 @@ dependencies:
   animations:
   currency_formatter:
   intl:
-  flutter_phone_direct_caller:
   permission_handler:
   shared_preferences:
   flutter_native_splash:

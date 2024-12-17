@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+// import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:mdw/services/storage_services.dart';
@@ -89,9 +89,9 @@ class AppFunctions {
     }
   }
 
-  static Future<bool?> callNumber(String number) async {
-    return await FlutterPhoneDirectCaller.callNumber(number);
-  }
+  // static Future<bool?> callNumber(String number) async {
+  //   return await FlutterPhoneDirectCaller.callNumber(number);
+  // }
 
   static bool shouldShowAttendanceScreen() {
     DateTime now = DateTime.now();

@@ -1,12 +1,18 @@
-import 'dart:math';
+import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:mdw/models/login_user_model.dart';
+import 'package:mdw/models/rider_model.dart';
 import 'package:mdw/screens/documents_screen.dart';
 import 'package:mdw/screens/onboarding_screen.dart';
 import 'package:mdw/services/app_function_services.dart';
+import 'package:mdw/services/storage_services.dart';
 import 'package:mdw/styles.dart';
 
 import '../models/salary_profile_model.dart';
+import '../services/app_keys.dart';
 import 'orders_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -20,41 +26,65 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   List<SalaryProfileModel> salaryList = [];
+  LoginUserModel? rider;
+  RiderModel? newRider;
+  String? message;
 
-  getSalaryData() async {
-    // Create a random number generator
-    Random random = Random();
-
-    // Add 10 random elements to the salaryList
-    for (int i = 0; i < 10; i++) {
-      int randomMonth = random.nextInt(12) + 1; // Random month between 1 and 12
-      int randomYear =
-          random.nextInt(10) + 2015; // Random year between 2015 and 2024
-      double randomSalary = random.nextInt(50000) +
-          50000; // Random salary between 50000 and 99999
-
-      salaryList.add(SalaryProfileModel(
-        month: randomMonth,
-        year: randomYear,
-        salary: randomSalary,
-      ));
-
-      salaryList.sort((a, b) {
-        if (a.year != b.year) {
-          return a.year.compareTo(b.year);
-        } else {
-          return a.month.compareTo(b.month);
-        }
-      });
+  getSalaryData(String riderId, String token) async {
+    log(token);
+    http.Response res = await http.get(
+      Uri.parse(
+          "${AppKeys.apiUrlKey}${AppKeys.ridersKey}/$riderId${AppKeys.salaryHistoryKey}"),
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    log(res.body.toString());
+    Map<String, dynamic> resJson = jsonDecode(res.body);
+    if (res.statusCode == 404 && res.statusCode == 200) {
+      if (resJson["success"] == 1) {
+      } else if (resJson["success"] == 0) {
+        message = resJson["message"];
+      }
+    } else {
+      message = resJson["message"];
     }
-
     setState(() {});
   }
 
   @override
   void initState() {
-    getSalaryData();
+    getData();
     super.initState();
+  }
+
+  getData() async {
+    await getProfile();
+    if (newRider != null && rider != null) {
+      await getSalaryData(newRider!.rider.riderId, rider!.token);
+    }
+  }
+
+  Future<void> getProfile() async {
+    String? riderJson = await StorageServices.getLoginUserDetails();
+    if (riderJson != null) {
+      rider = LoginUserModel.fromRawJson(riderJson);
+    }
+    if (rider != null) {
+      http.Response res = await http.get(Uri.parse(
+          AppKeys.apiUrlKey + AppKeys.ridersKey + "/${rider!.rider.riderId}"));
+
+      if (res.statusCode == 200) {
+        Map<String, dynamic> resJson = jsonDecode(res.body);
+        if (resJson["success"] == 1) {
+          newRider = RiderModel.fromJson(resJson);
+        }
+      }
+
+      setState(() {});
+    }
   }
 
   @override
@@ -66,239 +96,282 @@ class _ProfileScreenState extends State<ProfileScreen> {
           padding: const EdgeInsets.only(top: 15, bottom: 15),
           child: RefreshIndicator(
             onRefresh: (() async {
-              setState(() {
-                salaryList.clear();
-              });
-              await getSalaryData();
-              setState(() {});
+              getData();
             }),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundImage: NetworkImage(
-                              "https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"),
+              child: newRider != null
+                  ? CustomScrollView(
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 30,
+                                backgroundImage: NetworkImage(
+                                    "https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"),
+                              ),
+                              SizedBox(width: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    newRider!.rider.riderName,
+                                    style: TextStyle(
+                                      color: AppColors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Ph. No. : +91 ${newRider!.rider.phoneNumber.toString().substring(0, 5)} ${newRider!.rider.phoneNumber.toString().substring(5)}",
+                                    style: TextStyle(
+                                      color: AppColors.black,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                        SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Zakariya Yoder",
-                              style: TextStyle(
-                                color: AppColors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: 15,
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 15, vertical: 15),
+                            decoration: AppColors.customDecoration,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  newRider!.rider.vehicleType,
+                                  style: TextStyle(
+                                    color: AppColors.black,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                Text(
+                                  newRider!.rider.vehicleNumber,
+                                  style: TextStyle(
+                                    color: AppColors.black,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        if (salaryList.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: SizedBox(
+                              height: 15,
+                            ),
+                          ),
+                        if (salaryList.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: ProfileTodayContainer(
+                                    head: "Today's\nTrip",
+                                    data: "10",
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: ProfileTodayContainer(
+                                    head: "Order\nAmount",
+                                    data: "₹3000",
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: 15,
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: CustomDivider(),
+                        ),
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: 15,
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: GestureDetector(
+                            onTap: (() {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => DocumentsScreen(),
+                                ),
+                              );
+                            }),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 10),
+                              decoration: AppColors.customDecoration,
+                              child: Center(
+                                child: Text(
+                                  "Documents",
+                                  style: TextStyle(
+                                    color: AppColors.black,
+                                    fontSize: 12,
+                                  ),
+                                ),
                               ),
                             ),
-                            Text(
-                              "Ph. No. : +91 00000 00000",
-                              style: TextStyle(
-                                color: AppColors.black,
-                                fontSize: 12,
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: 15,
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: CustomDivider(),
+                        ),
+                        if (salaryList.isEmpty && message != null)
+                          SliverToBoxAdapter(
+                            child: CustomDivider(),
+                          ),
+                        if (salaryList.isEmpty && message != null)
+                          SliverToBoxAdapter(
+                            child: Center(
+                              child: Text(
+                                message!,
+                                style: TextStyle(
+                                  color: AppColors.black,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 15,
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                      decoration: AppColors.customDecoration,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Scooty",
-                            style: TextStyle(
-                              color: AppColors.black,
-                              fontSize: 12,
+                          ),
+                        if (salaryList.isEmpty && message == null)
+                          SliverToBoxAdapter(
+                            child: Center(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 15),
+                                child: CircularProgressIndicator(
+                                  color: AppColors.green,
+                                ),
+                              ),
                             ),
                           ),
-                          Text(
-                            "WB 00A 0000",
-                            style: TextStyle(
-                              color: AppColors.black,
-                              fontSize: 12,
-                            ),
+                        if (salaryList.isEmpty)
+                          SliverToBoxAdapter(
+                            child: CustomDivider(),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 15,
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: ProfileTodayContainer(
-                            head: "Today's\nTrip",
-                            data: "10",
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: ProfileTodayContainer(
-                            head: "Order\nAmount",
-                            data: "₹3000",
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 15,
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: CustomDivider(),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 15,
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: GestureDetector(
-                      onTap: (() {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => DocumentsScreen(),
-                          ),
-                        );
-                      }),
-                      child: Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                        decoration: AppColors.customDecoration,
-                        child: Center(
-                          child: Text(
-                            "Documents",
-                            style: TextStyle(
-                              color: AppColors.black,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 15,
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: CustomDivider(),
-                  ),
-                  if (salaryList.isNotEmpty)
-                    SliverToBoxAdapter(
-                      child: Container(
-                        child: Column(
-                          children: salaryList
-                              .map(
-                                (salary) => Column(
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.only(top: 15),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                        if (salaryList.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: Container(
+                              child: Column(
+                                children: salaryList
+                                    .map(
+                                      (salary) => Column(
                                         children: [
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                "Salary 1",
-                                                style: TextStyle(
-                                                  color: AppColors.black,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 15,
+                                          Padding(
+                                            padding: EdgeInsets.only(top: 15),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      "Salary 1",
+                                                      style: TextStyle(
+                                                        color: AppColors.black,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 15,
+                                                      ),
+                                                    ),
+                                                    SizedBox(height: 5),
+                                                    Text(
+                                                      "Reference ID: C079DB3D",
+                                                      style: TextStyle(
+                                                        color: AppColors.black,
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                              ),
-                                              SizedBox(height: 5),
-                                              Text(
-                                                "Reference ID: C079DB3D",
-                                                style: TextStyle(
-                                                  color: AppColors.black,
-                                                  fontSize: 12,
+                                                Text(
+                                                  "+ ₹873.01",
+                                                  style: TextStyle(
+                                                    color: AppColors.green,
+                                                    fontSize: 17,
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                          Text(
-                                            "+ ₹873.01",
-                                            style: TextStyle(
-                                              color: AppColors.green,
-                                              fontSize: 17,
+                                              ],
                                             ),
                                           ),
+                                          SizedBox(height: 15),
+                                          CustomDivider(),
                                         ],
                                       ),
-                                    ),
-                                    SizedBox(height: 15),
-                                    CustomDivider(),
-                                  ],
-                                ),
-                              )
-                              .toList(),
+                                    )
+                                    .toList(),
+                              ),
+                            ),
+                          ),
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: 15,
+                          ),
                         ),
-                      ),
-                    ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 15,
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: GestureDetector(
-                      onTap: (() async {
-                        widget.onChangeIndex(0);
-                      }),
-                      child: Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                        decoration: AppColors.customDecoration,
-                        child: Center(
-                          child: Text(
-                            "Orders",
-                            style: TextStyle(
-                              color: AppColors.black,
-                              fontSize: 12,
+                        SliverToBoxAdapter(
+                          child: GestureDetector(
+                            onTap: (() async {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => OrdersScreen(type: 1),
+                                ),
+                              );
+                            }),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 10),
+                              decoration: AppColors.customDecoration,
+                              child: Center(
+                                child: Text(
+                                  "Previous Orders",
+                                  style: TextStyle(
+                                    color: AppColors.black,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: 15,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.green,
                       ),
                     ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 15,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ),
         ),

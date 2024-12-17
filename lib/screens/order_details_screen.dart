@@ -4,6 +4,9 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
+import 'package:mdw/models/orders_model.dart';
+import 'package:mdw/models/prev_orders_model.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
 import 'package:mdw/services/app_function_services.dart';
 import 'package:mdw/styles.dart';
@@ -15,13 +18,12 @@ import 'onboarding_screen.dart';
 class OrderDetailsScreen extends StatefulWidget {
   const OrderDetailsScreen({
     super.key,
-    required this.orderID,
-    required this.name,
-    required this.phone,
-    required this.address,
+    this.order,
+    this.prevOrder,
   });
 
-  final String orderID, name, phone, address;
+  final OrdersModel? order;
+  final PrevOrdersModel? prevOrder;
 
   @override
   State<OrderDetailsScreen> createState() => _OrderDetailsScreenState();
@@ -107,7 +109,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         backgroundColor: AppColors.white,
         centerTitle: false,
         title: CustomAppBarTitle(
-          title: "#0CAC6C64",
+          title: (widget.prevOrder == null && widget.order != null)
+              ? "#${widget.order!.orderId}"
+              : (widget.prevOrder != null)
+                  ? "#${widget.prevOrder!.orderId}"
+                  : "",
         ),
       ),
       body: SafeArea(
@@ -151,7 +157,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "01 Jan 2025, 02:14 PM",
+                          DateFormat("dd MMM yyyy, hh:mm a").format(
+                              (widget.prevOrder == null && widget.order != null)
+                                  ? widget.order!.orderDate
+                                  : (widget.prevOrder != null)
+                                      ? widget.prevOrder!.orderDate
+                                      : DateTime.now()),
                           style: TextStyle(
                             color: AppColors.black,
                             fontSize: 15,
@@ -160,21 +171,34 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         ),
                         SizedBox(height: 10),
                         Text(
-                          "Random Name",
+                          (widget.prevOrder == null && widget.order != null)
+                              ? widget.order!.customer.name
+                              : (widget.prevOrder != null)
+                                  ? widget.prevOrder!.customer.name
+                                  : "",
                           style: TextStyle(
                             color: AppColors.black,
                             fontSize: 13,
                           ),
                         ),
                         Text(
-                          "00000 00000",
+                          (widget.prevOrder == null && widget.order != null)
+                              ? '+91 ${widget.order!.customer.phoneNumber.toString().substring(0, 5)} ${widget.order!.customer.phoneNumber.toString().substring(5)}'
+                              : (widget.prevOrder != null)
+                                  ? '+91 ${widget.prevOrder!.customer.phoneNumber.toString().substring(0, 5)} ${widget.prevOrder!.customer.phoneNumber.toString().substring(5)}'
+                                  : "",
                           style: TextStyle(
                             color: AppColors.black,
                             fontSize: 13,
                           ),
                         ),
                         Text(
-                          "Random Address",
+                          (widget.prevOrder == null && widget.order != null)
+                              ? widget.order!.customer.address.toString()
+                              : (widget.prevOrder != null)
+                                  ? widget.prevOrder!.customer.address
+                                      .toString()
+                                  : "",
                           style: TextStyle(
                             color: AppColors.black,
                             fontSize: 13,
@@ -199,10 +223,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   horizontalPadding: 0,
                   verticalPadding: 10,
                   onTap: (() async {
-                    log("message");
+                    // log("message");
                     // await locationService.requestLocationPermission(context);
-                    await AppFunctions.launchMap(context,
-                            "Techno International New Town, Kolkata, India")
+                    await AppFunctions.launchMap(
+                            context,
+                            (widget.prevOrder == null && widget.order != null)
+                                ? widget.order!.customer.address.toString()
+                                : (widget.prevOrder != null)
+                                    ? widget.prevOrder!.customer.address
+                                        .toString()
+                                    : "")
                         .whenComplete(() {});
                   }),
                   text: "View On Map",
@@ -241,48 +271,60 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       height: 10,
                     ),
                     Column(
-                      children: [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        6,
-                        7,
-                        8,
-                        9,
-                        10,
-                        11,
-                        12,
-                        13,
-                        14,
-                        15
-                      ]
-                          .map(
-                            (e) => Padding(
-                              padding: EdgeInsets.only(top: e == 1 ? 0 : 5),
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    height: 30,
-                                    width: 30,
-                                    child: Center(child: Text(e.toString())),
+                      children:
+                          ((widget.prevOrder == null && widget.order != null)
+                                  ? widget.order!.items
+                                  : (widget.prevOrder != null)
+                                      ? widget.prevOrder!.items
+                                      : [])
+                              .map(
+                                (item) => Padding(
+                                  padding: EdgeInsets.only(top: 5),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      SizedBox(
+                                        height: 30,
+                                        child: Center(
+                                          child: Text(
+                                            item.productName,
+                                            style: TextStyle(
+                                              color: AppColors.black,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      SizedBox(
+                                        height: 30,
+                                        child: Center(
+                                          child: Text(
+                                            "₹${item.amount}",
+                                            style: TextStyle(
+                                              color: AppColors.green,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  SizedBox(
-                                    width: 5,
-                                  ),
-                                  SizedBox(
-                                    height: 30,
-                                    child: Center(child: Text("Product $e")),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                          .toList(),
+                                ),
+                              )
+                              .toList(),
                     ),
                   ],
                 ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 20,
               ),
             ),
             SliverToBoxAdapter(
@@ -298,6 +340,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                 "Enter the code to confirm the delivery\nof the order.",
                             type: 1,
                             btnText: "Confirm Order",
+                            orderId: (widget.prevOrder == null &&
+                                    widget.order != null)
+                                ? widget.order!.orderId
+                                : (widget.prevOrder != null)
+                                    ? widget.prevOrder!.orderId
+                                    : "",
                           )),
                     ),
                   ).whenComplete(() {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mdw/screens/feedback_screen.dart';
+import 'package:mdw/screens/login_screen.dart';
 import 'package:mdw/screens/orders_screen.dart';
 import 'package:mdw/screens/profile_screen.dart';
 import 'package:mdw/styles.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'code_verification_screen.dart';
 
@@ -109,6 +111,34 @@ class _MainScreenState extends State<MainScreen> {
                   "Feedback",
                   style: TextStyle(
                     color: AppColors.black.withOpacity(0.7),
+                  ),
+                ),
+              ),
+              ListTile(
+                selected: index == 3,
+                selectedTileColor: AppColors.green.withOpacity(0.3),
+                onTap: (() async {
+                  setState(() {
+                    index = 3;
+                  });
+                  _scaffoldKey.currentState?.closeDrawer();
+                  final pref = await SharedPreferences.getInstance();
+                  await pref.clear();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => LoginScreen(),
+                    ),
+                  );
+                }),
+                leading: Icon(
+                  Icons.logout,
+                  color: AppColors.grey,
+                ),
+                title: Text(
+                  "Logout",
+                  style: TextStyle(
+                    color: AppColors.red.withOpacity(0.7),
                   ),
                 ),
               ),

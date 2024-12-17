@@ -1,7 +1,12 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:mdw/screens/login_screen.dart';
 import 'package:mdw/screens/main_screen.dart';
 import 'package:mdw/screens/onboarding_screen.dart';
+import 'package:mdw/services/app_keys.dart';
 import 'package:mdw/services/storage_services.dart';
 import 'package:mdw/styles.dart';
 import 'package:mdw/utils/snack_bar_utils.dart';
@@ -14,10 +19,12 @@ class CodeVerificationScreen extends StatefulWidget {
     required this.upperText,
     required this.type,
     required this.btnText,
+    this.orderId,
   });
 
   final String head, upperText, btnText;
   final int type;
+  final String? orderId;
 
   @override
   State<CodeVerificationScreen> createState() => _CodeVerificationScreenState();
@@ -47,7 +54,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                 height: MediaQuery.of(context).size.height / 7,
               ),
               CustomPinputField(
-                pin: 2003,
+                pin: 1234,
                 onCompleted: (bool isVerified) {
                   setState(() {
                     isPinVerified = isVerified;
@@ -81,8 +88,37 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                             ),
                           );
                         });
+                      } else if (widget.type == 1 && widget.orderId != null) {
+                        http.Response res = await http.patch(
+                          Uri.parse(AppKeys.apiUrlKey + AppKeys.orderStatusKey),
+                          headers: <String, String>{
+                            'Content-Type': 'application/json; charset=UTF-8',
+                          },
+                          body: jsonEncode(<String, dynamic>{
+                            "orderId": widget.orderId,
+                            "status": "Delivered"
+                          }),
+                        );
+                        log(res.body.toString());
+                        if (res.statusCode == 200) {
+                          Map<String, dynamic> resJson = jsonDecode(res.body);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            AppSnackBar().customizedAppSnackBar(
+                              message: resJson["message"],
+                              context: context,
+                            ),
+                          );
+                          if (resJson["success"] == 1) {
+                            Navigator.pop(context);
+                          }
+                        }
                       } else {
-                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          AppSnackBar().customizedAppSnackBar(
+                            message: "Something went wrong. Please try again!",
+                            context: context,
+                          ),
+                        );
                       }
                     }
                     setState(() {
