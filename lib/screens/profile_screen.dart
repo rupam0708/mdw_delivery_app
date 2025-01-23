@@ -340,7 +340,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => OrdersScreen(type: 1),
+                                  builder: (_) => OrdersScreen(
+                                    type: 1,
+                                    message:
+                                        "View the orders that you delivered.",
+                                  ),
                                 ),
                               );
                             }),

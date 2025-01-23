@@ -1,17 +1,25 @@
+import 'dart:convert';
+
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:mdw/constant.dart';
 import 'package:mdw/models/orders_model.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
 import 'package:mdw/services/app_keys.dart';
 import 'package:mdw/styles.dart';
+import 'package:mdw/utils/snack_bar_utils.dart';
 
 import '../models/prev_orders_model.dart';
 import 'order_details_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
-  const OrdersScreen({super.key, this.type});
+  const OrdersScreen({
+    super.key,
+    this.type,
+    this.message,
+  });
+
+  final String? message;
 
   final int? type;
 
@@ -43,9 +51,32 @@ class _OrdersScreenState extends State<OrdersScreen> {
         .get(Uri.parse(AppKeys.apiUrlKey + AppKeys.ordersKey + whichOrders));
     if (res.statusCode == 200) {
       if (widget.type == null) {
-        ordersList = await OrdersListModel.fromRawJson(res.body);
+        // log(res.body);
+        dynamic resJson = jsonDecode(res.body);
+        if (resJson is Map<String, dynamic>) {
+          if (resJson["message"] != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              AppSnackBar().customizedAppSnackBar(
+                  message: resJson["message"], context: context),
+            );
+          }
+        } else if (resJson is List<dynamic>) {
+          ordersList = await OrdersListModel.fromRawJson(res.body);
+        }
       } else if (widget.type != null && widget.type == 1) {
-        prevOrdersList = await PrevOrdersListModel.fromRawJson(res.body);
+        dynamic resJson = jsonDecode(res.body);
+
+        if (resJson is Map<String, dynamic>) {
+          if (resJson["message"] != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              AppSnackBar().customizedAppSnackBar(
+                  message: resJson["message"], context: context),
+            );
+          }
+        } else if (resJson is List<dynamic>) {
+          // log(resJson[0]["items"].toString());
+          prevOrdersList = await PrevOrdersListModel.fromRawJson(res.body);
+        }
       }
     } else {
       empty = true;
@@ -68,11 +99,28 @@ class _OrdersScreenState extends State<OrdersScreen> {
             }
           }),
           child: CustomScrollView(
-            physics: AppConstant.physics,
             slivers: [
+              if (widget.type == 1)
+                SliverAppBar(
+                  backgroundColor: AppColors.white,
+                  leading: IconButton(
+                    onPressed: (() {
+                      Navigator.pop(context);
+                    }),
+                    icon: Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: AppColors.green,
+                    ),
+                  ),
+                  title: CustomAppBarTitle(
+                    title: "Previous Orders",
+                  ),
+                ),
               SliverToBoxAdapter(
                 child: CustomUpperPortion(
-                    head: "View the order that you need\nto deliver."),
+                    head: widget.type == 1
+                        ? "View the orders those you\nalready delivered."
+                        : "View the order that you need\nto deliver."),
               ),
               SliverToBoxAdapter(
                 child: SizedBox(
@@ -100,13 +148,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           middleColor: AppColors.transparent,
                           openColor: AppColors.transparent,
                           transitionType: ContainerTransitionType.fade,
-                          onClosed: ((result) async {
-                            if (widget.type != null && widget.type == 1) {
-                              await getOrders(AppKeys.prevKey);
-                            } else if (widget.type == null) {
-                              await getOrders(AppKeys.todayKey);
-                            }
-                          }),
+                          // onClosed: ((result) async {
+                          //   if (widget.type != null && widget.type == 1) {
+                          //     await getOrders(AppKeys.prevKey);
+                          //   } else if (widget.type == null) {
+                          //     await getOrders(AppKeys.todayKey);
+                          //   }
+                          // }),
                           closedBuilder: ((closedCtx, openContainer) {
                             return Padding(
                               padding:

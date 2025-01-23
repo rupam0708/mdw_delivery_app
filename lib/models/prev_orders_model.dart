@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 class PrevOrdersListModel {
   final List<PrevOrdersModel> orders;
@@ -67,28 +68,33 @@ class PrevOrdersModel {
 
   String toRawJson() => json.encode(toJson());
 
-  factory PrevOrdersModel.fromJson(Map<String, dynamic> json) =>
-      PrevOrdersModel(
-        timestamps: Timestamps.fromJson(json["timestamps"]),
-        orderTimestamps: OrderTimestamps.fromJson(json["orderTimestamps"]),
-        customer: Customer.fromJson(json["customer"]),
-        id: json["_id"],
-        orderId: json["orderId"],
-        orderDate: DateTime.parse(json["orderDate"]),
-        orderTime: json["orderTime"],
-        items: List<Item>.from(json["items"].map((x) => Item.fromJson(x))),
-        amount: json["amount"],
-        deliveryStatus: json["deliveryStatus"],
-        riderName: json["riderName"] ?? "",
-        packerName: json["packerName"] ?? "",
-        binColor: json["binColor"] ?? "",
-        binNumber: json["binNumber"] ?? 0,
-        status: json["status"],
-        turnaroundTime: json["turnaroundTime"],
-        createdAt: DateTime.parse(json["createdAt"]),
-        updatedAt: DateTime.parse(json["updatedAt"]),
-        v: json["__v"],
-      );
+  factory PrevOrdersModel.fromJson(Map<String, dynamic> json) {
+    log(json["items"].toString() + " Log");
+    return PrevOrdersModel(
+      timestamps: Timestamps.fromJson(json["timestamps"]),
+      orderTimestamps: OrderTimestamps.fromJson(json["orderTimestamps"]),
+      customer: Customer.fromJson(json["customer"]),
+      id: json["_id"],
+      orderId: json["orderId"],
+      orderDate: DateTime.parse(json["orderDate"]),
+      orderTime: json["orderTime"],
+      items: List<Item>.from(json["items"].map((x) {
+        log(x.toString());
+        return Item.fromJson(x);
+      })),
+      amount: json["amount"],
+      deliveryStatus: json["deliveryStatus"],
+      riderName: json["riderName"] ?? "",
+      packerName: json["packerName"] ?? "",
+      binColor: json["binColor"] ?? "",
+      binNumber: json["binNumber"] ?? 0,
+      status: json["status"],
+      turnaroundTime: json["turnaroundTime"],
+      createdAt: DateTime.parse(json["createdAt"]),
+      updatedAt: DateTime.parse(json["updatedAt"]),
+      v: json["__v"],
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         "timestamps": timestamps.toJson(),
@@ -144,6 +150,16 @@ class Customer {
         "phoneNumber": phoneNumber,
         "email": email,
       };
+
+  @override
+  String toString() {
+    String phoneStr =
+        phoneNumber.toString(); // Convert int to String for formatting
+    if (phoneStr.length == 10) {
+      return '+91 ${phoneStr.substring(0, 5)} ${phoneStr.substring(5)}';
+    }
+    return phoneStr; // Return as-is if formatting fails
+  }
 }
 
 class Address {
@@ -180,6 +196,11 @@ class Address {
         "postalCode": postalCode,
         "country": country,
       };
+
+  @override
+  String toString() {
+    return "$street, $city: $postalCode, $state, $country";
+  }
 }
 
 class Item {
@@ -202,7 +223,7 @@ class Item {
   String toRawJson() => json.encode(toJson());
 
   factory Item.fromJson(Map<String, dynamic> json) => Item(
-        productId: json["productId"],
+        productId: json["productId"] ?? "",
         productName: json["productName"],
         quantity: json["quantity"],
         amount: json["amount"],
