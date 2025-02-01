@@ -56,6 +56,10 @@ dependencies:
   win32: ^5.5.3
   flutter_svg:
   dotted_border: ^2.1.0
+  file_picker:
+  flutter_pdfview:
+  native_exif:
+  pdf_render:
 
 dev_dependencies:
   flutter_test:

@@ -28,7 +28,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'MDW Delivery App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // textTheme: GoogleFonts.montserratTextTheme(),

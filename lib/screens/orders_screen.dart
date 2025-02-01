@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,8 @@ class OrdersScreen extends StatefulWidget {
 class _OrdersScreenState extends State<OrdersScreen> {
   OrdersListModel? ordersList;
   PrevOrdersListModel? prevOrdersList;
-  bool empty = false;
+  bool empty = false, ordersListEmpty = false, prevOrdersListEmpty = false;
+  String message = "";
 
   @override
   void initState() {
@@ -53,8 +55,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
       if (widget.type == null) {
         // log(res.body);
         dynamic resJson = jsonDecode(res.body);
+        log(resJson.toString());
         if (resJson is Map<String, dynamic>) {
           if (resJson["message"] != null) {
+            setState(() {
+              ordersListEmpty = true;
+              message = resJson["message"];
+            });
             ScaffoldMessenger.of(context).showSnackBar(
               AppSnackBar().customizedAppSnackBar(
                   message: resJson["message"], context: context),
@@ -68,6 +75,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
         if (resJson is Map<String, dynamic>) {
           if (resJson["message"] != null) {
+            setState(() {
+              prevOrdersListEmpty = true;
+              message = resJson["message"];
+            });
             ScaffoldMessenger.of(context).showSnackBar(
               AppSnackBar().customizedAppSnackBar(
                   message: resJson["message"], context: context),
@@ -119,15 +130,29 @@ class _OrdersScreenState extends State<OrdersScreen> {
               SliverToBoxAdapter(
                 child: CustomUpperPortion(
                     head: widget.type == 1
-                        ? "View the orders those you\nalready delivered."
-                        : "View the order that you need\nto deliver."),
+                        ? prevOrdersListEmpty
+                            ? message
+                            : "View the orders those you\nalready delivered."
+                        : ordersListEmpty
+                            ? message
+                            : "View the order that you need\nto deliver."),
               ),
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: 15,
                 ),
               ),
-              if (ordersList == null && prevOrdersList == null)
+              if ((widget.type == null || widget.type == 0) &&
+                  ordersList == null &&
+                  !ordersListEmpty)
+                SliverToBoxAdapter(
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppColors.green),
+                  ),
+                ),
+              if (widget.type == 1 &&
+                  prevOrdersList == null &&
+                  !prevOrdersListEmpty)
                 SliverToBoxAdapter(
                   child: Center(
                     child: CircularProgressIndicator(color: AppColors.green),
@@ -203,13 +228,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           middleColor: AppColors.transparent,
                           openColor: AppColors.transparent,
                           transitionType: ContainerTransitionType.fade,
-                          onClosed: ((result) async {
-                            if (widget.type != null && widget.type == 1) {
-                              await getOrders(AppKeys.prevKey);
-                            } else if (widget.type == null) {
-                              await getOrders(AppKeys.todayKey);
-                            }
-                          }),
+                          // onClosed: ((result) async {
+                          //   if (widget.type != null && widget.type == 1) {
+                          //     await getOrders(AppKeys.prevKey);
+                          //   } else if (widget.type == null) {
+                          //     await getOrders(AppKeys.todayKey);
+                          //   }
+                          // }),
                           closedBuilder: ((closedCtx, openContainer) {
                             return Padding(
                               padding:

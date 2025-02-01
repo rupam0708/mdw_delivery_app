@@ -9,4 +9,8 @@ class AppKeys {
   static const String ridersKey = "/riders";
   static const String salaryHistoryKey = "/salary-history";
   static const String orderStatusKey = "/orders/status";
+  static const String aadharFrontKey = "/aadhar/front";
+  static const String aadharBackKey = "/aadhar/back";
+  static const String panKey = "/pan";
+  static const int maxFileSizeInBytes = 25 * 1024 * 1024; //25mb
 }
