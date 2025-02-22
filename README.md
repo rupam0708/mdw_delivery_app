@@ -1,5 +1,7 @@
 # 📦 MDW Delivery App 🚀
 
+<img src="assets/logo.png" alt="App Logo" width="200" height="200">
+
 ![App Logo](assets/logo.png)
 
 **Fast, Reliable, and Secure Medicine Delivery App**
