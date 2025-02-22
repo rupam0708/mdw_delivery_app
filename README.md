@@ -49,7 +49,7 @@ This app is specifically built to assist **delivery partners** in managing their
 
 ## 📷 App Screenshots
 
-![Screenshot 1](assets/screenshot1.png)
+![Screenshot 1](https://i.postimg.cc/brMCJR5Q/temp-Image-O3e-RPt.avif)
 ![Screenshot 2](assets/screenshot2.png)
 ![Screenshot 3](assets/screenshot3.png)
 
