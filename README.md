@@ -1,4 +1,4 @@
-# <img src="https://github.com/hackeR200364/mdw_delivery_app/blob/main/assets/app_icon.png?raw=true" alt="App Logo" width="200" height="200"> 📦 MDW Delivery App 🚀
+# <img src="https://github.com/hackeR200364/mdw_delivery_app/blob/main/assets/app_icon.png?raw=true" alt="App Logo" width="100" height="100"> 📦 MDW Delivery App 🚀
 
 
 
