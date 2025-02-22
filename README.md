@@ -1,4 +1,6 @@
-# <img src="https://i.postimg.cc/W1NgQZz8/temp-Imageju-WRHV.avif" alt="App Logo" width="200" height="200"> 📦 MDW Delivery App 🚀
+# <img src="https://github.com/hackeR200364/mdw_delivery_app/blob/main/assets/app_icon.png?raw=true" alt="App Logo" width="200" height="200"> 📦 MDW Delivery App 🚀
+
+
 
 ![App Logo](assets/logo.png)
 
