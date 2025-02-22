@@ -2,17 +2,15 @@ import 'dart:developer';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
+// import 'package:geocoding/geocoding.dart';
+// import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:mdw/models/orders_model.dart';
 import 'package:mdw/models/prev_orders_model.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
 import 'package:mdw/services/app_function_services.dart';
 import 'package:mdw/styles.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-import '../services/location_service.dart';
 import 'onboarding_screen.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
@@ -31,38 +29,38 @@ class OrderDetailsScreen extends StatefulWidget {
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   bool isPinVerified = false, isLoading = false;
-  Position? position;
-  List<Placemark>? placemarks;
-  final LocationService locationService = LocationService();
+
+  // Position? position;
+  // List<Placemark>? placemarks;
   List<XFile> selectedImages = [];
 
-  Future<bool> getPermission() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      permission = await Geolocator.requestPermission();
-      return Future.error('Location services are disabled.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        openAppSettings();
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      openAppSettings();
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    return true;
-  }
+  // Future<bool> getPermission() async {
+  //   bool serviceEnabled;
+  //   LocationPermission permission;
+  //
+  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  //   if (!serviceEnabled) {
+  //     permission = await Geolocator.requestPermission();
+  //     return Future.error('Location services are disabled.');
+  //   }
+  //
+  //   permission = await Geolocator.checkPermission();
+  //   if (permission == LocationPermission.denied) {
+  //     permission = await Geolocator.requestPermission();
+  //     if (permission == LocationPermission.denied) {
+  //       openAppSettings();
+  //       return Future.error('Location permissions are denied');
+  //     }
+  //   }
+  //
+  //   if (permission == LocationPermission.deniedForever) {
+  //     openAppSettings();
+  //     return Future.error(
+  //         'Location permissions are permanently denied, we cannot request permissions.');
+  //   }
+  //
+  //   return true;
+  // }
 
   // Future<void> getLocationPermission() async {
   //   Permission permission = Permission.location;
@@ -70,22 +68,22 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   //   if(status.i)
   // }
 
-  Future<Position?> _determinePosition() async {
-    return await Geolocator.getCurrentPosition();
-  }
-
-  Future<List<Placemark>> _getPositionDetails(Position pos) async {
-    return await placemarkFromCoordinates(pos.latitude, pos.longitude);
-  }
+  // Future<Position?> _determinePosition() async {
+  //   return await Geolocator.getCurrentPosition();
+  // }
+  //
+  // Future<List<Placemark>> _getPositionDetails(Position pos) async {
+  //   return await placemarkFromCoordinates(pos.latitude, pos.longitude);
+  // }
 
   getDate() async {
     setState(() {
       isLoading = true;
     });
-    position = await _determinePosition();
-    if (position != null) {
-      placemarks = await _getPositionDetails(position!);
-    }
+    // position = await _determinePosition();
+    // if (position != null) {
+    //   placemarks = await _getPositionDetails(position!);
+    // }
     // if (placemarks != null) {
     //   log(placemarks.toString());
     // }
@@ -327,38 +325,39 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 height: 20,
               ),
             ),
-            SliverToBoxAdapter(
-              child: CustomBtn(
-                height: 45,
-                onTap: (() {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: ((ctx) => CodeVerificationScreen(
-                            head: "Code Verification",
-                            upperText:
-                                "Enter the code to confirm the delivery\nof the order.",
-                            type: 1,
-                            btnText: "Confirm Order",
-                            orderId: (widget.prevOrder == null &&
-                                    widget.order != null)
-                                ? widget.order!.orderId
-                                : (widget.prevOrder != null)
-                                    ? widget.prevOrder!.orderId
-                                    : "",
-                          )),
-                    ),
-                  ).whenComplete(() {
-                    log("Refreshed");
-                  });
-                }),
-                text: "Enter Code",
-                horizontalMargin: 0,
-                verticalPadding: 7,
-                fontSize: 12,
-                horizontalPadding: 15,
+            if (widget.order != null)
+              SliverToBoxAdapter(
+                child: CustomBtn(
+                  height: 45,
+                  onTap: (() {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: ((ctx) => CodeVerificationScreen(
+                              head: "Code Verification",
+                              upperText:
+                                  "Enter the code to confirm the delivery\nof the order.",
+                              type: 1,
+                              btnText: "Confirm Order",
+                              orderId: (widget.prevOrder == null &&
+                                      widget.order != null)
+                                  ? widget.order!.orderId
+                                  : (widget.prevOrder != null)
+                                      ? widget.prevOrder!.orderId
+                                      : "",
+                            )),
+                      ),
+                    ).whenComplete(() {
+                      log("Refreshed");
+                    });
+                  }),
+                  text: "Enter Code",
+                  horizontalMargin: 0,
+                  verticalPadding: 7,
+                  fontSize: 12,
+                  horizontalPadding: 15,
+                ),
               ),
-            ),
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 40,

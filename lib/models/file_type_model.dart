@@ -37,12 +37,12 @@ class FileTypeModel {
   // Convert JSON map to FileTypeModel
   static FileTypeModel fromJson(Map<String, dynamic> json) {
     final path = json['path'];
-    final typeString = json['type'];
+    // final typeString = json['type'];
 
     // Convert the type string back to the enum
-    final type = FileTypeEnum.values.firstWhere(
-        (e) => e.toString().split('.').last == typeString,
-        orElse: () => FileTypeEnum.unknown);
+    // final type = FileTypeEnum.values.firstWhere(
+    //     (e) => e.toString().split('.').last == typeString,
+    //     orElse: () => FileTypeEnum.unknown);
 
     return FileTypeModel(
         path: path); // Create the object and automatically set the type
