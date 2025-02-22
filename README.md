@@ -49,23 +49,23 @@ This app is specifically built to assist **delivery partners** in managing their
 
 ## 📷 App Screenshots
 
-<p align="center">
-  <img src="https://i.postimg.cc/YqhTHvP6/temp-Image-DVMcpn.avif" alt="Screenshot 1" height="200">
-  <img src="https://i.postimg.cc/c4224sqV/temp-Image-Ouhu-GL.avif" alt="Screenshot 2" height="200">
-  <img src="https://i.postimg.cc/7Zzc5pwb/temp-Imagehg6mt-D.avif" alt="Screenshot 3" height="200">
-</p>
-
-<p align="center">
-  <img src="https://i.postimg.cc/brMCJR5Q/temp-Image-O3e-RPt.avif" alt="Screenshot 4" height="200">
-  <img src="https://i.postimg.cc/rszZMHfV/temp-Image-Nz65-Ug.avif" alt="Screenshot 5" height="200">
-  <img src="https://i.postimg.cc/m2zpn0cV/temp-Imaget-JFNBF.avif" alt="Screenshot 6" height="200">
-</p>
-
-<p align="center">
-  <img src="https://i.postimg.cc/CKFNwtK3/temp-Image-NFIu-Tv.avif" alt="Screenshot 7" height="200">
-  <img src="https://i.postimg.cc/xTwpVtMQ/temp-Image-LWmuv9.avif" alt="Screenshot 8" height="200">
-  <img src="https://i.postimg.cc/zDPP0JfV/temp-Image0-Q7-P59.avif" alt="Screenshot 9" height="200">
-</p>
+<table style="width:100%; text-align:center;">
+  <tr>
+    <td><img src="https://i.postimg.cc/YqhTHvP6/temp-Image-DVMcpn.avif" alt="Screenshot 1" height="200"></td>
+    <td><img src="https://i.postimg.cc/c4224sqV/temp-Image-Ouhu-GL.avif" alt="Screenshot 2" height="200"></td>
+    <td><img src="https://i.postimg.cc/7Zzc5pwb/temp-Imagehg6mt-D.avif" alt="Screenshot 3" height="200"></td>
+  </tr>
+  <tr>
+    <td><img src="https://i.postimg.cc/brMCJR5Q/temp-Image-O3e-RPt.avif" alt="Screenshot 4" height="200"></td>
+    <td><img src="https://i.postimg.cc/rszZMHfV/temp-Image-Nz65-Ug.avif" alt="Screenshot 5" height="200"></td>
+    <td><img src="https://i.postimg.cc/m2zpn0cV/temp-Imaget-JFNBF.avif" alt="Screenshot 6" height="200"></td>
+  </tr>
+  <tr>
+    <td><img src="https://i.postimg.cc/CKFNwtK3/temp-Image-NFIu-Tv.avif" alt="Screenshot 7" height="200"></td>
+    <td><img src="https://i.postimg.cc/xTwpVtMQ/temp-Image-LWmuv9.avif" alt="Screenshot 8" height="200"></td>
+    <td><img src="https://i.postimg.cc/zDPP0JfV/temp-Image0-Q7-P59.avif" alt="Screenshot 9" height="200"></td>
+  </tr>
+</table>
 
 ---
 
