@@ -49,7 +49,8 @@ This app is specifically built to assist **delivery partners** in managing their
 
 ## 📷 App Screenshots
 
-<img src="https://i.postimg.cc/brMCJR5Q/temp-Image-O3e-RPt.avif" alt="Screenshot 1" height="500" style="border-radius: 10px; background-color: #FFFFFF;" align="center">
+**Orders Screen**
+<img src="https://i.postimg.cc/brMCJR5Q/temp-Image-O3e-RPt.avif" alt="Screenshot 1" height="400">
 ![Screenshot 2](assets/screenshot2.png)
 ![Screenshot 3](assets/screenshot3.png)
 
