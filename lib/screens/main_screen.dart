@@ -148,7 +148,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: PopScope(
         canPop: index == 0 ? true : false,
-        onPopInvoked: ((val) {
+        onPopInvokedWithResult: ((popped, val) {
           if (index != 0) {
             _changeIndex(0);
           } else {

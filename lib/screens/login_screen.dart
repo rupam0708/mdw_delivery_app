@@ -21,13 +21,25 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _usernameTextController, _passwordTextController;
+  late FocusNode _userNameFocusNode, _passwordFocusNode;
   bool obscure = true, loading = false;
 
   @override
   void initState() {
+    _userNameFocusNode = FocusNode();
+    _passwordFocusNode = FocusNode();
     _usernameTextController = TextEditingController();
     _passwordTextController = TextEditingController();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _userNameFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _usernameTextController.dispose();
+    _passwordTextController.dispose();
+    super.dispose();
   }
 
   @override
@@ -66,6 +78,8 @@ class _LoginScreenState extends State<LoginScreen> {
               Column(
                 children: [
                   CustomTextField(
+                    focusNode: _userNameFocusNode,
+                    textCapitalization: TextCapitalization.characters,
                     textEditingController: _usernameTextController,
                     head: "Username",
                     hint: "Enter Username",
@@ -78,6 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 15,
                   ),
                   CustomTextField(
+                    focusNode: _passwordFocusNode,
                     textEditingController: _passwordTextController,
                     head: "Password",
                     hint: "Enter password",
@@ -263,6 +278,8 @@ class CustomTextField extends StatefulWidget {
     required this.textEditingController,
     this.obscure,
     this.suffix,
+    this.textCapitalization,
+    this.focusNode,
   });
 
   final String head, hint;
@@ -271,6 +288,8 @@ class CustomTextField extends StatefulWidget {
   final TextEditingController textEditingController;
   final bool? obscure;
   final Widget? suffix;
+  final TextCapitalization? textCapitalization;
+  final FocusNode? focusNode;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -298,6 +317,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
           height: 10,
         ),
         TextFormField(
+          focusNode: widget.focusNode,
+          textCapitalization:
+              widget.textCapitalization ?? TextCapitalization.none,
           obscureText: widget.obscure ?? false,
           key: formFieldKey,
           onChanged: ((value) {
