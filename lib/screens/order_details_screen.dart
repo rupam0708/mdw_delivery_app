@@ -20,8 +20,8 @@ class OrderDetailsScreen extends StatefulWidget {
     this.prevOrder,
   });
 
-  final OrdersModel? order;
-  final PrevOrdersModel? prevOrder;
+  final TodayOrder? order;
+  final PreviousOrder? prevOrder;
 
   @override
   State<OrderDetailsScreen> createState() => _OrderDetailsScreenState();
@@ -157,9 +157,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         Text(
                           DateFormat("dd MMM yyyy, hh:mm a").format(
                               (widget.prevOrder == null && widget.order != null)
-                                  ? widget.order!.orderDate
+                                  ? DateFormat("dd-MM-yyyy").parse(widget.order!.orderDate)
                                   : (widget.prevOrder != null)
-                                      ? widget.prevOrder!.orderDate
+                                      ? DateFormat("dd-MM-yyyy").parse(widget.prevOrder!.orderDate)
                                       : DateTime.now()),
                           style: TextStyle(
                             color: AppColors.black,

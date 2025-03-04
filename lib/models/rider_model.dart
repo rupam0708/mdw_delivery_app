@@ -64,7 +64,7 @@ class Rider {
 
   factory Rider.fromJson(Map<String, dynamic> json) => Rider(
         id: json["_id"],
-        riderName: json["riderName"],
+        riderName: json["riderName"] ?? "",
         riderId: json["riderId"],
         riderIdProof: json["riderIdProof"],
         vehicleNumber: json["vehicleNumber"],
@@ -74,7 +74,7 @@ class Rider {
         riderPassword: json["riderPassword"],
         createdAt: DateTime.parse(json["createdAt"]),
         v: json["__v"],
-        idProofUrl: json["idProofUrl"],
+        idProofUrl: json["idProofUrl"] ?? "",
       );
 
   Map<String, dynamic> toJson() => {

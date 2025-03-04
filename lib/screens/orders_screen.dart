@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:mdw/models/orders_model.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
 import 'package:mdw/services/app_keys.dart';
@@ -55,8 +55,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
       if (widget.type == null) {
         // log(res.body);
         dynamic resJson = jsonDecode(res.body);
-        log(resJson.toString());
-        if (resJson is Map<String, dynamic>) {
+        // log(resJson.toString());
+        if (!resJson["success"]) {
           if (resJson["message"] != null) {
             setState(() {
               ordersListEmpty = true;
@@ -67,13 +67,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   message: resJson["message"], context: context),
             );
           }
-        } else if (resJson is List<dynamic>) {
+        } else if (resJson["success"]) {
           ordersList = await OrdersListModel.fromRawJson(res.body);
         }
       } else if (widget.type != null && widget.type == 1) {
         dynamic resJson = jsonDecode(res.body);
 
-        if (resJson is Map<String, dynamic>) {
+        if (resJson["status"] != "success") {
           if (resJson["message"] != null) {
             setState(() {
               prevOrdersListEmpty = true;
@@ -84,7 +84,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   message: resJson["message"], context: context),
             );
           }
-        } else if (resJson is List<dynamic>) {
+        } else if (resJson["status"] == "success") {
           // log(resJson[0]["items"].toString());
           prevOrdersList = await PrevOrdersListModel.fromRawJson(res.body);
         }
@@ -181,36 +181,37 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           //   }
                           // }),
                           closedBuilder: ((closedCtx, openContainer) {
+                            DateTime date = DateFormat("dd-MM-yyyy").parse(ordersList!.data[index].orderDate);
                             return Padding(
                               padding:
                                   const EdgeInsets.only(top: 10, bottom: 17),
                               child: CustomOrderContainer(
-                                id: ordersList!.orders[index].orderId
+                                id: ordersList!.data[index].orderId
                                     .toUpperCase(),
                                 index: index,
                                 onTapContainer: openContainer,
-                                amount: ordersList!.orders[index].amount,
-                                name: ordersList!.orders[index].customer.name,
+                                amount: ordersList!.data[index].amount.toString(),
+                                name: ordersList!.data[index].customer.name,
                                 phone: ordersList!
-                                    .orders[index].customer.phoneNumber
+                                    .data[index].customer.phoneNumber
                                     .toString(),
                                 address:
-                                    "${ordersList!.orders[index].customer.address.toString()}",
+                                    "${ordersList!.data[index].customer.address.toString()}",
                                 maxLines: 2,
                                 date:
-                                    "${ordersList!.orders[index].orderDate.day}/${ordersList!.orders[index].orderDate.month}/${ordersList!.orders[index].orderDate.year}",
-                                distance: ordersList!.orders[index].status,
-                                time: ordersList!.orders[index].turnaroundTime,
+                                    "${date.day}/${date.month}/${date.year}",
+                                distance: ordersList!.data[index].status,
+                                time: ordersList!.data[index].turnaroundTime,
                               ),
                             );
                           }),
                           openBuilder: ((openCtx, _) {
                             return OrderDetailsScreen(
-                              order: ordersList!.orders[index],
+                              order: ordersList!.data[index],
                             );
                           }));
                     },
-                    childCount: ordersList!.orders.length,
+                    childCount: ordersList!.data.length,
                   ),
                 ),
               if (prevOrdersList != null)
@@ -236,38 +237,40 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           //   }
                           // }),
                           closedBuilder: ((closedCtx, openContainer) {
+                            DateTime date = DateFormat("dd-MM-yyyy").parse(prevOrdersList!.data[index].orderDate);
+
                             return Padding(
                               padding:
                                   const EdgeInsets.only(top: 10, bottom: 17),
                               child: CustomOrderContainer(
-                                id: prevOrdersList!.orders[index].orderId
+                                id: prevOrdersList!.data[index].orderId
                                     .toUpperCase(),
                                 index: index,
                                 onTapContainer: openContainer,
-                                amount: prevOrdersList!.orders[index].amount,
+                                amount: prevOrdersList!.data[index].amount.toString(),
                                 name:
-                                    prevOrdersList!.orders[index].customer.name,
+                                    prevOrdersList!.data[index].customer.name,
                                 phone: prevOrdersList!
-                                    .orders[index].customer.phoneNumber
+                                    .data[index].customer.phoneNumber
                                     .toString(),
                                 address:
-                                    "${prevOrdersList!.orders[index].customer.address.toString()}",
+                                    "${prevOrdersList!.data[index].customer.address.toString()}",
                                 maxLines: 2,
                                 date:
-                                    "${prevOrdersList!.orders[index].orderDate.day}/${prevOrdersList!.orders[index].orderDate.month}/${prevOrdersList!.orders[index].orderDate.year}",
-                                distance: prevOrdersList!.orders[index].status,
+                                    "${date.day}/${date.month}/${date.year}",
+                                distance: prevOrdersList!.data[index].status.name,
                                 time: prevOrdersList!
-                                    .orders[index].turnaroundTime,
+                                    .data[index].turnaroundTime.name,
                               ),
                             );
                           }),
                           openBuilder: ((openCtx, _) {
                             return OrderDetailsScreen(
-                              prevOrder: prevOrdersList!.orders[index],
+                              prevOrder: prevOrdersList!.data[index],
                             );
                           }));
                     },
-                    childCount: prevOrdersList!.orders.length,
+                    childCount: prevOrdersList!.data.length,
                   ),
                 )
             ],
@@ -386,11 +389,14 @@ class CustomOrderContainer extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 15),
-                  Text(
-                    address,
-                    style: TextStyle(
-                      color: AppColors.black,
-                      fontSize: 12,
+                  Flexible(
+                    child: Text(
+                      address,
+                      style: TextStyle(
+                        color: AppColors.black,
+                        overflow: TextOverflow.clip,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ],
@@ -405,7 +411,7 @@ class CustomOrderContainer extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    distance,
+                    distance.replaceAll("_", " "),
                     style: TextStyle(
                       color: AppColors.black,
                       fontSize: 13,

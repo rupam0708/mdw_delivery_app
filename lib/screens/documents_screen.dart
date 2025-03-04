@@ -12,7 +12,7 @@ import 'package:mdw/screens/orders_screen.dart';
 import 'package:mdw/services/app_keys.dart';
 import 'package:mdw/services/storage_services.dart';
 import 'package:mdw/styles.dart';
-import 'package:pdf_render/pdf_render.dart';
+// import 'package:pdf_render/pdf_render.dart';
 
 import '../utils/snack_bar_utils.dart';
 
@@ -214,35 +214,35 @@ class NotEmptyContainer extends StatelessWidget {
   final String head;
   final VoidCallback onChange;
 
-  Future<Map<String, double>> _getPdfPageDimensions(String filePath) async {
-    final doc = await PdfDocument.openFile(filePath);
-    final page = await doc.getPage(1); // Access the first page (index 0)
+  // Future<Map<String, double>> _getPdfPageDimensions(String filePath) async {
+  //   final doc = await PdfDocument.openFile(filePath);
+  //   final page = await doc.getPage(1); // Access the first page (index 0)
+  //
+  //   final width = page.width;
+  //   final height = page.height;
+  //
+  //   doc.dispose();
+  //
+  //   return {'width': width, 'height': height};
+  // }
 
-    final width = page.width;
-    final height = page.height;
-
-    doc.dispose();
-
-    return {'width': width, 'height': height};
-  }
-
-  Future<double> _getCalculatedHeight(
-      String filePath, double desiredWidth) async {
-    // Get the PDF page dimensions (width and height)
-    Map<String, double> dimensions = await _getPdfPageDimensions(filePath);
-
-    final originalWidth = dimensions['width']!;
-    final originalHeight = dimensions['height']!;
-
-    // Ensure the aspect ratio calculation is correct
-    final aspectRatio = originalHeight / originalWidth;
-
-    // Calculate the height based on the desired width and the aspect ratio
-    final calculatedHeight = desiredWidth * aspectRatio;
-
-    // Return the calculated height
-    return calculatedHeight - 20;
-  }
+  // Future<double> _getCalculatedHeight(
+  //     String filePath, double desiredWidth) async {
+  //   // Get the PDF page dimensions (width and height)
+  //   Map<String, double> dimensions = await _getPdfPageDimensions(filePath);
+  //
+  //   final originalWidth = dimensions['width']!;
+  //   final originalHeight = dimensions['height']!;
+  //
+  //   // Ensure the aspect ratio calculation is correct
+  //   final aspectRatio = originalHeight / originalWidth;
+  //
+  //   // Calculate the height based on the desired width and the aspect ratio
+  //   final calculatedHeight = desiredWidth * aspectRatio;
+  //
+  //   // Return the calculated height
+  //   return calculatedHeight - 20;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -252,10 +252,12 @@ class NotEmptyContainer extends StatelessWidget {
     }
 
     return FutureBuilder<double>(
-      future: fileModel!.type == FileTypeEnum.pdf
-          ? _getCalculatedHeight(fileModel!.path,
-              MediaQuery.of(context).size.width) // Only call for PDF
-          : Future.value(0.0), // Return 0 if not a PDF (no height for non-PDF)
+      future:
+      // fileModel!.type == FileTypeEnum.pdf
+      //     ? _getCalculatedHeight(fileModel!.path,
+      //         MediaQuery.of(context).size.width) // Only call for PDF
+      //     :
+      Future.value(0.0), // Return 0 if not a PDF (no height for non-PDF)
       builder: (ctx, snapshot) {
         // log(snapshot.toString());
         if (snapshot.hasError) {

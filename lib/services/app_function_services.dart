@@ -66,9 +66,7 @@ class AppFunctions {
         return 'Bad';
       case FeedbackType.worst:
         return 'Worst';
-      default:
-        return 'Unknown';
-    }
+      }
   }
 
 // Function to convert string to FeedbackType enum
