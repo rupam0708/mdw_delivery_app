@@ -90,7 +90,7 @@ class TodayOrder {
     amount: json["amount"]?.toDouble(),
     deliveryStatus: json["deliveryStatus"],
     riderName: json["riderName"],
-    riderId: json["riderId"],
+    riderId: json["riderId"]??"",
     packerName: json["packerName"],
     binColor: json["binColor"],
     binNumber: json["binNumber"],
@@ -99,7 +99,7 @@ class TodayOrder {
     turnaroundTime: json["turnaroundTime"],
     orderTimestamps: OrderTimestamps.fromJson(json["orderTimestamps"]),
     customer: Customer.fromJson(json["customer"]),
-    orderCreatedby: OrderCreatedby.fromJson(json["orderCreatedby"]),
+    orderCreatedby: OrderCreatedby.fromJson(json["orderCreatedby"]??{}),
     createdAt: json["createdAt"],
     updatedAt: json["updatedAt"],
     v: json["__v"],
@@ -229,11 +229,11 @@ class Item {
   String toRawJson() => json.encode(toJson());
 
   factory Item.fromJson(Map<String, dynamic> json) => Item(
-    productId: json["productId"],
+    productId: json["productId"] ?? "",
     productName: json["productName"],
     quantity: json["quantity"],
     amount: json["amount"]?.toDouble(),
-    itemCost: json["itemCost"]?.toDouble(),
+    itemCost: json["itemCost"]?.toDouble()??0,
     id: json["_id"],
   );
 
@@ -263,9 +263,9 @@ class OrderCreatedby {
   String toRawJson() => json.encode(toJson());
 
   factory OrderCreatedby.fromJson(Map<String, dynamic> json) => OrderCreatedby(
-    name: json["name"],
-    role: json["role"],
-    email: json["email"],
+    name: json["name"]??"",
+    role: json["role"]??"",
+    email: json["email"]??"",
   );
 
   Map<String, dynamic> toJson() => {

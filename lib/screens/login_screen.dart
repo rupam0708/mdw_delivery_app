@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                             body: jsonEncode({
                               'riderId': _usernameTextController.text.trim(),
-                              'riderPassword':
+                              'riderLoginPassword':
                                   _passwordTextController.text.trim(),
                             }));
                         final Map<String, dynamic> resJson =

@@ -1,0 +1,2 @@
+/Users/rupamkarmakar/Documents/Development/mdw_delivery_app/android/app/.cxx/RelWithDebInfo/2w353l2p/x86/CMakeFiles/edit_cache.dir
+/Users/rupamkarmakar/Documents/Development/mdw_delivery_app/android/app/.cxx/RelWithDebInfo/2w353l2p/x86/CMakeFiles/rebuild_cache.dir

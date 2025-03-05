@@ -121,6 +121,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           slivers: [
             SliverToBoxAdapter(
               child: Container(
+                // width: MediaQuery.of(context).size.width,
                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
@@ -192,18 +193,19 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         ),
                         Text(
                           (widget.prevOrder == null && widget.order != null)
-                              ? widget.order!.customer.address.toString()
+                              ? widget.order!.customer.address.toString().replaceAll(", ", "\n")
                               : (widget.prevOrder != null)
                                   ? widget.prevOrder!.customer.address
-                                      .toString()
+                                      .toString().replaceAll(", ", "\n")
                                   : "",
                           style: TextStyle(
+                            overflow: TextOverflow.clip,
                             color: AppColors.black,
                             fontSize: 13,
                           ),
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
