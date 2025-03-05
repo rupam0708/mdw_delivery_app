@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 // import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -66,7 +66,7 @@ class AppFunctions {
         return 'Bad';
       case FeedbackType.worst:
         return 'Worst';
-      }
+    }
   }
 
 // Function to convert string to FeedbackType enum
@@ -196,5 +196,22 @@ class AppFunctions {
   static String formatCurrencyByComma(double amount) {
     final formatter = NumberFormat('#,##0');
     return formatter.format(amount);
+  }
+
+  static Color getColorFromString(String colorName) {
+    switch (colorName.toLowerCase()) {
+      case "red":
+        return Colors.red;
+      case "blue":
+        return Colors.blue;
+      case "green":
+        return Colors.green;
+      case "pink":
+        return Colors.pink;
+      case "yellow":
+        return Colors.yellow;
+      default:
+        return Colors.black; // Default color if the input doesn't match
+    }
   }
 }

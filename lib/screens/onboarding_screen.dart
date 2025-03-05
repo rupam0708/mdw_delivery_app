@@ -163,6 +163,7 @@ class CustomBtn extends StatelessWidget {
     this.width,
     this.height,
     this.child,
+    this.color,
   });
 
   final VoidCallback onTap;
@@ -174,6 +175,7 @@ class CustomBtn extends StatelessWidget {
       width,
       height;
   final Widget? child;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +189,9 @@ class CustomBtn extends StatelessWidget {
             vertical: verticalPadding ?? 15,
             horizontal: horizontalPadding ?? 0),
         decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15), color: AppColors.btnColor),
+          borderRadius: BorderRadius.circular(15),
+          color: color ?? AppColors.btnColor,
+        ),
         child: child ??
             Center(
               child: Text(

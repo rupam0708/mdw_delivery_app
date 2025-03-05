@@ -1,12 +1,15 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:mdw/models/login_user_model.dart';
 import 'package:mdw/models/orders_model.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
 import 'package:mdw/services/app_keys.dart';
+import 'package:mdw/services/storage_services.dart';
 import 'package:mdw/styles.dart';
 import 'package:mdw/utils/snack_bar_utils.dart';
 
@@ -33,6 +36,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   PrevOrdersListModel? prevOrdersList;
   bool empty = false, ordersListEmpty = false, prevOrdersListEmpty = false;
   String message = "";
+  LoginUserModel? rider;
 
   @override
   void initState() {
@@ -41,72 +45,91 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   getData() async {
-    if (widget.type != null && widget.type == 1) {
-      await getOrders(AppKeys.prevKey);
-    } else if (widget.type == null) {
-      await getOrders(AppKeys.todayKey);
+    String? user = await StorageServices.getLoginUserDetails();
+    if (user != null) {
+      rider = await LoginUserModel.fromRawJson(user);
+      await getOrders();
+      // if (widget.type != null && widget.type == 1) {
+      //   await getOrders(AppKeys.prevKey);
+      // } else if (widget.type == null) {
+      //   await getOrders(AppKeys.todayKey);
+      // }
     }
   }
 
-  Future<void> getOrders(String whichOrders) async {
-    http.Response res = await http
-        .get(Uri.parse(AppKeys.apiUrlKey + AppKeys.ordersKey + whichOrders));
+  Future<void> getOrders() async {
+    String url = "";
+    if (widget.type != null && widget.type == 1) {
+      url = AppKeys.apiUrlKey + AppKeys.ordersKey + AppKeys.prevKey;
+    } else if (widget.type == null && rider != null) {
+      url = AppKeys.apiUrlKey +
+          AppKeys.ridersKey +
+          "/${rider!.rider.riderId}" +
+          AppKeys.allottedOrdersKey;
+    }
+    log(url);
+    http.Response res = await http.get(Uri.parse(url),
+        headers: {"authorization": "Bearer ${rider!.token}"});
     if (res.statusCode == 200) {
       if (widget.type == null) {
         // log(res.body);
         dynamic resJson = jsonDecode(res.body);
         // log(resJson.toString());
-        try{
-          ordersList = await OrdersListModel.fromRawJson(res.body);
-        }catch(e){
-          if (resJson["message"] != null) {
+        log(resJson["orders"].length.toString());
+
+        try {
+          if (resJson["orders"].length == 0) {
             setState(() {
               ordersListEmpty = true;
+              message = resJson["message"] ?? "Something went wrong";
+            });
+            ScaffoldMessenger.of(context).showSnackBar(AppSnackBar()
+                .customizedAppSnackBar(message: message, context: context));
+          } else {
+            ordersListEmpty = false;
+            ordersList = await OrdersListModel.fromJson(resJson);
+            // log(ordersList!.orders.length.toString());
+            setState(() {});
+          }
+        } catch (e) {
+          log(e.toString());
+          setState(() {
+            ordersListEmpty = true;
+            message = resJson["message"] ?? "Something went wrong";
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            AppSnackBar().customizedAppSnackBar(
+                message: resJson["message"] ?? "Something went wrong",
+                context: context),
+          );
+        }
+      } else if (widget.type != null && widget.type == 1) {
+        dynamic resJson = jsonDecode(res.body);
+        prevOrdersList = await PrevOrdersListModel.fromRawJson(res.body);
+
+        try {
+          prevOrdersList = await PrevOrdersListModel.fromRawJson(res.body);
+        } catch (e) {
+          if (resJson["message"] != null) {
+            setState(() {
+              prevOrdersListEmpty = true;
               message = resJson["message"];
             });
             ScaffoldMessenger.of(context).showSnackBar(
               AppSnackBar().customizedAppSnackBar(
                   message: resJson["message"], context: context),
             );
-          }else{
+          } else {
             setState(() {
               ordersListEmpty = true;
               message = "Something wrong happened";
             });
             ScaffoldMessenger.of(context).showSnackBar(
-              AppSnackBar().customizedAppSnackBar(
-                  message: message, context: context),
+              AppSnackBar()
+                  .customizedAppSnackBar(message: message, context: context),
             );
           }
         }
-
-      } else if (widget.type != null && widget.type == 1) {
-        dynamic resJson = jsonDecode(res.body);
-try{
-  prevOrdersList = await PrevOrdersListModel.fromRawJson(res.body);
-
-}catch(e){
-  if (resJson["message"] != null) {
-    setState(() {
-      prevOrdersListEmpty = true;
-      message = resJson["message"];
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      AppSnackBar().customizedAppSnackBar(
-          message: resJson["message"], context: context),
-    );
-  }else{
-    setState(() {
-      ordersListEmpty = true;
-      message = "Something wrong happened";
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      AppSnackBar().customizedAppSnackBar(
-          message: message, context: context),
-    );
-  }
-
-}
       }
     } else {
       empty = true;
@@ -123,9 +146,9 @@ try{
           color: AppColors.green,
           onRefresh: (() async {
             if (widget.type != null && widget.type == 1) {
-              await getOrders(AppKeys.prevKey);
+              await getOrders();
             } else if (widget.type == null) {
-              await getOrders(AppKeys.todayKey);
+              await getOrders();
             }
           }),
           child: CustomScrollView(
@@ -200,37 +223,37 @@ try{
                           //   }
                           // }),
                           closedBuilder: ((closedCtx, openContainer) {
-                            DateTime date = DateFormat("dd-MM-yyyy").parse(ordersList!.data[index].orderDate);
+                            DateTime date = ordersList!.orders[index].orderDate;
                             return Padding(
                               padding:
                                   const EdgeInsets.only(top: 10, bottom: 17),
                               child: CustomOrderContainer(
-                                id: ordersList!.data[index].orderId
+                                id: ordersList!.orders[index].orderId
                                     .toUpperCase(),
                                 index: index,
                                 onTapContainer: openContainer,
-                                amount: ordersList!.data[index].amount.toString(),
-                                name: ordersList!.data[index].customer.name,
+                                amount:
+                                    ordersList!.orders[index].amount.toString(),
+                                name: ordersList!.orders[index].customer.name,
                                 phone: ordersList!
-                                    .data[index].customer.phoneNumber
+                                    .orders[index].customer.phoneNumber
                                     .toString(),
                                 address:
-                                    "${ordersList!.data[index].customer.address.toString()}",
+                                    "${ordersList!.orders[index].customer.address.toString()}",
                                 maxLines: 2,
-                                date:
-                                    "${date.day}/${date.month}/${date.year}",
-                                distance: ordersList!.data[index].status,
-                                time: ordersList!.data[index].turnaroundTime,
+                                date: "${date.day}/${date.month}/${date.year}",
+                                distance: ordersList!.orders[index].status,
+                                time: ordersList!.orders[index].turnaroundTime,
                               ),
                             );
                           }),
                           openBuilder: ((openCtx, _) {
                             return OrderDetailsScreen(
-                              order: ordersList!.data[index],
+                              order: ordersList!.orders[index],
                             );
                           }));
                     },
-                    childCount: ordersList!.data.length,
+                    childCount: ordersList!.orders.length,
                   ),
                 ),
               if (prevOrdersList != null)
@@ -256,7 +279,8 @@ try{
                           //   }
                           // }),
                           closedBuilder: ((closedCtx, openContainer) {
-                            DateTime date = DateFormat("dd-MM-yyyy").parse(prevOrdersList!.data[index].orderDate);
+                            DateTime date = DateFormat("dd-MM-yyyy")
+                                .parse(prevOrdersList!.data[index].orderDate);
 
                             return Padding(
                               padding:
@@ -266,20 +290,21 @@ try{
                                     .toUpperCase(),
                                 index: index,
                                 onTapContainer: openContainer,
-                                amount: prevOrdersList!.data[index].amount.toString(),
-                                name:
-                                    prevOrdersList!.data[index].customer.name,
+                                amount: prevOrdersList!.data[index].amount
+                                    .toString(),
+                                name: prevOrdersList!.data[index].customer.name,
                                 phone: prevOrdersList!
                                     .data[index].customer.phoneNumber
                                     .toString(),
                                 address:
                                     "${prevOrdersList!.data[index].customer.address.toString()}",
                                 maxLines: 2,
-                                date:
-                                    "${date.day}/${date.month}/${date.year}",
-                                distance: prevOrdersList!.data[index].status.name,
+                                date: "${date.day}/${date.month}/${date.year}",
+                                distance:
+                                    prevOrdersList!.data[index].status.name,
                                 time: prevOrdersList!
-                                    .data[index].turnaroundTime.name,
+                                        .data[index].turnaroundTime?.name ??
+                                    "",
                               ),
                             );
                           }),

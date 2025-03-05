@@ -6,6 +6,7 @@ class AppKeys {
   static const String ordersKey = "/orders";
   static const String todayKey = "/gettodaysorders";
   static const String prevKey = "/getpreviousorders";
+  static const String allottedOrdersKey = "/allotted-orders";
   static const String ridersKey = "/riders";
   static const String salaryHistoryKey = "/salary-history";
   static const String orderStatusKey = "/orders/status";

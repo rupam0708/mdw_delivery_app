@@ -20,7 +20,7 @@ class OrderDetailsScreen extends StatefulWidget {
     this.prevOrder,
   });
 
-  final TodayOrder? order;
+  final Order? order;
   final PreviousOrder? prevOrder;
 
   @override
@@ -151,60 +151,94 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       ),
                     ),
                     SizedBox(width: 15),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          DateFormat("dd MMM yyyy, hh:mm a").format(
-                              (widget.prevOrder == null && widget.order != null)
-                                  ? DateFormat("dd-MM-yyyy").parse(widget.order!.orderDate)
-                                  : (widget.prevOrder != null)
-                                      ? DateFormat("dd-MM-yyyy").parse(widget.prevOrder!.orderDate)
-                                      : DateTime.now()),
-                          style: TextStyle(
-                            color: AppColors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            DateFormat("dd MMM yyyy, hh:mm a").format(
+                                (widget.prevOrder == null &&
+                                        widget.order != null)
+                                    ? widget.order!.orderDate
+                                    : (widget.prevOrder != null)
+                                        ? DateFormat("dd-MM-yyyy")
+                                            .parse(widget.prevOrder!.orderDate)
+                                        : DateTime.now()),
+                            style: TextStyle(
+                              color: AppColors.black,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          (widget.prevOrder == null && widget.order != null)
-                              ? widget.order!.customer.name
-                              : (widget.prevOrder != null)
-                                  ? widget.prevOrder!.customer.name
-                                  : "",
-                          style: TextStyle(
-                            color: AppColors.black,
-                            fontSize: 13,
+                          SizedBox(height: 10),
+                          Text(
+                            (widget.prevOrder == null && widget.order != null)
+                                ? "Name: " + widget.order!.customer.name
+                                : (widget.prevOrder != null)
+                                    ? "Name: " + widget.prevOrder!.customer.name
+                                    : "",
+                            style: TextStyle(
+                              color: AppColors.black,
+                              fontSize: 13,
+                            ),
                           ),
-                        ),
-                        Text(
-                          (widget.prevOrder == null && widget.order != null)
-                              ? '+91 ${widget.order!.customer.phoneNumber.toString().substring(0, 5)} ${widget.order!.customer.phoneNumber.toString().substring(5)}'
-                              : (widget.prevOrder != null)
-                                  ? '+91 ${widget.prevOrder!.customer.phoneNumber.toString().substring(0, 5)} ${widget.prevOrder!.customer.phoneNumber.toString().substring(5)}'
-                                  : "",
-                          style: TextStyle(
-                            color: AppColors.black,
-                            fontSize: 13,
+                          SizedBox(height: 5),
+                          Text(
+                            (widget.prevOrder == null && widget.order != null)
+                                ? "Phone No: " +
+                                    '+91 ${widget.order!.customer.phoneNumber.toString().substring(0, 5)} ${widget.order!.customer.phoneNumber.toString().substring(5)}'
+                                : (widget.prevOrder != null)
+                                    ? "Phone No: " +
+                                        '+91 ${widget.prevOrder!.customer.phoneNumber.toString().substring(0, 5)} ${widget.prevOrder!.customer.phoneNumber.toString().substring(5)}'
+                                    : "",
+                            style: TextStyle(
+                              color: AppColors.black,
+                              fontSize: 13,
+                            ),
                           ),
-                        ),
-                        Text(
-                          (widget.prevOrder == null && widget.order != null)
-                              ? widget.order!.customer.address.toString().replaceAll(", ", "\n")
-                              : (widget.prevOrder != null)
-                                  ? widget.prevOrder!.customer.address
-                                      .toString().replaceAll(", ", "\n")
-                                  : "",
-                          style: TextStyle(
-                            overflow: TextOverflow.clip,
-                            color: AppColors.black,
-                            fontSize: 13,
+                          SizedBox(height: 5),
+                          Text(
+                            (widget.prevOrder == null && widget.order != null)
+                                ? "Address: " +
+                                    widget.order!.customer.address
+                                        .toString()
+                                        .replaceAll(", ", "\n")
+                                : (widget.prevOrder != null)
+                                    ? "Address: " +
+                                        widget.prevOrder!.customer.address
+                                            .toString()
+                                            .replaceAll(", ", "\n")
+                                    : "",
+                            style: TextStyle(
+                              overflow: TextOverflow.visible,
+                              color: AppColors.black,
+                              fontSize: 13,
+                            ),
                           ),
-                        ),
-                      ],
+                          SizedBox(height: 5),
+                          Text(
+                            (widget.prevOrder == null && widget.order != null)
+                                ? "Bin: " + widget.order!.binNumber.toString()
+                                : (widget.prevOrder != null)
+                                    ? "Bin: " +
+                                        widget.prevOrder!.binNumber.toString()
+                                    : "",
+                            style: TextStyle(
+                              overflow: TextOverflow.visible,
+                              color: AppFunctions.getColorFromString(
+                                  (widget.prevOrder == null &&
+                                          widget.order != null)
+                                      ? widget.order!.binColor
+                                      : (widget.prevOrder != null)
+                                          ? widget.prevOrder!.binColor
+                                          : ""),
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -331,6 +365,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               SliverToBoxAdapter(
                 child: CustomBtn(
                   height: 45,
+                  color: AppColors.red,
                   onTap: (() {
                     Navigator.push(
                       context,
