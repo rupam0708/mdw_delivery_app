@@ -1,56 +1,60 @@
 import 'dart:convert';
 
 class OrdersListModel {
-  bool success;
-  List<TodayOrder> data;
+  int success;
+  List<Order> orders;
 
   OrdersListModel({
     required this.success,
-    required this.data,
+    required this.orders,
   });
 
-  factory OrdersListModel.fromRawJson(String str) => OrdersListModel.fromJson(json.decode(str));
+  factory OrdersListModel.fromRawJson(String str) =>
+      OrdersListModel.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-  factory OrdersListModel.fromJson(Map<String, dynamic> json) => OrdersListModel(
-    success: json["success"],
-    data: List<TodayOrder>.from(json["data"].map((x) => TodayOrder.fromJson(x))),
-  );
+  factory OrdersListModel.fromJson(Map<String, dynamic> json) =>
+      OrdersListModel(
+        success: json["success"],
+        orders: List<Order>.from(json["orders"].map((x) => Order.fromJson(x))),
+      );
 
   Map<String, dynamic> toJson() => {
-    "success": success,
-    "data": List<dynamic>.from(data.map((x) => x.toJson())),
-  };
+        "success": success,
+        "orders": List<dynamic>.from(orders.map((x) => x.toJson())),
+      };
 }
 
-class TodayOrder {
+class Order {
+  Timestamps timestamps;
+  OrderTimestamps orderTimestamps;
+  Customer customer;
+  OrderCreatedby orderCreatedby;
   String id;
   String orderId;
-  String orderDate;
+  DateTime orderDate;
   String orderTime;
   List<Item> items;
-  double amount;
+  int amount;
   String deliveryStatus;
   String riderName;
   String riderId;
   String packerName;
+  String packerId;
   String binColor;
   int binNumber;
   String status;
-  Timestamps timestamps;
   String turnaroundTime;
-  OrderTimestamps orderTimestamps;
-  Customer customer;
-  OrderCreatedby orderCreatedby;
-  String createdAt;
-  String updatedAt;
+  DateTime createdAt;
+  DateTime updatedAt;
   int v;
-  int statusOrder;
-  String? packerId;
-  String? cancellationReason;
 
-  TodayOrder({
+  Order({
+    required this.timestamps,
+    required this.orderTimestamps,
+    required this.customer,
+    required this.orderCreatedby,
     required this.id,
     required this.orderId,
     required this.orderDate,
@@ -61,113 +65,103 @@ class TodayOrder {
     required this.riderName,
     required this.riderId,
     required this.packerName,
+    required this.packerId,
     required this.binColor,
     required this.binNumber,
     required this.status,
-    required this.timestamps,
     required this.turnaroundTime,
-    required this.orderTimestamps,
-    required this.customer,
-    required this.orderCreatedby,
     required this.createdAt,
     required this.updatedAt,
     required this.v,
-    required this.statusOrder,
-    this.packerId,
-    this.cancellationReason,
   });
 
-  factory TodayOrder.fromRawJson(String str) => TodayOrder.fromJson(json.decode(str));
+  factory Order.fromRawJson(String str) => Order.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-  factory TodayOrder.fromJson(Map<String, dynamic> json) => TodayOrder(
-    id: json["_id"],
-    orderId: json["orderId"],
-    orderDate: json["orderDate"],
-    orderTime: json["orderTime"],
-    items: List<Item>.from(json["items"].map((x) => Item.fromJson(x))),
-    amount: json["amount"]?.toDouble(),
-    deliveryStatus: json["deliveryStatus"],
-    riderName: json["riderName"],
-    riderId: json["riderId"]??"",
-    packerName: json["packerName"],
-    binColor: json["binColor"],
-    binNumber: json["binNumber"],
-    status: json["status"],
-    timestamps: Timestamps.fromJson(json["timestamps"]),
-    turnaroundTime: json["turnaroundTime"],
-    orderTimestamps: OrderTimestamps.fromJson(json["orderTimestamps"]),
-    customer: Customer.fromJson(json["customer"]),
-    orderCreatedby: OrderCreatedby.fromJson(json["orderCreatedby"]??{}),
-    createdAt: json["createdAt"],
-    updatedAt: json["updatedAt"],
-    v: json["__v"],
-    statusOrder: json["statusOrder"],
-    packerId: json["packerId"],
-    cancellationReason: json["cancellationReason"],
-  );
+  factory Order.fromJson(Map<String, dynamic> json) => Order(
+        timestamps: Timestamps.fromJson(json["timestamps"]),
+        orderTimestamps: OrderTimestamps.fromJson(json["orderTimestamps"]),
+        customer: Customer.fromJson(json["customer"]),
+        orderCreatedby: OrderCreatedby.fromJson(json["orderCreatedby"]),
+        id: json["_id"],
+        orderId: json["orderId"],
+        orderDate: DateTime.parse(json["orderDate"]),
+        orderTime: json["orderTime"],
+        items: List<Item>.from(json["items"].map((x) => Item.fromJson(x))),
+        amount: json["amount"],
+        deliveryStatus: json["deliveryStatus"],
+        riderName: json["riderName"],
+        riderId: json["riderId"],
+        packerName: json["packerName"],
+        packerId: json["packerId"],
+        binColor: json["binColor"],
+        binNumber: json["binNumber"],
+        status: json["status"],
+        turnaroundTime: json["turnaroundTime"],
+        createdAt: DateTime.parse(json["createdAt"]),
+        updatedAt: DateTime.parse(json["updatedAt"]),
+        v: json["__v"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "_id": id,
-    "orderId": orderId,
-    "orderDate": orderDate,
-    "orderTime": orderTime,
-    "items": List<dynamic>.from(items.map((x) => x.toJson())),
-    "amount": amount,
-    "deliveryStatus": deliveryStatus,
-    "riderName": riderName,
-    "riderId": riderId,
-    "packerName": packerName,
-    "binColor": binColor,
-    "binNumber": binNumber,
-    "status": status,
-    "timestamps": timestamps.toJson(),
-    "turnaroundTime": turnaroundTime,
-    "orderTimestamps": orderTimestamps.toJson(),
-    "customer": customer.toJson(),
-    "orderCreatedby": orderCreatedby.toJson(),
-    "createdAt": createdAt,
-    "updatedAt": updatedAt,
-    "__v": v,
-    "statusOrder": statusOrder,
-    "packerId": packerId,
-    "cancellationReason": cancellationReason,
-  };
+        "timestamps": timestamps.toJson(),
+        "orderTimestamps": orderTimestamps.toJson(),
+        "customer": customer.toJson(),
+        "orderCreatedby": orderCreatedby.toJson(),
+        "_id": id,
+        "orderId": orderId,
+        "orderDate": orderDate.toIso8601String(),
+        "orderTime": orderTime,
+        "items": List<dynamic>.from(items.map((x) => x.toJson())),
+        "amount": amount,
+        "deliveryStatus": deliveryStatus,
+        "riderName": riderName,
+        "riderId": riderId,
+        "packerName": packerName,
+        "packerId": packerId,
+        "binColor": binColor,
+        "binNumber": binNumber,
+        "status": status,
+        "turnaroundTime": turnaroundTime,
+        "createdAt": createdAt.toIso8601String(),
+        "updatedAt": updatedAt.toIso8601String(),
+        "__v": v,
+      };
 }
 
 class Customer {
+  Address address;
   String name;
   int phoneNumber;
   String email;
-  Address address;
 
   Customer({
+    required this.address,
     required this.name,
     required this.phoneNumber,
     required this.email,
-    required this.address,
   });
 
-  factory Customer.fromRawJson(String str) => Customer.fromJson(json.decode(str));
+  factory Customer.fromRawJson(String str) =>
+      Customer.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
   factory Customer.fromJson(Map<String, dynamic> json) => Customer(
-    name: json["name"],
-    phoneNumber: json["phoneNumber"],
-    email: json["email"],
-    address: Address.fromJson(json["address"]),
-  );
+        address: Address.fromJson(json["address"]),
+        name: json["name"],
+        phoneNumber: json["phoneNumber"],
+        email: json["email"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "name": name,
-    "phoneNumber": phoneNumber,
-    "email": email,
-    "address": address.toJson(),
-  };
+        "address": address.toJson(),
+        "name": name,
+        "phoneNumber": phoneNumber,
+        "email": email,
+      };
 }
-
 
 class Address {
   String street;
@@ -186,33 +180,32 @@ class Address {
 
   String toRawJson() => json.encode(toJson());
 
-  factory Address.fromJson(Map<String, dynamic> json) => Address(
-    street: json["street"],
-    city: json["city"],
-    state: json["state"],
-    postalCode: json["postalCode"],
-  );
-
-  Map<String, dynamic> toJson() => {
-    "street": street,
-    "city": city,
-    "state": state,
-    "postalCode": postalCode,
-  };
-
   @override
   String toString() {
     return 'Street: $street, city: $city, state: $state, postalCode: $postalCode';
   }
-}
 
+  factory Address.fromJson(Map<String, dynamic> json) => Address(
+        street: json["street"],
+        city: json["city"],
+        state: json["state"],
+        postalCode: json["postalCode"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "street": street,
+        "city": city,
+        "state": state,
+        "postalCode": postalCode,
+      };
+}
 
 class Item {
   String productId;
   String productName;
   int quantity;
-  double amount;
-  double itemCost;
+  int amount;
+  int itemCost;
   String id;
 
   Item({
@@ -229,22 +222,22 @@ class Item {
   String toRawJson() => json.encode(toJson());
 
   factory Item.fromJson(Map<String, dynamic> json) => Item(
-    productId: json["productId"] ?? "",
-    productName: json["productName"],
-    quantity: json["quantity"],
-    amount: json["amount"]?.toDouble(),
-    itemCost: json["itemCost"]?.toDouble()??0,
-    id: json["_id"],
-  );
+        productId: json["productId"],
+        productName: json["productName"],
+        quantity: json["quantity"],
+        amount: json["amount"],
+        itemCost: json["itemCost"],
+        id: json["_id"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "productId": productId,
-    "productName": productName,
-    "quantity": quantity,
-    "amount": amount,
-    "itemCost": itemCost,
-    "_id": id,
-  };
+        "productId": productId,
+        "productName": productName,
+        "quantity": quantity,
+        "amount": amount,
+        "itemCost": itemCost,
+        "_id": id,
+      };
 }
 
 class OrderCreatedby {
@@ -258,25 +251,26 @@ class OrderCreatedby {
     required this.email,
   });
 
-  factory OrderCreatedby.fromRawJson(String str) => OrderCreatedby.fromJson(json.decode(str));
+  factory OrderCreatedby.fromRawJson(String str) =>
+      OrderCreatedby.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
   factory OrderCreatedby.fromJson(Map<String, dynamic> json) => OrderCreatedby(
-    name: json["name"]??"",
-    role: json["role"]??"",
-    email: json["email"]??"",
-  );
+        name: json["name"],
+        role: json["role"],
+        email: json["email"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "name": name,
-    "role": role,
-    "email": email,
-  };
+        "name": name,
+        "role": role,
+        "email": email,
+      };
 }
 
 class OrderTimestamps {
-  String received;
+  DateTime received;
   DateTime? packing;
   DateTime? packed;
   DateTime? outForDelivery;
@@ -290,25 +284,32 @@ class OrderTimestamps {
     this.delivered,
   });
 
-  factory OrderTimestamps.fromRawJson(String str) => OrderTimestamps.fromJson(json.decode(str));
+  factory OrderTimestamps.fromRawJson(String str) =>
+      OrderTimestamps.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-  factory OrderTimestamps.fromJson(Map<String, dynamic> json) => OrderTimestamps(
-    received: json["received"],
-    packing: json["packing"] == null ? null : DateTime.parse(json["packing"]),
-    packed: json["packed"] == null ? null : DateTime.parse(json["packed"]),
-    outForDelivery: json["outForDelivery"] == null ? null : DateTime.parse(json["outForDelivery"]),
-    delivered: json["delivered"] == null ? null : DateTime.parse(json["delivered"]),
-  );
+  factory OrderTimestamps.fromJson(Map<String, dynamic> json) =>
+      OrderTimestamps(
+        received: DateTime.parse(json["received"]),
+        packing:
+            json["packing"] == null ? null : DateTime.parse(json["packing"]),
+        packed: json["packed"] == null ? null : DateTime.parse(json["packed"]),
+        outForDelivery: json["outForDelivery"] == null
+            ? null
+            : DateTime.parse(json["outForDelivery"]),
+        delivered: json["delivered"] == null
+            ? null
+            : DateTime.parse(json["delivered"]),
+      );
 
   Map<String, dynamic> toJson() => {
-    "received": received,
-    "packing": packing?.toIso8601String(),
-    "packed": packed?.toIso8601String(),
-    "outForDelivery": outForDelivery?.toIso8601String(),
-    "delivered": delivered?.toIso8601String(),
-  };
+        "received": received.toIso8601String(),
+        "packing": packing?.toIso8601String(),
+        "packed": packed?.toIso8601String(),
+        "outForDelivery": outForDelivery?.toIso8601String(),
+        "delivered": delivered?.toIso8601String(),
+      };
 }
 
 class Timestamps {
@@ -326,23 +327,24 @@ class Timestamps {
     this.deliveredAt,
   });
 
-  factory Timestamps.fromRawJson(String str) => Timestamps.fromJson(json.decode(str));
+  factory Timestamps.fromRawJson(String str) =>
+      Timestamps.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
   factory Timestamps.fromJson(Map<String, dynamic> json) => Timestamps(
-    orderReceivedAt: json["orderReceivedAt"],
-    packingStartedAt: json["packingStartedAt"],
-    packedAt: json["packedAt"],
-    outForDeliveryAt: json["outForDeliveryAt"],
-    deliveredAt: json["deliveredAt"],
-  );
+        orderReceivedAt: json["orderReceivedAt"],
+        packingStartedAt: json["packingStartedAt"],
+        packedAt: json["packedAt"],
+        outForDeliveryAt: json["outForDeliveryAt"],
+        deliveredAt: json["deliveredAt"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "orderReceivedAt": orderReceivedAt,
-    "packingStartedAt": packingStartedAt,
-    "packedAt": packedAt,
-    "outForDeliveryAt": outForDeliveryAt,
-    "deliveredAt": deliveredAt,
-  };
+        "orderReceivedAt": orderReceivedAt,
+        "packingStartedAt": packingStartedAt,
+        "packedAt": packedAt,
+        "outForDeliveryAt": outForDeliveryAt,
+        "deliveredAt": deliveredAt,
+      };
 }
