@@ -56,7 +56,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
         // log(res.body);
         dynamic resJson = jsonDecode(res.body);
         // log(resJson.toString());
-        if (!resJson["success"]) {
+        try{
+          ordersList = await OrdersListModel.fromRawJson(res.body);
+        }catch(e){
           if (resJson["message"] != null) {
             setState(() {
               ordersListEmpty = true;
@@ -66,28 +68,45 @@ class _OrdersScreenState extends State<OrdersScreen> {
               AppSnackBar().customizedAppSnackBar(
                   message: resJson["message"], context: context),
             );
-          }
-        } else if (resJson["success"]) {
-          ordersList = await OrdersListModel.fromRawJson(res.body);
-        }
-      } else if (widget.type != null && widget.type == 1) {
-        dynamic resJson = jsonDecode(res.body);
-
-        if (resJson["status"] != "success") {
-          if (resJson["message"] != null) {
+          }else{
             setState(() {
-              prevOrdersListEmpty = true;
-              message = resJson["message"];
+              ordersListEmpty = true;
+              message = "Something wrong happened";
             });
             ScaffoldMessenger.of(context).showSnackBar(
               AppSnackBar().customizedAppSnackBar(
-                  message: resJson["message"], context: context),
+                  message: message, context: context),
             );
           }
-        } else if (resJson["status"] == "success") {
-          // log(resJson[0]["items"].toString());
-          prevOrdersList = await PrevOrdersListModel.fromRawJson(res.body);
         }
+
+      } else if (widget.type != null && widget.type == 1) {
+        dynamic resJson = jsonDecode(res.body);
+try{
+  prevOrdersList = await PrevOrdersListModel.fromRawJson(res.body);
+
+}catch(e){
+  if (resJson["message"] != null) {
+    setState(() {
+      prevOrdersListEmpty = true;
+      message = resJson["message"];
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      AppSnackBar().customizedAppSnackBar(
+          message: resJson["message"], context: context),
+    );
+  }else{
+    setState(() {
+      ordersListEmpty = true;
+      message = "Something wrong happened";
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      AppSnackBar().customizedAppSnackBar(
+          message: message, context: context),
+    );
+  }
+
+}
       }
     } else {
       empty = true;

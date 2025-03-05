@@ -71,7 +71,7 @@ class Rider {
         vehicleType: json["vehicleType"],
         phoneNumber: json["phoneNumber"],
         paymentReceived: json["paymentReceived"],
-        riderPassword: json["riderPassword"],
+        riderPassword: json["riderPassword"]??"",
         createdAt: DateTime.parse(json["createdAt"]),
         v: json["__v"],
         idProofUrl: json["idProofUrl"] ?? "",

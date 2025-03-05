@@ -1,0 +1,1 @@
+/Users/rupamkarmakar/Documents/Development/mdw_delivery_app/build/app/intermediates/cxx/RelWithDebInfo/2w353l2p/obj/arm64-v8a
