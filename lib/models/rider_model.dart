@@ -64,14 +64,14 @@ class Rider {
 
   factory Rider.fromJson(Map<String, dynamic> json) => Rider(
         id: json["_id"],
-        riderName: json["riderName"] ?? "",
+        riderName: json["name"] ?? "",
         riderId: json["riderId"],
         riderIdProof: json["riderIdProof"],
         vehicleNumber: json["vehicleNumber"],
         vehicleType: json["vehicleType"],
         phoneNumber: json["phoneNumber"],
         paymentReceived: json["paymentReceived"],
-        riderPassword: json["riderPassword"]??"",
+        riderPassword: json["riderPassword"] ?? "",
         createdAt: DateTime.parse(json["createdAt"]),
         v: json["__v"],
         idProofUrl: json["idProofUrl"] ?? "",

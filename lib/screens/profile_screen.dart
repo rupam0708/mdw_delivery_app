@@ -71,19 +71,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     String? riderJson = await StorageServices.getLoginUserDetails();
     if (riderJson != null) {
       rider = LoginUserModel.fromRawJson(riderJson);
+      setState(() {});
     }
     if (rider != null) {
       http.Response res = await http.get(Uri.parse(
           AppKeys.apiUrlKey + AppKeys.ridersKey + "/${rider!.rider.riderId}"));
-
       if (res.statusCode == 200) {
         Map<String, dynamic> resJson = jsonDecode(res.body);
         if (resJson["success"] == 1) {
           newRider = RiderModel.fromJson(resJson);
+          setState(() {});
         }
       }
-
-      setState(() {});
     }
   }
 
