@@ -63,11 +63,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
       url = AppKeys.apiUrlKey + AppKeys.ordersKey + AppKeys.prevKey;
     } else if (widget.type == null && rider != null) {
       url = AppKeys.apiUrlKey +
-          AppKeys.ridersKey +
-          "/${rider!.rider.riderId}" +
-          AppKeys.allottedOrdersKey;
+              AppKeys.ridersKey +
+              "/${rider!.rider.riderId}" +
+              AppKeys.allottedOrdersKey
+          // +
+          // "?sortOrder=-1"
+          ;
     }
-    log(url);
+    // log(url);
     http.Response res = await http.get(Uri.parse(url),
         headers: {"authorization": "Bearer ${rider!.token}"});
     if (res.statusCode == 200) {
@@ -75,7 +78,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
         // log(res.body);
         dynamic resJson = jsonDecode(res.body);
         // log(resJson.toString());
-        log(resJson["orders"].length.toString());
+        // log(resJson["orders"].length.toString());
+        ordersList = await OrdersListModel.fromJson(resJson);
 
         try {
           if (resJson["orders"].length == 0) {

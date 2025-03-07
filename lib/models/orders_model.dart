@@ -30,7 +30,7 @@ class Order {
   Timestamps timestamps;
   OrderTimestamps orderTimestamps;
   Customer customer;
-  OrderCreatedby orderCreatedby;
+  OrderCreatedby? orderCreatedby;
   String id;
   String orderId;
   DateTime orderDate;
@@ -83,18 +83,21 @@ class Order {
         timestamps: Timestamps.fromJson(json["timestamps"]),
         orderTimestamps: OrderTimestamps.fromJson(json["orderTimestamps"]),
         customer: Customer.fromJson(json["customer"]),
-        orderCreatedby: OrderCreatedby.fromJson(json["orderCreatedby"]),
+        orderCreatedby: json["orderCreatedby"] != null
+            ? OrderCreatedby.fromJson(json["orderCreatedby"])
+            : null,
+        // Handle null safely
         id: json["_id"],
         orderId: json["orderId"],
         orderDate: DateTime.parse(json["orderDate"]),
         orderTime: json["orderTime"],
         items: List<Item>.from(json["items"].map((x) => Item.fromJson(x))),
-        amount: json["amount"],
+        amount: json["amount"].toInt(),
         deliveryStatus: json["deliveryStatus"],
         riderName: json["riderName"],
         riderId: json["riderId"],
-        packerName: json["packerName"],
-        packerId: json["packerId"],
+        packerName: json["packerName"] ?? "",
+        packerId: json["packerId"] ?? "",
         binColor: json["binColor"],
         binNumber: json["binNumber"],
         status: json["status"],
@@ -108,7 +111,7 @@ class Order {
         "timestamps": timestamps.toJson(),
         "orderTimestamps": orderTimestamps.toJson(),
         "customer": customer.toJson(),
-        "orderCreatedby": orderCreatedby.toJson(),
+        "orderCreatedby": orderCreatedby!.toJson(),
         "_id": id,
         "orderId": orderId,
         "orderDate": orderDate.toIso8601String(),
@@ -204,8 +207,8 @@ class Item {
   String productId;
   String productName;
   int quantity;
-  int amount;
-  int itemCost;
+  double amount;
+  double itemCost;
   String id;
 
   Item({
@@ -222,11 +225,11 @@ class Item {
   String toRawJson() => json.encode(toJson());
 
   factory Item.fromJson(Map<String, dynamic> json) => Item(
-        productId: json["productId"],
+        productId: json["productId"] ?? "",
         productName: json["productName"],
         quantity: json["quantity"],
-        amount: json["amount"],
-        itemCost: json["itemCost"],
+        amount: json["amount"]?.toDouble() ?? 0.0,
+        itemCost: json["itemCost"]?.toDouble() ?? 0.0,
         id: json["_id"],
       );
 
