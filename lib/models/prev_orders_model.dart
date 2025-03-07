@@ -94,10 +94,10 @@ class PreviousOrder {
         orderDate: json["orderDate"],
         orderTime: json["orderTime"],
         items: List<Item>.from(json["items"].map((x) => Item.fromJson(x))),
-        amount: json["amount"],
+        amount: json["amount"].toInt(),
         deliveryStatus: deliveryStatusValues.map[json["deliveryStatus"]]!,
         weight: json["weight"]?.toDouble(),
-        riderName: json["riderName"],
+        riderName: json["riderName"] ?? "",
         packerName: json["packerName"] ?? "",
         binColor: json["binColor"],
         binNumber: json["binNumber"],
@@ -223,10 +223,10 @@ final deliveryStatusValues = EnumValues({"Pending": DeliveryStatus.PENDING});
 class Item {
   String productName;
   int quantity;
-  int amount;
+  double amount;
   String id;
   String? productId;
-  int? itemCost;
+  double itemCost;
 
   Item({
     required this.productName,
@@ -234,7 +234,7 @@ class Item {
     required this.amount,
     required this.id,
     this.productId,
-    this.itemCost,
+    required this.itemCost,
   });
 
   factory Item.fromRawJson(String str) => Item.fromJson(json.decode(str));
@@ -244,10 +244,10 @@ class Item {
   factory Item.fromJson(Map<String, dynamic> json) => Item(
         productName: json["productName"],
         quantity: json["quantity"],
-        amount: json["amount"],
+        amount: json["amount"]?.toDouble() ?? 0.0,
+        itemCost: json["itemCost"]?.toDouble() ?? 0.0,
         id: json["_id"],
         productId: json["productId"],
-        itemCost: json["itemCost"],
       );
 
   Map<String, dynamic> toJson() => {
