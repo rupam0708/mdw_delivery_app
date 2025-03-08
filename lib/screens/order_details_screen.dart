@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 // import 'package:geocoding/geocoding.dart';
 // import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:mdw/models/login_user_model.dart';
 import 'package:mdw/models/orders_model.dart';
 import 'package:mdw/models/prev_orders_model.dart';
 import 'package:mdw/screens/code_verification_screen.dart';
@@ -18,10 +19,12 @@ class OrderDetailsScreen extends StatefulWidget {
     super.key,
     this.order,
     this.prevOrder,
+    this.rider,
   });
 
   final Order? order;
   final PreviousOrder? prevOrder;
+  final LoginUserModel? rider;
 
   @override
   State<OrderDetailsScreen> createState() => _OrderDetailsScreenState();
@@ -371,6 +374,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       context,
                       MaterialPageRoute(
                         builder: ((ctx) => CodeVerificationScreen(
+                              rider: widget.rider,
                               head: "Code Verification",
                               upperText:
                                   "Enter the code to confirm the delivery\nof the order.",

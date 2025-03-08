@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
@@ -10,9 +11,11 @@ import 'package:mdw/screens/onboarding_screen.dart';
 import 'package:mdw/services/app_function_services.dart';
 import 'package:mdw/services/storage_services.dart';
 import 'package:mdw/styles.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/salary_profile_model.dart';
 import '../services/app_keys.dart';
+import 'login_screen.dart';
 import 'orders_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -29,6 +32,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   LoginUserModel? rider;
   RiderModel? newRider;
   String? message;
+  bool tokenInvalid = false;
 
   getSalaryData(String riderId, String token) async {
     log(token);
@@ -48,16 +52,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
       } else if (resJson["success"] == 0) {
         message = resJson["message"];
       }
-    } else {
+    } else if (res.statusCode == 401) {
       message = resJson["message"];
+      startTimer();
     }
     setState(() {});
+  }
+
+  void logout() async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.clear();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LoginScreen(),
+      ),
+    );
   }
 
   @override
   void initState() {
     getData();
     super.initState();
+  }
+
+  int timer = 5;
+  Timer? _countdownTimer;
+
+  void startTimer() {
+    _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (this.timer > 0) {
+        setState(() {
+          this.timer--;
+        });
+      } else {
+        timer.cancel();
+        logout(); // Call logout function when timer reaches 0
+      }
+    });
   }
 
   getData() async {
@@ -247,7 +279,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           SliverToBoxAdapter(
                             child: Center(
                               child: Text(
-                                message!,
+                                message! + "Logging Out in ${timer} seconds",
                                 style: TextStyle(
                                   color: AppColors.black,
                                   fontSize: 12,

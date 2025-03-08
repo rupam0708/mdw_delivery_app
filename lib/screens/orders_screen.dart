@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
@@ -12,8 +13,10 @@ import 'package:mdw/services/app_keys.dart';
 import 'package:mdw/services/storage_services.dart';
 import 'package:mdw/styles.dart';
 import 'package:mdw/utils/snack_bar_utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/prev_orders_model.dart';
+import 'login_screen.dart';
 import 'order_details_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
@@ -34,7 +37,9 @@ class OrdersScreen extends StatefulWidget {
 class _OrdersScreenState extends State<OrdersScreen> {
   OrdersListModel? ordersList;
   PrevOrdersListModel? prevOrdersList;
-  bool empty = false, ordersListEmpty = false, prevOrdersListEmpty = false;
+  bool ordersListEmpty = false,
+      prevOrdersListEmpty = false,
+      tokenInvalid = false;
   String message = "";
   LoginUserModel? rider;
 
@@ -136,9 +141,58 @@ class _OrdersScreenState extends State<OrdersScreen> {
         }
       }
     } else {
-      empty = true;
+      if (widget.type != null && widget.type == 1) {
+        prevOrdersListEmpty = true;
+      } else if (widget.type == null && rider != null) {
+        ordersListEmpty = true;
+      }
+      Map<String, dynamic> resJson = jsonDecode(res.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+        AppSnackBar().customizedAppSnackBar(
+          message: resJson["message"],
+          context: context,
+        ),
+      );
+      setState(() {
+        tokenInvalid = true;
+      });
+
+      startTimer();
     }
     setState(() {});
+  }
+
+  void startTimer() {
+    _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (this.timer > 0) {
+        setState(() {
+          this.timer--;
+        });
+      } else {
+        timer.cancel();
+        logout(); // Call logout function when timer reaches 0
+      }
+    });
+  }
+
+  void logout() async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.clear();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LoginScreen(),
+      ),
+    );
+  }
+
+  int timer = 5;
+  Timer? _countdownTimer;
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -157,6 +211,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
           }),
           child: CustomScrollView(
             slivers: [
+              if (tokenInvalid)
+                SliverToBoxAdapter(
+                  child: CustomUpperPortion(
+                    head: "Token Invalid. Logging Out in ${timer} seconds",
+                  ),
+                ),
               if (widget.type == 1)
                 SliverAppBar(
                   backgroundColor: AppColors.white,
@@ -253,6 +313,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           }),
                           openBuilder: ((openCtx, _) {
                             return OrderDetailsScreen(
+                              rider: rider,
                               order: ordersList!.orders[index],
                             );
                           }));
