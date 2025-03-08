@@ -59,6 +59,7 @@ dependencies:
   file_picker:
   flutter_pdfview:
   native_exif:
+  provider:
 #  pdf_render: ^1.4.12
 
 dev_dependencies:

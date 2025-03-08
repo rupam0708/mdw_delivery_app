@@ -12,6 +12,8 @@ import 'package:mdw/styles.dart';
 import 'package:mdw/utils/snack_bar_utils.dart';
 import 'package:pinput/pinput.dart';
 
+import '../models/login_user_model.dart';
+
 class CodeVerificationScreen extends StatefulWidget {
   const CodeVerificationScreen({
     super.key,
@@ -20,11 +22,13 @@ class CodeVerificationScreen extends StatefulWidget {
     required this.type,
     required this.btnText,
     this.orderId,
+    this.rider,
   });
 
   final String head, upperText, btnText;
   final int type;
   final String? orderId;
+  final LoginUserModel? rider;
 
   @override
   State<CodeVerificationScreen> createState() => _CodeVerificationScreenState();
@@ -32,6 +36,13 @@ class CodeVerificationScreen extends StatefulWidget {
 
 class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
   bool isPinVerified = false, loading = false;
+  late TextEditingController otpController;
+
+  @override
+  void initState() {
+    otpController = TextEditingController();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,12 +65,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                 height: MediaQuery.of(context).size.height / 7,
               ),
               CustomPinputField(
-                pin: 1234,
-                onCompleted: (bool isVerified) {
-                  setState(() {
-                    isPinVerified = isVerified;
-                  });
-                },
+                otpController: otpController,
               ),
               SizedBox(
                 height: 30,
@@ -70,7 +76,8 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                     setState(() {
                       loading = true;
                     });
-                    if (!isPinVerified) {
+                    log(otpController.text.trim().length.toString());
+                    if (otpController.text.trim().length != 4) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         AppSnackBar().customizedAppSnackBar(
                           message: "Please enter the valid pin.",
@@ -88,15 +95,19 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                             ),
                           );
                         });
-                      } else if (widget.type == 1 && widget.orderId != null) {
+                      } else if (widget.type == 1 &&
+                          widget.orderId != null &&
+                          widget.rider != null) {
                         http.Response res = await http.patch(
                           Uri.parse(AppKeys.apiUrlKey + AppKeys.orderStatusKey),
                           headers: <String, String>{
                             'Content-Type': 'application/json; charset=UTF-8',
+                            "authorization": "Bearer ${widget.rider!.token}",
                           },
                           body: jsonEncode(<String, dynamic>{
                             "orderId": widget.orderId,
-                            "status": "Delivered"
+                            "deliveryCode":
+                                int.parse(otpController.text.trim()),
                           }),
                         );
                         log(res.body.toString());
@@ -162,12 +173,14 @@ class CustomAppBarTitle extends StatelessWidget {
 class CustomPinputField extends StatelessWidget {
   const CustomPinputField({
     super.key,
-    required this.pin,
-    required this.onCompleted,
+    required this.otpController,
+    // required this.pin,
+    // required this.onCompleted,
   });
 
-  final int pin;
-  final void Function(bool) onCompleted;
+  // final int pin;
+  // final void Function(bool) onCompleted;
+  final TextEditingController otpController;
 
   @override
   Widget build(BuildContext context) {
@@ -209,17 +222,18 @@ class CustomPinputField extends StatelessWidget {
 
     return Pinput(
       length: 4,
+      controller: otpController,
       defaultPinTheme: defaultPinTheme,
       focusedPinTheme: focusedPinTheme,
       submittedPinTheme: submittedPinTheme,
       errorPinTheme: errorPinTheme,
       pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
       showCursor: true,
-      validator: (enteredPin) {
-        final isValid = enteredPin == pin.toString();
-        onCompleted(isValid);
-        return isValid ? null : 'Pin is incorrect';
-      },
+      // validator: (enteredPin) {
+      //   final isValid = enteredPin == pin.toString();
+      //   onCompleted(isValid);
+      //   return isValid ? null : 'Pin is incorrect';
+      // },
     );
   }
 }
