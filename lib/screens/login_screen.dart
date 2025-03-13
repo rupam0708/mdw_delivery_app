@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -79,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   CustomTextField(
                     focusNode: _userNameFocusNode,
-                    textCapitalization: TextCapitalization.characters,
+                    // textCapitalization: TextCapitalization.characters,
                     textEditingController: _usernameTextController,
                     head: "Username",
                     hint: "Enter Username",
@@ -150,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             }));
                         final Map<String, dynamic> resJson =
                             jsonDecode(res.body);
-                        // log(resJson.toString());
+                        log(resJson.toString());
 
                         if (resJson["success"] == 1) {
                           await StorageServices.setLoginUserDetails(resJson)
@@ -183,6 +184,13 @@ class _LoginScreenState extends State<LoginScreen> {
                               }
                             });
                           });
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            AppSnackBar().customizedAppSnackBar(
+                              message: resJson["message"],
+                              context: context,
+                            ),
+                          );
                         }
                       }
                     } else {

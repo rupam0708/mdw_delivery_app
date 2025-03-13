@@ -12,6 +12,7 @@ import 'package:mdw/screens/orders_screen.dart';
 import 'package:mdw/services/app_keys.dart';
 import 'package:mdw/services/storage_services.dart';
 import 'package:mdw/styles.dart';
+
 // import 'package:pdf_render/pdf_render.dart';
 
 import '../utils/snack_bar_utils.dart';
@@ -29,7 +30,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   Future<FilePickerResult?> getFile(String title) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+      allowedExtensions: ['jpg', 'jpeg', 'png'],
     );
 
     if (result != null) {
@@ -253,11 +254,11 @@ class NotEmptyContainer extends StatelessWidget {
 
     return FutureBuilder<double>(
       future:
-      // fileModel!.type == FileTypeEnum.pdf
-      //     ? _getCalculatedHeight(fileModel!.path,
-      //         MediaQuery.of(context).size.width) // Only call for PDF
-      //     :
-      Future.value(0.0), // Return 0 if not a PDF (no height for non-PDF)
+          // fileModel!.type == FileTypeEnum.pdf
+          //     ? _getCalculatedHeight(fileModel!.path,
+          //         MediaQuery.of(context).size.width) // Only call for PDF
+          //     :
+          Future.value(0.0), // Return 0 if not a PDF (no height for non-PDF)
       builder: (ctx, snapshot) {
         // log(snapshot.toString());
         if (snapshot.hasError) {

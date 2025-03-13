@@ -98,8 +98,10 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                       } else if (widget.type == 1 &&
                           widget.orderId != null &&
                           widget.rider != null) {
-                        http.Response res = await http.patch(
-                          Uri.parse(AppKeys.apiUrlKey + AppKeys.orderStatusKey),
+                        http.Response res = await http.put(
+                          Uri.parse(AppKeys.apiUrlKey +
+                              AppKeys.ridersKey +
+                              AppKeys.verifyOTPKey),
                           headers: <String, String>{
                             'Content-Type': 'application/json; charset=UTF-8',
                             "authorization": "Bearer ${widget.rider!.token}",
@@ -119,9 +121,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                               context: context,
                             ),
                           );
-                          if (resJson["success"] == 1) {
-                            Navigator.pop(context);
-                          }
+                          Navigator.pop(context);
                         }
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
