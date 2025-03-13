@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:mdw/models/login_user_model.dart';
 import 'package:mdw/models/rider_model.dart';
 import 'package:mdw/screens/documents_screen.dart';
@@ -13,6 +15,7 @@ import 'package:mdw/services/storage_services.dart';
 import 'package:mdw/styles.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/file_type_model.dart';
 import '../models/salary_profile_model.dart';
 import '../services/app_keys.dart';
 import 'login_screen.dart';
@@ -33,9 +36,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   RiderModel? newRider;
   String? message;
   bool tokenInvalid = false;
+  late http.Response salaryRes;
+  FileTypeModel? profilePic;
+  ImagePicker imagePicker = ImagePicker();
 
   getSalaryData(String riderId, String token) async {
-    log(token);
+    // log(token);
     http.Response res = await http.get(
       Uri.parse(
           "${AppKeys.apiUrlKey}${AppKeys.ridersKey}/$riderId${AppKeys.salaryHistoryKey}"),
@@ -45,7 +51,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'Authorization': 'Bearer $token',
       },
     );
+    log(token);
     log(res.body.toString());
+    log(res.statusCode.toString());
+    salaryRes = res;
     Map<String, dynamic> resJson = jsonDecode(res.body);
     if (res.statusCode == 404 && res.statusCode == 200) {
       if (resJson["success"] == 1) {
@@ -55,6 +64,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else if (res.statusCode == 401) {
       message = resJson["message"];
       startTimer();
+    } else {
+      message = resJson["message"] ?? "Something wrong happened";
     }
     setState(() {});
   }
@@ -101,6 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> getProfile() async {
     String? riderJson = await StorageServices.getLoginUserDetails();
+    profilePic = await StorageServices.getProfilePic();
     if (riderJson != null) {
       rider = LoginUserModel.fromRawJson(riderJson);
       setState(() {});
@@ -137,11 +149,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         SliverToBoxAdapter(
                           child: Row(
                             children: [
-                              CircleAvatar(
-                                radius: 30,
-                                backgroundImage: NetworkImage(
-                                    "https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"),
-                              ),
+                              if (profilePic == null)
+                                GestureDetector(
+                                  onTap: (() async {
+                                    XFile? pic = await imagePicker.pickImage(
+                                        source: ImageSource.camera);
+                                    if (pic != null) {
+                                      await StorageServices.setProfilePic(
+                                          FileTypeModel(path: pic.path));
+                                      await getProfile();
+                                    }
+                                  }),
+                                  child: CircleAvatar(
+                                    radius: 30,
+                                    backgroundImage:
+                                        AssetImage("assets/person.png"),
+                                  ),
+                                ),
+                              if (profilePic != null)
+                                CircleAvatar(
+                                  radius: 30,
+                                  backgroundImage:
+                                      FileImage(File(profilePic!.path)),
+                                ),
                               SizedBox(width: 10),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,11 +305,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           SliverToBoxAdapter(
                             child: CustomDivider(),
                           ),
-                        if (salaryList.isEmpty && message != null)
+                        if (salaryList.isEmpty &&
+                            message != null &&
+                            salaryRes.statusCode == 401)
                           SliverToBoxAdapter(
                             child: Center(
                               child: Text(
                                 message! + "Logging Out in ${timer} seconds",
+                                style: TextStyle(
+                                  color: AppColors.black,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        if (salaryList.isEmpty &&
+                            message != null &&
+                            salaryRes.statusCode != 401)
+                          SliverToBoxAdapter(
+                            child: Center(
+                              child: Text(
+                                message!,
                                 style: TextStyle(
                                   color: AppColors.black,
                                   fontSize: 12,

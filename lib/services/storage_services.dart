@@ -35,6 +35,21 @@ class StorageServices {
     pref.setString(AppKeys.panKey, file.toJsonString());
   }
 
+  static Future<void> setProfilePic(FileTypeModel file) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString(AppKeys.profilePicKey, file.toJsonString());
+  }
+
+  static Future<FileTypeModel?> getProfilePic() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    final data = pref.getString(AppKeys.profilePicKey);
+    if (data != null) {
+      return FileTypeModel.fromJson(jsonDecode(data));
+    } else {
+      return null;
+    }
+  }
+
   static Future<FileTypeModel?> getPan() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     final data = pref.getString(AppKeys.panKey);
