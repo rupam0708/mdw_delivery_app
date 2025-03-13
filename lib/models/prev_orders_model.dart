@@ -95,7 +95,8 @@ class PreviousOrder {
         orderTime: json["orderTime"],
         items: List<Item>.from(json["items"].map((x) => Item.fromJson(x))),
         amount: json["amount"].toInt(),
-        deliveryStatus: deliveryStatusValues.map[json["deliveryStatus"]]!,
+        deliveryStatus: deliveryStatusValues.map[json["deliveryStatus"]] ??
+            DeliveryStatus.PENDING,
         weight: json["weight"]?.toDouble(),
         riderName: json["riderName"] ?? "",
         packerName: json["packerName"] ?? "",
