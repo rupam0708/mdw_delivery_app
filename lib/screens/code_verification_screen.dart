@@ -12,6 +12,7 @@ import 'package:mdw/styles.dart';
 import 'package:mdw/utils/snack_bar_utils.dart';
 import 'package:pinput/pinput.dart';
 
+import '../constant.dart';
 import '../models/login_user_model.dart';
 
 class CodeVerificationScreen extends StatefulWidget {
@@ -22,13 +23,14 @@ class CodeVerificationScreen extends StatefulWidget {
     required this.type,
     required this.btnText,
     this.orderId,
-    this.rider,
+    // this.rider,
   });
 
   final String head, upperText, btnText;
   final int type;
   final String? orderId;
-  final LoginUserModel? rider;
+
+  // final LoginUserModel? rider;
 
   @override
   State<CodeVerificationScreen> createState() => _CodeVerificationScreenState();
@@ -37,6 +39,15 @@ class CodeVerificationScreen extends StatefulWidget {
 class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
   bool isPinVerified = false, loading = false;
   late TextEditingController otpController;
+  late LoginUserModel? rider;
+
+  getRider() async {
+    final String? temp = await StorageServices.getLoginUserDetails();
+    if (temp != null) {
+      rider = LoginUserModel.fromRawJson(temp);
+      setState(() {});
+    }
+  }
 
   @override
   void initState() {
@@ -55,6 +66,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: AppConstant.physics,
           padding: EdgeInsets.only(top: 15, left: 20, right: 20),
           child: Column(
             children: [
@@ -85,26 +97,44 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                         ),
                       );
                     } else {
-                      if (widget.type == 0) {
+                      if (widget.type == 0 || widget.type == 2) {
+                        // http.Response res = await http.put(
+                        //   Uri.parse(AppKeys.apiUrlKey +
+                        //       AppKeys.ridersKey +
+                        //       AppKeys.verifyOTPKey),
+                        //   headers: <String, String>{
+                        //     'Content-Type': 'application/json; charset=UTF-8',
+                        //     "authorization": "Bearer ${rider!.token}",
+                        //   },
+                        //   body: jsonEncode(<String, dynamic>{
+                        //     "orderId": widget.orderId,
+                        //     "deliveryCode":
+                        //         int.parse(otpController.text.trim()),
+                        //   }),
+                        // );
                         await StorageServices.setAttendanceStatus(true)
                             .whenComplete(() {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: ((ctx) => MainScreen()),
-                            ),
-                          );
+                          if (widget.type == 0) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: ((ctx) => MainScreen()),
+                              ),
+                            );
+                          } else {
+                            Navigator.pop(context);
+                          }
                         });
                       } else if (widget.type == 1 &&
                           widget.orderId != null &&
-                          widget.rider != null) {
+                          rider != null) {
                         http.Response res = await http.put(
                           Uri.parse(AppKeys.apiUrlKey +
                               AppKeys.ridersKey +
                               AppKeys.verifyOTPKey),
                           headers: <String, String>{
                             'Content-Type': 'application/json; charset=UTF-8',
-                            "authorization": "Bearer ${widget.rider!.token}",
+                            "authorization": "Bearer ${rider!.token}",
                           },
                           body: jsonEncode(<String, dynamic>{
                             "orderId": widget.orderId,

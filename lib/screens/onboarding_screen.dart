@@ -3,6 +3,7 @@ import 'package:lottie/lottie.dart';
 import 'package:mdw/styles.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+import '../constant.dart';
 import 'login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -32,6 +33,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SingleChildScrollView(
+        physics: AppConstant.physics,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -51,9 +50,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'Authorization': 'Bearer $token',
       },
     );
-    log(token);
-    log(res.body.toString());
-    log(res.statusCode.toString());
+    // log(token);
+    // log(res.body.toString());
+    // log(res.statusCode.toString());
     salaryRes = res;
     Map<String, dynamic> resJson = jsonDecode(res.body);
     if (res.statusCode == 404 && res.statusCode == 200) {
@@ -145,6 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: newRider != null
                   ? CustomScrollView(
+                      // physics: AppConstant.physics,
                       slivers: [
                         SliverToBoxAdapter(
                           child: Row(

@@ -1,7 +1,8 @@
 import 'dart:developer';
 
-import 'package:camera/camera.dart';
+// import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 // import 'package:geocoding/geocoding.dart';
 // import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
@@ -12,6 +13,7 @@ import 'package:mdw/screens/code_verification_screen.dart';
 import 'package:mdw/services/app_function_services.dart';
 import 'package:mdw/styles.dart';
 
+import '../constant.dart';
 import 'onboarding_screen.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
@@ -121,6 +123,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           child: Padding(
         padding: const EdgeInsets.only(left: 15, right: 15),
         child: CustomScrollView(
+          physics: AppConstant.physics,
           slivers: [
             SliverToBoxAdapter(
               child: Container(
@@ -374,7 +377,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       context,
                       MaterialPageRoute(
                         builder: ((ctx) => CodeVerificationScreen(
-                              rider: widget.rider,
+                              // rider: widget.rider,
                               head: "Code Verification",
                               upperText:
                                   "Enter the code to confirm the delivery\nof the order.",

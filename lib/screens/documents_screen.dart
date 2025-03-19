@@ -1,10 +1,9 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
+// import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mdw/models/file_type_model.dart';
 import 'package:mdw/screens/onboarding_screen.dart';
@@ -15,6 +14,7 @@ import 'package:mdw/styles.dart';
 
 // import 'package:pdf_render/pdf_render.dart';
 
+import '../constant.dart';
 import '../utils/snack_bar_utils.dart';
 
 class DocumentsScreen extends StatefulWidget {
@@ -101,6 +101,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         ],
       ),
       body: SingleChildScrollView(
+        physics: AppConstant.physics,
         padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         child: SafeArea(
           child: Column(
@@ -287,38 +288,38 @@ class NotEmptyContainer extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (fileModel!.type == FileTypeEnum.pdf)
-                  Container(
-                    height: pageHeight,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      // Set the same radius as container
-                      child: PDFView(
-                        filePath: fileModel!.path,
-                        enableSwipe: true,
-                        swipeHorizontal: true,
-                        autoSpacing: false,
-                        pageFling: false,
-                        backgroundColor: AppColors.white,
-                        onRender: (_pages) {
-                          log(fileModel!.path);
-                          // Handle rendering
-                        },
-                        onError: (error) {
-                          // Handle error
-                        },
-                        onPageError: (page, error) {
-                          // Handle page error
-                        },
-                        onViewCreated: (PDFViewController pdfViewController) {
-                          // Handle view creation
-                        },
-                      ),
-                    ),
-                  ),
+                // if (fileModel!.type == FileTypeEnum.pdf)
+                //   Container(
+                //     height: pageHeight,
+                //     decoration: BoxDecoration(
+                //       borderRadius: BorderRadius.circular(15),
+                //     ),
+                //     child: ClipRRect(
+                //       borderRadius: BorderRadius.circular(15),
+                //       // Set the same radius as container
+                //       child: PDFView(
+                //         filePath: fileModel!.path,
+                //         enableSwipe: true,
+                //         swipeHorizontal: true,
+                //         autoSpacing: false,
+                //         pageFling: false,
+                //         backgroundColor: AppColors.white,
+                //         onRender: (_pages) {
+                //           log(fileModel!.path);
+                //           // Handle rendering
+                //         },
+                //         onError: (error) {
+                //           // Handle error
+                //         },
+                //         onPageError: (page, error) {
+                //           // Handle page error
+                //         },
+                //         onViewCreated: (PDFViewController pdfViewController) {
+                //           // Handle view creation
+                //         },
+                //       ),
+                //     ),
+                //   ),
                 SizedBox(height: 5),
                 Text(head),
                 SizedBox(height: 5),

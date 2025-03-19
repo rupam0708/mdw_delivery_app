@@ -27,7 +27,7 @@ class OrdersListModel {
 }
 
 class Order {
-  Timestamps timestamps;
+  Timestamps? timestamps;
   OrderTimestamps orderTimestamps;
   Customer customer;
   OrderCreatedby? orderCreatedby;
@@ -108,7 +108,7 @@ class Order {
       );
 
   Map<String, dynamic> toJson() => {
-        "timestamps": timestamps.toJson(),
+        "timestamps": timestamps?.toJson(),
         "orderTimestamps": orderTimestamps.toJson(),
         "customer": customer.toJson(),
         "orderCreatedby": orderCreatedby!.toJson(),
@@ -335,12 +335,12 @@ class Timestamps {
 
   String toRawJson() => json.encode(toJson());
 
-  factory Timestamps.fromJson(Map<String, dynamic> json) => Timestamps(
-        orderReceivedAt: json["orderReceivedAt"],
-        packingStartedAt: json["packingStartedAt"],
-        packedAt: json["packedAt"],
-        outForDeliveryAt: json["outForDeliveryAt"],
-        deliveredAt: json["deliveredAt"],
+  factory Timestamps.fromJson(Map<String, dynamic>? json) => Timestamps(
+        orderReceivedAt: json?["orderReceivedAt"] ?? "",
+        packingStartedAt: json?["packingStartedAt"] ?? "",
+        packedAt: json?["packedAt"] ?? "",
+        outForDeliveryAt: json?["outForDeliveryAt"] ?? "",
+        deliveredAt: json?["deliveredAt"] ?? "",
       );
 
   Map<String, dynamic> toJson() => {
