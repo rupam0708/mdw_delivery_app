@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:mdw/screens/feedback_screen.dart';
 import 'package:mdw/screens/login_screen.dart';
+import 'package:mdw/screens/onboarding_screen.dart';
 import 'package:mdw/screens/orders_screen.dart';
 import 'package:mdw/screens/profile_screen.dart';
+import 'package:mdw/services/storage_services.dart';
 import 'package:mdw/styles.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../constant.dart';
 import 'code_verification_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -18,11 +21,23 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int index = 0;
+  bool attendanceStatus = false;
 
   void _changeIndex(int newIndex) {
     setState(() {
       index = newIndex;
     });
+  }
+
+  getData() async {
+    attendanceStatus = await StorageServices.getAttendanceStatus();
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    getData();
+    super.initState();
   }
 
   @override
@@ -48,11 +63,46 @@ class _MainScreenState extends State<MainScreen> {
                   ? "Profile"
                   : "Feedback",
         ),
+        actions: index == 1
+            ? [
+                CustomBtn(
+                  horizontalPadding: 15,
+                  horizontalMargin: 10,
+                  verticalPadding: 10,
+                  height: 40,
+                  onTap: (() async {
+                    if (attendanceStatus) {
+                      await StorageServices.setAttendanceStatus(false);
+                      attendanceStatus = false;
+                      setState(() {});
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: ((ctx) => CodeVerificationScreen(
+                                head: "Attendance",
+                                upperText:
+                                    "Ask your admin to enter his code to confirm your attendance.",
+                                type: 2,
+                                btnText: "Confirm Attendance",
+                              )),
+                        ),
+                      ).whenComplete(() async {
+                        await getData();
+                      });
+                    }
+                  }),
+                  text: "${attendanceStatus ? "End" : "Start"} Shift",
+                ),
+                SizedBox(width: 10),
+              ]
+            : null,
       ),
       drawer: Drawer(
         width: MediaQuery.of(context).size.width / 1.6,
         child: SafeArea(
           child: ListView(
+            physics: AppConstant.physics,
             children: [
               ListTile(
                 selected: index == 0,

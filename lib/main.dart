@@ -3,6 +3,7 @@ import 'package:mdw/screens/code_verification_screen.dart';
 import 'package:mdw/screens/main_screen.dart';
 import 'package:mdw/screens/onboarding_screen.dart';
 import 'package:mdw/services/app_function_services.dart';
+import 'package:mdw/services/storage_services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,12 +17,19 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool signInStatus = false, attendStatus = false;
+  bool signInStatus = false, attendStatus = false, showAttendance = false;
 
-  getData() async {
-    signInStatus = await AppFunctions.getSignInStatus();
-    attendStatus = await AppFunctions.getAttendanceStatus();
+  Future<void> getData() async {
+    signInStatus = await StorageServices.getSignInStatus();
+    attendStatus = await StorageServices.getAttendanceStatus();
+    showAttendance = AppFunctions.shouldShowAttendanceScreen();
     setState(() {});
+  }
+
+  @override
+  void initState() {
+    getData();
+    super.initState();
   }
 
   // This widget is the root of your application.
@@ -35,11 +43,10 @@ class _MyAppState extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: FutureBuilder(
-        future: getData(),
-        builder: ((ctx, snapshot) {
+      home: Builder(
+        builder: ((ctx) {
           if (signInStatus == true) {
-            if (attendStatus) {
+            if (attendStatus || !showAttendance) {
               return MainScreen();
             } else {
               return CodeVerificationScreen(

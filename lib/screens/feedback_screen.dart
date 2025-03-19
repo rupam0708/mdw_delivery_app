@@ -5,6 +5,7 @@ import 'package:mdw/services/app_function_services.dart';
 import 'package:mdw/styles.dart';
 import 'package:mdw/utils/snack_bar_utils.dart';
 
+import '../constant.dart';
 import 'onboarding_screen.dart';
 
 class FeedbackScreen extends StatefulWidget {
@@ -68,6 +69,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: AppConstant.physics,
           padding: EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

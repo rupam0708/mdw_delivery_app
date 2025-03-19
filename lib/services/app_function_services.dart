@@ -1,10 +1,10 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 // import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:mdw/services/storage_services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/feedback_model.dart';
@@ -99,24 +99,15 @@ class AppFunctions {
     DateTime eightPM = DateTime(now.year, now.month, now.day, 20);
 
     if (now.isAfter(nineAM) && now.isBefore(twoPM)) {
+      log("Morning shift attendance closed");
       return false;
     } else if (now.isAfter(threePM) && now.isBefore(eightPM)) {
+      log("Afternoon shift attendance closed");
       return false;
     } else {
+      log("Attendance open");
       return true;
     }
-  }
-
-  static Future<bool> getSignInStatus() async {
-    return await StorageServices.getSignInStatus();
-  }
-
-  static Future<bool> getAttendanceStatus() async {
-    bool attendanceStatus = await StorageServices.getSignInStatus();
-    if (!attendanceStatus) {
-      attendanceStatus = AppFunctions.shouldShowAttendanceScreen();
-    }
-    return attendanceStatus;
   }
 
   static Future<void> launchMap(BuildContext context, String place) async {

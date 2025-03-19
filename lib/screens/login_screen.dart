@@ -10,6 +10,7 @@ import 'package:mdw/services/storage_services.dart';
 import 'package:mdw/styles.dart';
 import 'package:mdw/utils/snack_bar_utils.dart';
 
+import '../constant.dart';
 import 'code_verification_screen.dart';
 import 'main_screen.dart';
 
@@ -60,6 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: AppConstant.physics,
           padding: EdgeInsets.only(top: 15, left: 20, right: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -159,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             await StorageServices.setSignInStatus(true)
                                 .whenComplete(() async {
                               bool attendanceStatus =
-                                  await AppFunctions.getAttendanceStatus();
+                                  await StorageServices.getAttendanceStatus();
                               if (attendanceStatus) {
                                 Navigator.pushReplacement(
                                   context,
