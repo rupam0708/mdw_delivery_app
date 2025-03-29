@@ -96,7 +96,9 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
               Navigator.pop(context);
             }),
-            text: "Save",
+            text: (aadharFront != null || aadharBack != null || pan != null)
+                ? "Update"
+                : "Save",
           ),
         ],
       ),
