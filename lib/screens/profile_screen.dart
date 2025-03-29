@@ -39,35 +39,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
   FileTypeModel? profilePic;
   ImagePicker imagePicker = ImagePicker();
 
-  getSalaryData(String riderId, String token) async {
-    // log(token);
-    http.Response res = await http.get(
-      Uri.parse(
-          "${AppKeys.apiUrlKey}${AppKeys.ridersKey}/$riderId${AppKeys.salaryHistoryKey}"),
-      headers: {
-        'Content-type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-    // log(token);
-    // log(res.body.toString());
-    // log(res.statusCode.toString());
-    salaryRes = res;
-    Map<String, dynamic> resJson = jsonDecode(res.body);
-    if (res.statusCode == 404 && res.statusCode == 200) {
-      if (resJson["success"] == 1) {
-      } else if (resJson["success"] == 0) {
-        message = resJson["message"];
-      }
-    } else if (res.statusCode == 401) {
-      message = resJson["message"];
-      startTimer();
-    } else {
-      message = resJson["message"] ?? "Something wrong happened";
-    }
-    setState(() {});
-  }
+  // getSalaryData(String riderId, String token) async {
+  //   // log(token);
+  //   http.Response res = await http.get(
+  //     Uri.parse(
+  //         "${AppKeys.apiUrlKey}${AppKeys.ridersKey}/$riderId${AppKeys.salaryHistoryKey}"),
+  //     headers: {
+  //       'Content-type': 'application/json',
+  //       'Accept': 'application/json',
+  //       'Authorization': 'Bearer $token',
+  //     },
+  //   );
+  //   // log(token);
+  //   // log(res.body.toString());
+  //   // log(res.statusCode.toString());
+  //   salaryRes = res;
+  //   Map<String, dynamic> resJson = jsonDecode(res.body);
+  //   if (res.statusCode == 404 && res.statusCode == 200) {
+  //     if (resJson["success"] == 1) {
+  //     } else if (resJson["success"] == 0) {
+  //       message = resJson["message"];
+  //     }
+  //   } else if (res.statusCode == 401) {
+  //     message = resJson["message"];
+  //     startTimer();
+  //   } else {
+  //     message = resJson["message"] ?? "Something wrong happened";
+  //   }
+  //   setState(() {});
+  // }
 
   void logout() async {
     final pref = await SharedPreferences.getInstance();
@@ -104,9 +104,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   getData() async {
     await getProfile();
-    if (newRider != null && rider != null) {
-      await getSalaryData(newRider!.rider.riderId, rider!.token);
-    }
+    // if (newRider != null && rider != null) {
+    //   await getSalaryData(newRider!.rider.riderId, rider!.token);
+    // }
   }
 
   Future<void> getProfile() async {
@@ -227,33 +227,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                         ),
-                        if (salaryList.isNotEmpty)
-                          SliverToBoxAdapter(
-                            child: SizedBox(
-                              height: 15,
-                            ),
-                          ),
-                        if (salaryList.isNotEmpty)
-                          SliverToBoxAdapter(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: ProfileTodayContainer(
-                                    head: "Today's\nTrip",
-                                    data: "10",
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: ProfileTodayContainer(
-                                    head: "Order\nAmount",
-                                    data: "₹3000",
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        // if (salaryList.isNotEmpty)
+                        //   SliverToBoxAdapter(
+                        //     child: SizedBox(
+                        //       height: 15,
+                        //     ),
+                        //   ),
+                        // if (salaryList.isNotEmpty)
+                        //   SliverToBoxAdapter(
+                        //     child: Row(
+                        //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //       children: [
+                        //         Expanded(
+                        //           child: ProfileTodayContainer(
+                        //             head: "Today's\nTrip",
+                        //             data: "10",
+                        //           ),
+                        //         ),
+                        //         SizedBox(width: 10),
+                        //         Expanded(
+                        //           child: ProfileTodayContainer(
+                        //             head: "Order\nAmount",
+                        //             data: "₹3000",
+                        //           ),
+                        //         ),
+                        //       ],
+                        //     ),
+                        //   ),
                         SliverToBoxAdapter(
                           child: SizedBox(
                             height: 15,
@@ -301,111 +301,111 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         SliverToBoxAdapter(
                           child: CustomDivider(),
                         ),
-                        if (salaryList.isEmpty && message != null)
-                          SliverToBoxAdapter(
-                            child: CustomDivider(),
-                          ),
-                        if (salaryList.isEmpty &&
-                            message != null &&
-                            salaryRes.statusCode == 401)
-                          SliverToBoxAdapter(
-                            child: Center(
-                              child: Text(
-                                message! + "Logging Out in ${timer} seconds",
-                                style: TextStyle(
-                                  color: AppColors.black,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ),
-                        if (salaryList.isEmpty &&
-                            message != null &&
-                            salaryRes.statusCode != 401)
-                          SliverToBoxAdapter(
-                            child: Center(
-                              child: Text(
-                                message!,
-                                style: TextStyle(
-                                  color: AppColors.black,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ),
-                        if (salaryList.isEmpty && message == null)
-                          SliverToBoxAdapter(
-                            child: Center(
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 15),
-                                child: CircularProgressIndicator(
-                                  color: AppColors.green,
-                                ),
-                              ),
-                            ),
-                          ),
-                        if (salaryList.isEmpty)
-                          SliverToBoxAdapter(
-                            child: CustomDivider(),
-                          ),
-                        if (salaryList.isNotEmpty)
-                          SliverToBoxAdapter(
-                            child: Container(
-                              child: Column(
-                                children: salaryList
-                                    .map(
-                                      (salary) => Column(
-                                        children: [
-                                          Padding(
-                                            padding: EdgeInsets.only(top: 15),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      "Salary 1",
-                                                      style: TextStyle(
-                                                        color: AppColors.black,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 15,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 5),
-                                                    Text(
-                                                      "Reference ID: C079DB3D",
-                                                      style: TextStyle(
-                                                        color: AppColors.black,
-                                                        fontSize: 12,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Text(
-                                                  "+ ₹873.01",
-                                                  style: TextStyle(
-                                                    color: AppColors.green,
-                                                    fontSize: 17,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          SizedBox(height: 15),
-                                          CustomDivider(),
-                                        ],
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            ),
-                          ),
+                        // if (salaryList.isEmpty && message != null)
+                        //   SliverToBoxAdapter(
+                        //     child: CustomDivider(),
+                        //   ),
+                        // if (salaryList.isEmpty &&
+                        //     message != null &&
+                        //     salaryRes.statusCode == 401)
+                        //   SliverToBoxAdapter(
+                        //     child: Center(
+                        //       child: Text(
+                        //         message! + "Logging Out in ${timer} seconds",
+                        //         style: TextStyle(
+                        //           color: AppColors.black,
+                        //           fontSize: 12,
+                        //         ),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // if (salaryList.isEmpty &&
+                        //     message != null &&
+                        //     salaryRes.statusCode != 401)
+                        //   SliverToBoxAdapter(
+                        //     child: Center(
+                        //       child: Text(
+                        //         message!,
+                        //         style: TextStyle(
+                        //           color: AppColors.black,
+                        //           fontSize: 12,
+                        //         ),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // if (salaryList.isEmpty && message == null)
+                        //   SliverToBoxAdapter(
+                        //     child: Center(
+                        //       child: Container(
+                        //         padding: EdgeInsets.symmetric(
+                        //             horizontal: 10, vertical: 15),
+                        //         child: CircularProgressIndicator(
+                        //           color: AppColors.green,
+                        //         ),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // if (salaryList.isEmpty)
+                        //   SliverToBoxAdapter(
+                        //     child: CustomDivider(),
+                        //   ),
+                        // if (salaryList.isNotEmpty)
+                        //   SliverToBoxAdapter(
+                        //     child: Container(
+                        //       child: Column(
+                        //         children: salaryList
+                        //             .map(
+                        //               (salary) => Column(
+                        //                 children: [
+                        //                   Padding(
+                        //                     padding: EdgeInsets.only(top: 15),
+                        //                     child: Row(
+                        //                       mainAxisAlignment:
+                        //                           MainAxisAlignment
+                        //                               .spaceBetween,
+                        //                       children: [
+                        //                         Column(
+                        //                           crossAxisAlignment:
+                        //                               CrossAxisAlignment.start,
+                        //                           children: [
+                        //                             Text(
+                        //                               "Salary 1",
+                        //                               style: TextStyle(
+                        //                                 color: AppColors.black,
+                        //                                 fontWeight:
+                        //                                     FontWeight.bold,
+                        //                                 fontSize: 15,
+                        //                               ),
+                        //                             ),
+                        //                             SizedBox(height: 5),
+                        //                             Text(
+                        //                               "Reference ID: C079DB3D",
+                        //                               style: TextStyle(
+                        //                                 color: AppColors.black,
+                        //                                 fontSize: 12,
+                        //                               ),
+                        //                             ),
+                        //                           ],
+                        //                         ),
+                        //                         Text(
+                        //                           "+ ₹873.01",
+                        //                           style: TextStyle(
+                        //                             color: AppColors.green,
+                        //                             fontSize: 17,
+                        //                           ),
+                        //                         ),
+                        //                       ],
+                        //                     ),
+                        //                   ),
+                        //                   SizedBox(height: 15),
+                        //                   CustomDivider(),
+                        //                 ],
+                        //               ),
+                        //             )
+                        //             .toList(),
+                        //       ),
+                        //     ),
+                        //   ),
                         SliverToBoxAdapter(
                           child: SizedBox(
                             height: 15,
