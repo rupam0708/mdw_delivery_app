@@ -54,6 +54,9 @@ flutter_native_splash:
   ios: true
   color: "#FFFFFF"
   image: "assets/app_icon.png"
+  android_12:
+    color: "#FFFFFF" # Explicitly set background color for Android 12+
+    # icon_background_color: "#FFFFFF" # Optional, if your image has a transparent background
 
 flutter_lints: ^2.0.0
 flutter:
