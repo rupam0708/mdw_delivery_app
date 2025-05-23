@@ -87,10 +87,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   int timer = 5;
-  Timer? _countdownTimer;
+
+  // Timer? _countdownTimer;
 
   void startTimer() {
-    _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+    // _countdownTimer =
+    Timer.periodic(Duration(seconds: 1), (timer) {
       if (this.timer > 0) {
         setState(() {
           this.timer--;
@@ -518,7 +520,7 @@ class CustomProfileEarnContainer extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
             spreadRadius: 3,
             blurRadius: 10,
             offset: Offset(0, 2), // changes position of shadow
@@ -563,7 +565,7 @@ class ProfileContainer extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
             spreadRadius: 3,
             blurRadius: 10,
             offset: Offset(0, 2), // changes position of shadow
@@ -627,7 +629,7 @@ class CustomContainerHeading extends StatelessWidget {
           child: Text(
             head,
             style: TextStyle(
-              color: AppColors.black.withOpacity(0.5),
+              color: AppColors.black.withValues(alpha: 0.5),
             ),
           ),
         ),

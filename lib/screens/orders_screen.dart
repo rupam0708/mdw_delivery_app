@@ -487,7 +487,7 @@ class CustomOrderContainer extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.green.withOpacity(0.6),
+                          color: AppColors.green.withValues(alpha: 0.6),
                           // Shadow color
                           spreadRadius: 2,
                           // Spread radius

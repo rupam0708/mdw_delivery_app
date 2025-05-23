@@ -219,7 +219,7 @@ class CustomPinputField extends StatelessWidget {
       height: 50,
       textStyle: TextStyle(fontSize: 20, color: Colors.black),
       decoration: BoxDecoration(
-        color: AppColors.green.withOpacity(0.1),
+        color: AppColors.green.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.grey),
       ),
