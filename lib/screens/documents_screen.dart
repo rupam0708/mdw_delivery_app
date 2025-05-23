@@ -267,13 +267,13 @@ class NotEmptyContainer extends StatelessWidget {
         if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (snapshot.hasData) {
-          final pageHeight = snapshot.data ?? 0.0; // Safely handle null data
+          // final pageHeight = snapshot.data ?? 0.0; // Safely handle null data
 
           return Container(
             decoration: BoxDecoration(
               color: AppColors.white,
               border: Border.all(
-                color: AppColors.black.withOpacity(0.2),
+                color: AppColors.black.withValues(alpha: 0.2),
               ),
               borderRadius: BorderRadius.circular(15),
             ),
@@ -416,7 +416,7 @@ class DocContainer extends StatelessWidget {
           onTap: onTap,
           child: DottedBorder(
             dashPattern: [4, 4],
-            color: AppColors.black.withOpacity(0.5),
+            color: AppColors.black.withValues(alpha: 0.5),
             borderType: BorderType.RRect,
             radius: Radius.circular(15),
             child: Container(

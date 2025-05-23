@@ -111,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         obscure
                             ? Icons.visibility_rounded
                             : Icons.visibility_off_rounded,
-                        color: AppColors.black.withOpacity(0.4),
+                        color: AppColors.black.withValues(alpha: 0.4),
                       ),
                     ),
                     validator: ((value) =>
@@ -346,19 +346,19 @@ class _CustomTextFieldState extends State<CustomTextField> {
             hintText: widget.hint,
             border: OutlineInputBorder(
               borderSide: BorderSide(
-                color: AppColors.black.withOpacity(0.1),
+                color: AppColors.black.withValues(alpha: 0.1),
               ),
               borderRadius: BorderRadius.circular(15),
             ),
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: AppColors.black.withOpacity(0.2),
+                color: AppColors.black.withValues(alpha: 0.2),
               ),
               borderRadius: BorderRadius.circular(15),
             ),
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: AppColors.green.withOpacity(0.7),
+                color: AppColors.green.withValues(alpha: 0.7),
               ),
               borderRadius: BorderRadius.circular(15),
             ),

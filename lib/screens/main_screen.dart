@@ -106,7 +106,7 @@ class _MainScreenState extends State<MainScreen> {
             children: [
               ListTile(
                 selected: index == 0,
-                selectedTileColor: AppColors.green.withOpacity(0.3),
+                selectedTileColor: AppColors.green.withValues(alpha: 0.3),
                 onTap: (() {
                   setState(() {
                     index = 0;
@@ -120,13 +120,13 @@ class _MainScreenState extends State<MainScreen> {
                 title: Text(
                   "Orders",
                   style: TextStyle(
-                    color: AppColors.black.withOpacity(0.7),
+                    color: AppColors.black.withValues(alpha: 0.7),
                   ),
                 ),
               ),
               ListTile(
                 selected: index == 1,
-                selectedTileColor: AppColors.green.withOpacity(0.3),
+                selectedTileColor: AppColors.green.withValues(alpha: 0.3),
                 onTap: (() {
                   setState(() {
                     index = 1;
@@ -140,13 +140,13 @@ class _MainScreenState extends State<MainScreen> {
                 title: Text(
                   "Profile",
                   style: TextStyle(
-                    color: AppColors.black.withOpacity(0.7),
+                    color: AppColors.black.withValues(alpha: 0.7),
                   ),
                 ),
               ),
               ListTile(
                 selected: index == 2,
-                selectedTileColor: AppColors.green.withOpacity(0.3),
+                selectedTileColor: AppColors.green.withValues(alpha: 0.3),
                 onTap: (() {
                   setState(() {
                     index = 2;
@@ -160,13 +160,13 @@ class _MainScreenState extends State<MainScreen> {
                 title: Text(
                   "Feedback",
                   style: TextStyle(
-                    color: AppColors.black.withOpacity(0.7),
+                    color: AppColors.black.withValues(alpha: 0.7),
                   ),
                 ),
               ),
               ListTile(
                 selected: index == 3,
-                selectedTileColor: AppColors.green.withOpacity(0.3),
+                selectedTileColor: AppColors.green.withValues(alpha: 0.3),
                 onTap: (() async {
                   setState(() {
                     index = 3;
@@ -188,7 +188,7 @@ class _MainScreenState extends State<MainScreen> {
                 title: Text(
                   "Logout",
                   style: TextStyle(
-                    color: AppColors.red.withOpacity(0.7),
+                    color: AppColors.red.withValues(alpha: 0.7),
                   ),
                 ),
               ),

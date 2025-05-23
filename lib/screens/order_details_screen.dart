@@ -148,7 +148,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.green.withOpacity(0.6),
+                            color: AppColors.green.withValues(alpha: 0.6),
                             spreadRadius: 2,
                             blurRadius: 5,
                             offset: Offset(0, 0),

@@ -14,6 +14,7 @@ class AppColors {
   static const iconColor = Color(0xff364B63);
   static const rupeesContainerColor = Color(0xffF0F5FF);
   static const btnColor = Color(0xff46CA36);
+  static const splashColor = Color(0xffff4b92);
   static var customDecoration = BoxDecoration(
     borderRadius: BorderRadius.circular(10),
     border: Border.all(

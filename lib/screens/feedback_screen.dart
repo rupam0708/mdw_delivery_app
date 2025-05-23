@@ -124,19 +124,19 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                   hintText: "Write your feedback here...",
                   border: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: AppColors.black.withOpacity(0.1),
+                      color: AppColors.black.withValues(alpha: 0.1),
                     ),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: AppColors.black.withOpacity(0.2),
+                      color: AppColors.black.withValues(alpha: 0.2),
                     ),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: AppColors.green.withOpacity(0.7),
+                      color: AppColors.green.withValues(alpha: 0.7),
                     ),
                     borderRadius: BorderRadius.circular(15),
                   ),
