@@ -30,7 +30,7 @@ class _MyAppState extends State<MyApp> {
     attendStatus = await StorageServices.getAttendanceStatus();
     showAttendance = AppFunctions.shouldShowAttendanceScreen();
     setState(() {});
-    Future.delayed(Duration(seconds: 2), (() {
+    Future.delayed(Duration(seconds: 4), (() {
       setState(() {
         splashShow = false;
       });
