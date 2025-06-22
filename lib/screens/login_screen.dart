@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:mdw/screens/onboarding_screen.dart';
+import 'package:mdw/screens/registration_screen.dart';
 import 'package:mdw/services/app_function_services.dart';
 import 'package:mdw/services/app_keys.dart';
 import 'package:mdw/services/storage_services.dart';
@@ -255,6 +257,32 @@ class _LoginScreenState extends State<LoginScreen> {
                   text: "Login to my account",
                 ),
               if (loading) CustomLoadingIndicator(),
+              SizedBox(height: 10),
+              if (!loading)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Don't have an account?"),
+                    SizedBox(width: 5),
+                    GestureDetector(
+                      onTap: (() {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: ((ctx) => RegistrationScreen()),
+                          ),
+                        );
+                      }),
+                      child: Text(
+                        "Register",
+                        style: TextStyle(
+                          color: AppColors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )
+                  ],
+                )
             ],
           ),
         ),
@@ -290,6 +318,8 @@ class CustomTextField extends StatefulWidget {
     this.suffix,
     this.textCapitalization,
     this.focusNode,
+    this.inputFormatters,
+    this.isMultiline,
   });
 
   final String head, hint;
@@ -300,6 +330,8 @@ class CustomTextField extends StatefulWidget {
   final Widget? suffix;
   final TextCapitalization? textCapitalization;
   final FocusNode? focusNode;
+  final List<TextInputFormatter>? inputFormatters;
+  final bool? isMultiline;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -310,6 +342,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final bool multiline = widget.isMultiline ?? false;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -323,49 +357,48 @@ class _CustomTextFieldState extends State<CustomTextField> {
             ),
           ),
         ),
-        SizedBox(
-          height: 10,
-        ),
+        const SizedBox(height: 10),
         TextFormField(
           focusNode: widget.focusNode,
           textCapitalization:
               widget.textCapitalization ?? TextCapitalization.none,
           obscureText: widget.obscure ?? false,
           key: formFieldKey,
-          onChanged: ((value) {
-            formFieldKey.currentState!.validate();
-          }),
+          onChanged: (value) {
+            formFieldKey.currentState?.validate();
+          },
           controller: widget.textEditingController,
-          style: TextStyle(color: AppColors.black, fontSize: 15),
+          style: const TextStyle(color: AppColors.black, fontSize: 15),
           validator: widget.validator,
-          keyboardType: widget.keyboard,
+          keyboardType: multiline ? TextInputType.multiline : widget.keyboard,
+          inputFormatters: widget.inputFormatters,
           cursorColor: AppColors.green,
+          maxLines: multiline ? null : 1,
+          minLines: multiline ? 5 : 1,
           decoration: InputDecoration(
             suffixIcon: widget.suffix,
-            contentPadding: EdgeInsets.all(15),
+            contentPadding: const EdgeInsets.all(15),
             hintText: widget.hint,
             border: OutlineInputBorder(
               borderSide: BorderSide(
-                color: AppColors.black.withValues(alpha: 0.1),
+                color: AppColors.black.withOpacity(0.1),
               ),
               borderRadius: BorderRadius.circular(15),
             ),
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: AppColors.black.withValues(alpha: 0.2),
+                color: AppColors.black.withOpacity(0.2),
               ),
               borderRadius: BorderRadius.circular(15),
             ),
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: AppColors.green.withValues(alpha: 0.7),
+                color: AppColors.green.withOpacity(0.7),
               ),
               borderRadius: BorderRadius.circular(15),
             ),
             errorBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: AppColors.red,
-              ),
+              borderSide: const BorderSide(color: AppColors.red),
               borderRadius: BorderRadius.circular(15),
             ),
           ),

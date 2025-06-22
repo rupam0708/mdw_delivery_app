@@ -7,6 +7,7 @@ class AppSnackBar {
     required String message,
     required BuildContext context,
   }) {
+    ScaffoldMessenger.of(context).clearSnackBars();
     return SnackBar(
       margin: EdgeInsets.only(
         bottom: 30,
