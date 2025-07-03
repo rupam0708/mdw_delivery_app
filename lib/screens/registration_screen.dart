@@ -320,9 +320,33 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   text: "Register",
                 ),
               if (loading) CustomLoadingIndicator(),
-              SizedBox(
-                height: 25,
-              ),
+              SizedBox(height: 10),
+              if (!loading)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Already have an account?"),
+                    SizedBox(width: 5),
+                    GestureDetector(
+                      onTap: (() {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: ((ctx) => LoginScreen()),
+                          ),
+                        );
+                      }),
+                      child: Text(
+                        "Login",
+                        style: TextStyle(
+                          color: AppColors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              SizedBox(height: 25),
             ],
           ),
         ),

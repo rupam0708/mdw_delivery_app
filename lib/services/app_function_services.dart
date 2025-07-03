@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/feedback_model.dart';
+import '../models/orders_model.dart';
 
 class AppFunctions {
   static String? passwordValidator(String? value) {
@@ -204,5 +205,30 @@ class AppFunctions {
       default:
         return Colors.black; // Default color if the input doesn't match
     }
+  }
+
+  static int countTodayPackedOrders(List<Order> orders) {
+    final today = DateTime.now();
+    return orders.where((order) {
+      final packingDate = order.orderTimestamps.packing;
+      return packingDate != null &&
+          packingDate.year == today.year &&
+          packingDate.month == today.month &&
+          packingDate.day == today.day;
+    }).length;
+  }
+
+  static int sumTodayDeliveredAmounts(List<Order> orders) {
+    final today = DateTime.now();
+    return orders.fold(0, (sum, order) {
+      final deliveredDate = order.orderTimestamps.delivered;
+      if (deliveredDate != null &&
+          deliveredDate.year == today.year &&
+          deliveredDate.month == today.month &&
+          deliveredDate.day == today.day) {
+        return sum + order.amount;
+      }
+      return sum;
+    });
   }
 }
