@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mdw/screens/feedback_screen.dart';
+import 'package:mdw/screens/home_screen.dart';
 import 'package:mdw/screens/login_screen.dart';
 import 'package:mdw/screens/onboarding_screen.dart';
 import 'package:mdw/screens/orders_screen.dart';
@@ -58,10 +59,12 @@ class _MainScreenState extends State<MainScreen> {
         ),
         title: CustomAppBarTitle(
           title: index == 0
-              ? "Orders"
+              ? "Home"
               : index == 1
-                  ? "Profile"
-                  : "Feedback",
+                  ? "Orders"
+                  : index == 2
+                      ? "Profile"
+                      : "Feedback",
         ),
         actions: index == 1
             ? [
@@ -114,11 +117,11 @@ class _MainScreenState extends State<MainScreen> {
                   _scaffoldKey.currentState?.closeDrawer();
                 }),
                 leading: Icon(
-                  Icons.inventory_rounded,
+                  Icons.home_filled,
                   color: AppColors.grey,
                 ),
                 title: Text(
-                  "Orders",
+                  "Home",
                   style: TextStyle(
                     color: AppColors.black.withValues(alpha: 0.7),
                   ),
@@ -134,11 +137,11 @@ class _MainScreenState extends State<MainScreen> {
                   _scaffoldKey.currentState?.closeDrawer();
                 }),
                 leading: Icon(
-                  Icons.person_rounded,
+                  Icons.inventory_rounded,
                   color: AppColors.grey,
                 ),
                 title: Text(
-                  "Profile",
+                  "Orders",
                   style: TextStyle(
                     color: AppColors.black.withValues(alpha: 0.7),
                   ),
@@ -154,6 +157,26 @@ class _MainScreenState extends State<MainScreen> {
                   _scaffoldKey.currentState?.closeDrawer();
                 }),
                 leading: Icon(
+                  Icons.person_rounded,
+                  color: AppColors.grey,
+                ),
+                title: Text(
+                  "Profile",
+                  style: TextStyle(
+                    color: AppColors.black.withValues(alpha: 0.7),
+                  ),
+                ),
+              ),
+              ListTile(
+                selected: index == 3,
+                selectedTileColor: AppColors.green.withValues(alpha: 0.3),
+                onTap: (() {
+                  setState(() {
+                    index = 3;
+                  });
+                  _scaffoldKey.currentState?.closeDrawer();
+                }),
+                leading: Icon(
                   Icons.feedback_rounded,
                   color: AppColors.grey,
                 ),
@@ -165,11 +188,11 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
               ListTile(
-                selected: index == 3,
+                selected: index == 4,
                 selectedTileColor: AppColors.green.withValues(alpha: 0.3),
                 onTap: (() async {
                   setState(() {
-                    index = 3;
+                    index = 4;
                   });
                   _scaffoldKey.currentState?.closeDrawer();
                   final pref = await SharedPreferences.getInstance();
@@ -208,10 +231,12 @@ class _MainScreenState extends State<MainScreen> {
         child: Builder(builder: ((ctx) {
           switch (index) {
             case 0:
-              return OrdersScreen();
+              return HomeScreen(onChangeIndex: _changeIndex);
             case 1:
-              return ProfileScreen(onChangeIndex: _changeIndex);
+              return OrdersScreen();
             case 2:
+              return ProfileScreen(onChangeIndex: _changeIndex);
+            case 3:
               return FeedbackScreen();
           }
           return Container();
