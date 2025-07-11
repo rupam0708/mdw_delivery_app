@@ -4,11 +4,15 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mdw/models/login_user_model.dart';
+import 'package:mdw/screens/documents_screen.dart';
 import 'package:mdw/screens/onboarding_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../constant.dart';
+import '../models/file_type_model.dart';
 import '../services/app_function_services.dart';
 import '../services/app_keys.dart';
+import '../services/storage_services.dart';
 import '../styles.dart';
 import '../utils/snack_bar_utils.dart';
 import 'login_screen.dart';
@@ -32,7 +36,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       phoneTextController,
       addressTextController,
       riderIdProofTextController;
-  bool loading = false, obscure = true, confirmObscure = true;
+  bool loading = false, obscure = true, confirmObscure = true, agree = false;
+  FileTypeModel? aadharFront, aadharBack, pan;
+  String? user;
+  late LoginUserModel u;
 
   @override
   void initState() {
@@ -48,6 +55,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     addressTextController = TextEditingController();
     riderIdProofTextController = TextEditingController();
     super.initState();
+  }
+
+  Future<void> getDocs() async {
+    user = await StorageServices.getLoginUserDetails();
+    if (user != null) {
+      u = LoginUserModel.fromRawJson(user!);
+      aadharFront = await StorageServices.getAadharFront(u.rider.riderId);
+      aadharBack = await StorageServices.getAadharBack(u.rider.riderId);
+      pan = await StorageServices.getPan(u.rider.riderId);
+    }
+    setState(() {});
   }
 
   @override
@@ -97,7 +115,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   CustomTextField(
                     // textCapitalization: TextCapitalization.characters,
                     textEditingController: riderIdProofTextController,
-                    head: "Rider Id Proof",
+                    head: "Rider Id Proof Type",
                     hint: "Proof Document Type",
                     keyboard: TextInputType.text,
                   ),
@@ -215,6 +233,73 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   SizedBox(
                     height: 15,
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Checkbox(
+                        value: agree,
+                        checkColor: AppColors.white,
+                        activeColor: AppColors.green,
+                        side: BorderSide(
+                          color: AppColors.green,
+                          width: 1.5,
+                        ),
+                        onChanged: ((val) {
+                          setState(() {
+                            agree = val ?? false;
+                          });
+                        }),
+                      ),
+                      SizedBox(width: 5),
+                      Text("Agree to the"),
+                      SizedBox(width: 3),
+                      GestureDetector(
+                        onTap: (() async {
+                          String url =
+                              "https://3vra7mgrlh.ufs.sh/f/b8iVQa6UTCDiDZh0htaHs1edfE6n4JLPrBvlqxtkybQipAX9";
+                          if (await canLaunchUrl(Uri.parse(url))) {
+                            launchUrl(
+                              Uri.parse(url),
+                              mode: LaunchMode.inAppBrowserView,
+                            );
+                          }
+                        }),
+                        child: Text(
+                          "T&C",
+                          style: TextStyle(
+                            color: AppColors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 3),
+                      Text("and"),
+                      SizedBox(width: 3),
+                      GestureDetector(
+                        onTap: (() async {
+                          String url =
+                              "https://3vra7mgrlh.ufs.sh/f/b8iVQa6UTCDinfEtogAsJ2h95gpP4froiO6IYxwBQSM3qduW";
+                          if (await canLaunchUrl(Uri.parse(url))) {
+                            launchUrl(
+                              Uri.parse(url),
+                              mode: LaunchMode.inAppBrowserView,
+                            );
+                          }
+                        }),
+                        child: Text(
+                          "Privacy Policy",
+                          style: TextStyle(
+                            color: AppColors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Text("."),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
                 ],
               ),
               if (!loading)
@@ -243,6 +328,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               message: AppFunctions.passwordValidator(
                                       passTextController.text.trim()) ??
                                   "",
+                              context: context),
+                        );
+                      } else if (!agree) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          AppSnackBar().customizedAppSnackBar(
+                              message:
+                                  "Please agree to the T&C and Privacy Policy",
                               context: context),
                         );
                       } else {
@@ -284,10 +376,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               context: context,
                             ),
                           );
+                          await getDocs();
+                          if (aadharFront == null &&
+                              aadharBack == null &&
+                              pan == null) {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (ctx) => DocumentsScreen(),
+                              ),
+                            );
+                          }
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: ((ctx) => LoginScreen()),
+                              builder: (ctx) => LoginScreen(),
                             ),
                           );
                         } else {

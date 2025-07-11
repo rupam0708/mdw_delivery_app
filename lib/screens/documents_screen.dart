@@ -15,10 +15,14 @@ import 'package:mdw/styles.dart';
 // import 'package:pdf_render/pdf_render.dart';
 
 import '../constant.dart';
+import '../models/login_user_model.dart';
 import '../utils/snack_bar_utils.dart';
+import 'login_screen.dart';
 
 class DocumentsScreen extends StatefulWidget {
-  const DocumentsScreen({super.key});
+  const DocumentsScreen({super.key, this.type});
+
+  final int? type;
 
   @override
   State<DocumentsScreen> createState() => _DocumentsScreenState();
@@ -26,6 +30,8 @@ class DocumentsScreen extends StatefulWidget {
 
 class _DocumentsScreenState extends State<DocumentsScreen> {
   FileTypeModel? aadharFront, aadharBack, pan;
+  String? user;
+  late LoginUserModel u;
 
   Future<FilePickerResult?> getFile(String title) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -48,9 +54,13 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   }
 
   getDocs() async {
-    aadharFront = await StorageServices.getAadharFront();
-    aadharBack = await StorageServices.getAadharBack();
-    pan = await StorageServices.getPan();
+    user = await StorageServices.getLoginUserDetails();
+    if (user != null) {
+      u = LoginUserModel.fromRawJson(user!);
+      aadharFront = await StorageServices.getAadharFront(u.rider.riderId);
+      aadharBack = await StorageServices.getAadharBack(u.rider.riderId);
+      pan = await StorageServices.getPan(u.rider.riderId);
+    }
     setState(() {});
   }
 
@@ -85,16 +95,27 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
             height: 40,
             onTap: (() async {
               if (aadharFront != null) {
-                await StorageServices.setAadharFront(aadharFront!);
+                await StorageServices.setAadharFront(
+                    aadharFront!, u.rider.riderId);
               }
               if (aadharBack != null) {
-                await StorageServices.setAadharBack(aadharBack!);
+                await StorageServices.setAadharBack(
+                    aadharBack!, u.rider.riderId);
               }
               if (pan != null) {
-                await StorageServices.setPan(pan!);
+                await StorageServices.setPan(pan!, u.rider.riderId);
               }
 
-              Navigator.pop(context);
+              if (widget.type == 0 || widget.type == null) {
+                Navigator.pop(context);
+              } else if (widget.type == 1) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: ((ctx) => LoginScreen()),
+                  ),
+                );
+              }
             }),
             text: (aadharFront != null || aadharBack != null || pan != null)
                 ? "Update"

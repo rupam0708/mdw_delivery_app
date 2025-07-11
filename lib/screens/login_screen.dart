@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +12,10 @@ import 'package:mdw/styles.dart';
 import 'package:mdw/utils/snack_bar_utils.dart';
 
 import '../constant.dart';
+import '../models/file_type_model.dart';
+import '../models/login_user_model.dart';
 import 'code_verification_screen.dart';
+import 'documents_screen.dart';
 import 'main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -27,6 +29,9 @@ class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _usernameTextController, _passwordTextController;
   late FocusNode _userNameFocusNode, _passwordFocusNode;
   bool obscure = true, loading = false;
+  FileTypeModel? aadharFront, aadharBack, pan;
+  String? user;
+  late LoginUserModel u;
 
   @override
   void initState() {
@@ -44,6 +49,17 @@ class _LoginScreenState extends State<LoginScreen> {
     _usernameTextController.dispose();
     _passwordTextController.dispose();
     super.dispose();
+  }
+
+  Future<void> getDocs() async {
+    user = await StorageServices.getLoginUserDetails();
+    if (user != null) {
+      u = LoginUserModel.fromRawJson(user!);
+      aadharFront = await StorageServices.getAadharFront(u.rider.riderId);
+      aadharBack = await StorageServices.getAadharBack(u.rider.riderId);
+      pan = await StorageServices.getPan(u.rider.riderId);
+    }
+    setState(() {});
   }
 
   @override
@@ -155,39 +171,76 @@ class _LoginScreenState extends State<LoginScreen> {
                             }));
                         final Map<String, dynamic> resJson =
                             jsonDecode(res.body);
-                        log(resJson.toString());
+                        // log(resJson.toString());
 
                         if (resJson["success"] == 1) {
-                          await StorageServices.setLoginUserDetails(resJson)
-                              .whenComplete(() async {
-                            await StorageServices.setSignInStatus(true)
-                                .whenComplete(() async {
-                              bool attendanceStatus =
-                                  await StorageServices.getAttendanceStatus();
-                              if (attendanceStatus) {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: ((ctx) => MainScreen()),
+                          await StorageServices.setLoginUserDetails(resJson);
+                          await StorageServices.setSignInStatus(true);
+
+                          bool attendanceStatus =
+                              await StorageServices.getAttendanceStatus();
+                          await getDocs();
+
+                          if (aadharFront != null &&
+                              aadharBack != null &&
+                              pan != null) {
+                            // Directly check attendance and navigate
+                            if (attendanceStatus) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (ctx) => MainScreen()),
+                              );
+                            } else {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (ctx) =>
+                                      const CodeVerificationScreen(
+                                    head: "Attendance",
+                                    upperText:
+                                        "Ask your admin to enter his code to confirm your attendance.",
+                                    type: 0,
+                                    btnText: "Confirm Attendance",
                                   ),
-                                );
-                              } else {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: ((ctx) =>
-                                        const CodeVerificationScreen(
-                                          head: "Attendance",
-                                          upperText:
-                                              "Ask your admin to enter his code to confirm your attendance.",
-                                          type: 0,
-                                          btnText: "Confirm Attendance",
-                                        )),
+                                ),
+                              );
+                            }
+                          } else {
+                            // Navigate to document screen and wait for it to complete
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (ctx) => DocumentsScreen(type: 0)),
+                            );
+
+                            // Re-check attendance status (if it might change)
+                            attendanceStatus =
+                                await StorageServices.getAttendanceStatus();
+
+                            // After returning from DocumentsScreen
+                            if (attendanceStatus) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (ctx) => MainScreen()),
+                              );
+                            } else {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (ctx) =>
+                                      const CodeVerificationScreen(
+                                    head: "Attendance",
+                                    upperText:
+                                        "Ask your admin to enter his code to confirm your attendance.",
+                                    type: 0,
+                                    btnText: "Confirm Attendance",
                                   ),
-                                );
-                              }
-                            });
-                          });
+                                ),
+                              );
+                            }
+                          }
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             AppSnackBar().customizedAppSnackBar(

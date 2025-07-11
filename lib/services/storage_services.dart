@@ -20,19 +20,19 @@ class StorageServices {
     pref.setString(AppKeys.loginKey, jsonEncode(user));
   }
 
-  static Future<void> setAadharFront(FileTypeModel file) async {
+  static Future<void> setAadharFront(FileTypeModel file, String uname) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setString(AppKeys.aadharFrontKey, file.toJsonString());
+    pref.setString(AppKeys.aadharFrontKey + "/" + uname, file.toJsonString());
   }
 
-  static Future<void> setAadharBack(FileTypeModel file) async {
+  static Future<void> setAadharBack(FileTypeModel file, String uname) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setString(AppKeys.aadharBackKey, file.toJsonString());
+    pref.setString(AppKeys.aadharBackKey + "/" + uname, file.toJsonString());
   }
 
-  static Future<void> setPan(FileTypeModel file) async {
+  static Future<void> setPan(FileTypeModel file, String uname) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setString(AppKeys.panKey, file.toJsonString());
+    pref.setString(AppKeys.panKey + "/" + uname, file.toJsonString());
   }
 
   static Future<void> setProfilePic(FileTypeModel file) async {
@@ -50,9 +50,9 @@ class StorageServices {
     }
   }
 
-  static Future<FileTypeModel?> getPan() async {
+  static Future<FileTypeModel?> getPan(String uname) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    final data = pref.getString(AppKeys.panKey);
+    final data = pref.getString(AppKeys.panKey + "/" + uname);
     if (data != null) {
       return FileTypeModel.fromJson(jsonDecode(data));
     } else {
@@ -60,9 +60,9 @@ class StorageServices {
     }
   }
 
-  static Future<FileTypeModel?> getAadharBack() async {
+  static Future<FileTypeModel?> getAadharBack(String uname) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    final data = pref.getString(AppKeys.aadharBackKey);
+    final data = pref.getString(AppKeys.aadharBackKey + "/" + uname);
     if (data != null) {
       return FileTypeModel.fromJson(jsonDecode(data));
     } else {
@@ -70,9 +70,9 @@ class StorageServices {
     }
   }
 
-  static Future<FileTypeModel?> getAadharFront() async {
+  static Future<FileTypeModel?> getAadharFront(String uname) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    final data = pref.getString(AppKeys.aadharFrontKey);
+    final data = pref.getString(AppKeys.aadharFrontKey + "/" + uname);
     if (data != null) {
       print(jsonDecode(data).runtimeType);
 
