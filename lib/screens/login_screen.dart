@@ -207,18 +207,31 @@ class _LoginScreenState extends State<LoginScreen> {
                               );
                             }
                           } else {
-                            // Navigate to document screen and wait for it to complete
-                            await Navigator.push(
+                            final result = await Navigator.push<bool>(
                               context,
                               MaterialPageRoute(
-                                  builder: (ctx) => DocumentsScreen(type: 0)),
+                                builder: (ctx) => DocumentsScreen(type: 1),
+                              ),
                             );
 
-                            // Re-check attendance status (if it might change)
+// If the user did not complete document upload or returned false
+                            if (result == false || result == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                AppSnackBar().customizedAppSnackBar(
+                                  message:
+                                      "Please complete your document verification first.",
+                                  context: context,
+                                ),
+                              );
+                              setState(() {
+                                loading = false;
+                              });
+                              return; // Exit early, don't navigate forward
+                            }
+                            // If result is true, continue
                             attendanceStatus =
                                 await StorageServices.getAttendanceStatus();
 
-                            // After returning from DocumentsScreen
                             if (attendanceStatus) {
                               Navigator.pushReplacement(
                                 context,

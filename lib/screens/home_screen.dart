@@ -152,10 +152,10 @@ class _HomeScreenState extends State<HomeScreen> {
           onRefresh: (() async {
             await getData();
           }),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Container(
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Container(
                   height: 300,
                   width: MediaQuery.of(context).size.width,
                   padding: const EdgeInsets.all(15),
@@ -165,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Row(
                     children: [
-                      /// Left SVG image
+                      /// Left image
                       Expanded(
                         child: Image.asset(
                           "assets/man.png",
@@ -173,24 +173,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
 
-                      /// Right side column
+                      /// Right column
                       Expanded(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            /// Top small SVG icon (optional; remove if not needed)
                             Image.asset(
                               "assets/mdw_logo_2.png",
                               height: 80,
                               fit: BoxFit.contain,
                             ),
                             const SizedBox(height: 10),
-
-                            /// Welcome Text
-                            Text(
+                            const Text(
                               "Welcome\nOur\nDawai Dost",
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppColors.black,
                                 fontSize: 25,
                                 fontWeight: FontWeight.bold,
@@ -202,44 +199,47 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
-                Text(
-                  "Progress",
+              ),
+              SliverToBoxAdapter(child: const SizedBox(height: 20)),
+              SliverToBoxAdapter(
+                child: Text(
+                  message.isNotEmpty ? message : "Progress",
                   style: TextStyle(
                     color: AppColors.black,
                     fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: message.isNotEmpty ? null : FontWeight.bold,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 15),
-                Column(
-                  children: [
-                    if (!ordersListEmpty && ordersList != null)
-                      CustomContainer(
-                        head: "Earnings",
-                        value: "₹" +
-                            AppFunctions.sumTodayDeliveredAmounts(
-                                    ordersList!.orders)
-                                .toString(),
-                        onTap: (() {}),
-                      ),
-                    if (!ordersListEmpty && ordersList != null)
-                      SizedBox(height: 15),
-                    if (!ordersListEmpty && ordersList != null)
-                      CustomContainer(
-                        head: "Orders",
-                        value: AppFunctions.countTodayPackedOrders(
+              ),
+              SliverToBoxAdapter(child: const SizedBox(height: 15)),
+              if (!ordersListEmpty && ordersList != null)
+                SliverToBoxAdapter(
+                  child: CustomContainer(
+                    head: "Earnings",
+                    value: "₹" +
+                        AppFunctions.sumTodayDeliveredAmounts(
                                 ordersList!.orders)
                             .toString(),
-                        showArrow: true,
-                        onTap: (() {
-                          widget.onChangeIndex(1);
-                        }),
-                      ),
-                  ],
-                )
-              ],
-            ),
+                    onTap: (() {}),
+                  ),
+                ),
+              if (!ordersListEmpty && ordersList != null)
+                SliverToBoxAdapter(child: const SizedBox(height: 15)),
+              if (!ordersListEmpty && ordersList != null)
+                SliverToBoxAdapter(
+                  child: CustomContainer(
+                    head: "Orders",
+                    value:
+                        AppFunctions.countTodayPackedOrders(ordersList!.orders)
+                            .toString(),
+                    showArrow: true,
+                    onTap: (() {
+                      widget.onChangeIndex(1);
+                    }),
+                  ),
+                ),
+            ],
           ),
         ),
       ),

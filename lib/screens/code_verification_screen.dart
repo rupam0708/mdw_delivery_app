@@ -56,6 +56,12 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
   }
 
   @override
+  void dispose() {
+    otpController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -88,7 +94,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                     setState(() {
                       loading = true;
                     });
-                    log(otpController.text.trim().length.toString());
+                    // log(otpController.text.trim().length.toString());
                     if (otpController.text.trim().length != 4) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         AppSnackBar().customizedAppSnackBar(

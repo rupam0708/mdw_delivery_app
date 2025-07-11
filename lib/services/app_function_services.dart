@@ -11,6 +11,31 @@ import '../models/feedback_model.dart';
 import '../models/orders_model.dart';
 
 class AppFunctions {
+  static String? phoneNumberValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Phone number is required";
+    }
+
+    final trimmedValue = value.trim();
+
+    // Check if it contains only digits
+    if (!RegExp(r'^\d+$').hasMatch(trimmedValue)) {
+      return "Phone number must contain only digits";
+    }
+
+    // Check for 10-digit Indian mobile number
+    if (trimmedValue.length != 10) {
+      return "Phone number must be 10 digits long";
+    }
+
+    // Check if it starts with 6-9 (for Indian numbers)
+    if (!RegExp(r'^[6-9]').hasMatch(trimmedValue)) {
+      return "Phone number must start with 6, 7, 8, or 9";
+    }
+
+    return null; // valid
+  }
+
   static String? passwordValidator(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
