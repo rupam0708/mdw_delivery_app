@@ -17,7 +17,6 @@ import 'package:mdw/styles.dart';
 import '../constant.dart';
 import '../models/login_user_model.dart';
 import '../utils/snack_bar_utils.dart';
-import 'login_screen.dart';
 
 class DocumentsScreen extends StatefulWidget {
   const DocumentsScreen({super.key, this.type});
@@ -80,146 +79,183 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: AppBar(
+    return PopScope(
+      canPop: widget.type != 1 ||
+          (aadharFront != null && aadharBack != null && pan != null),
+      onPopInvokedWithResult: (bool result, Object? returnValue) {
+        if (!result &&
+            widget.type == 1 &&
+            (aadharFront == null || aadharBack == null || pan == null)) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(
+            AppSnackBar().customizedAppSnackBar(
+              message:
+                  "Please upload all documents before leaving this screen.",
+              context: context,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
         backgroundColor: AppColors.white,
-        elevation: 0,
-        centerTitle: false,
-        title: Text("Documents"),
-        actions: [
-          CustomBtn(
-            horizontalMargin: 15,
-            horizontalPadding: 20,
-            verticalPadding: 5,
-            height: 40,
-            onTap: (() async {
-              if (aadharFront != null) {
-                await StorageServices.setAadharFront(
-                    aadharFront!, u.rider.riderId);
-              }
-              if (aadharBack != null) {
-                await StorageServices.setAadharBack(
-                    aadharBack!, u.rider.riderId);
-              }
-              if (pan != null) {
-                await StorageServices.setPan(pan!, u.rider.riderId);
-              }
+        appBar: AppBar(
+          backgroundColor: AppColors.white,
+          elevation: 0,
+          centerTitle: false,
+          title: Text("Documents"),
+          leading: widget.type == 1 ? SizedBox() : null,
+          actions: [
+            CustomBtn(
+              horizontalMargin: 15,
+              horizontalPadding: 20,
+              verticalPadding: 5,
+              height: 40,
+              onTap: () async {
+                // If no documents uploaded, show SnackBar and return early
+                if (aadharFront == null && aadharBack == null && pan == null) {
+                  ScaffoldMessenger.of(context).clearSnackBars();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    AppSnackBar().customizedAppSnackBar(
+                      message: "Please upload all the documents to proceed.",
+                      context: context,
+                    ),
+                  );
+                  return;
+                }
 
-              if (widget.type == 0 || widget.type == null) {
-                Navigator.pop(context);
-              } else if (widget.type == 1) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: ((ctx) => LoginScreen()),
+                // Save uploaded documents
+                if (aadharFront != null) {
+                  await StorageServices.setAadharFront(
+                      aadharFront!, u.rider.riderId);
+                }
+                if (aadharBack != null) {
+                  await StorageServices.setAadharBack(
+                      aadharBack!, u.rider.riderId);
+                }
+                if (pan != null) {
+                  await StorageServices.setPan(pan!, u.rider.riderId);
+                }
+
+                // Pop with result only if it's a verification flow
+                if (widget.type == 0 || widget.type == null) {
+                  Navigator.pop(
+                    context,
+                    aadharFront != null && aadharBack != null && pan != null,
+                  );
+                }
+
+                // If type is 1 and all documents are uploaded, pop manually
+                if (widget.type == 1 &&
+                    aadharFront != null &&
+                    aadharBack != null &&
+                    pan != null) {
+                  Navigator.pop(context, true);
+                }
+              },
+              text: (aadharFront != null || aadharBack != null || pan != null)
+                  ? "Update"
+                  : "Save",
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          physics: AppConstant.physics,
+          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          child: SafeArea(
+            child: Column(
+              children: [
+                DocType(head: "AADHAR CARD"),
+                SizedBox(height: 25),
+                if (aadharFront == null)
+                  DocContainer(
+                    head: "Front Side of Card",
+                    instruction: "Click to Upload Front Side of Card",
+                    onTap: (() async {
+                      FilePickerResult? result =
+                          await getFile("Upload Front Side of Aadhar Card");
+                      if (result != null) {
+                        aadharFront =
+                            FileTypeModel(path: result.files.single.path!);
+                        setState(() {});
+                      }
+                    }),
                   ),
-                );
-              }
-            }),
-            text: (aadharFront != null || aadharBack != null || pan != null)
-                ? "Update"
-                : "Save",
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        physics: AppConstant.physics,
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        child: SafeArea(
-          child: Column(
-            children: [
-              DocType(head: "AADHAR CARD"),
-              SizedBox(height: 25),
-              if (aadharFront == null)
-                DocContainer(
-                  head: "Front Side of Card",
-                  instruction: "Click to Upload Front Side of Card",
-                  onTap: (() async {
-                    FilePickerResult? result =
-                        await getFile("Upload Front Side of Aadhar Card");
-                    if (result != null) {
-                      aadharFront =
-                          FileTypeModel(path: result.files.single.path!);
-                      setState(() {});
-                    }
-                  }),
-                ),
-              if (aadharFront != null)
-                NotEmptyContainer(
-                  onChange: (() async {
-                    aadharFront = null;
-                    FilePickerResult? result =
-                        await getFile("Upload Front Side of Aadhar Card");
-                    if (result != null) {
-                      aadharFront =
-                          FileTypeModel(path: result.files.single.path!);
-                      setState(() {});
-                    }
-                  }),
-                  fileModel: aadharFront,
-                  head: "Aadhar Card Front",
-                ),
-              SizedBox(height: 25),
-              if (aadharBack == null)
-                DocContainer(
-                  head: "Back Side of Card",
-                  instruction: "Click to Upload Back Side of Card",
-                  onTap: (() async {
-                    FilePickerResult? result =
-                        await getFile("Upload Back Side of Aadhar Card");
-                    if (result != null) {
-                      aadharBack =
-                          FileTypeModel(path: result.files.single.path!);
-                      setState(() {});
-                    }
-                  }),
-                ),
-              if (aadharBack != null)
-                NotEmptyContainer(
-                  fileModel: aadharBack,
-                  head: "Aadhar Card Back",
-                  onChange: (() async {
-                    aadharBack = null;
-                    FilePickerResult? result =
-                        await getFile("Upload Back Side of Aadhar Card");
-                    if (result != null) {
-                      aadharBack =
-                          FileTypeModel(path: result.files.single.path!);
-                      setState(() {});
-                    }
-                  }),
-                ),
-              SizedBox(height: 25),
-              DocType(head: "PAN CARD"),
-              SizedBox(height: 15),
-              if (pan == null)
-                DocContainer(
-                  instruction: "Click to Upload Front Side of Card",
-                  onTap: (() async {
-                    FilePickerResult? result =
-                        await getFile("Upload Back Side of Aadhar Card");
-                    if (result != null) {
-                      pan = FileTypeModel(path: result.files.single.path!);
-                      setState(() {});
-                    }
-                  }),
-                ),
-              if (pan != null)
-                NotEmptyContainer(
-                  fileModel: pan,
-                  head: "PAN Card",
-                  onChange: (() async {
-                    pan = null;
-                    FilePickerResult? result =
-                        await getFile("Upload Back Side of Aadhar Card");
-                    if (result != null) {
-                      pan = FileTypeModel(path: result.files.single.path!);
-                      setState(() {});
-                    }
-                  }),
-                ),
-            ],
+                if (aadharFront != null)
+                  NotEmptyContainer(
+                    onChange: (() async {
+                      aadharFront = null;
+                      FilePickerResult? result =
+                          await getFile("Upload Front Side of Aadhar Card");
+                      if (result != null) {
+                        aadharFront =
+                            FileTypeModel(path: result.files.single.path!);
+                        setState(() {});
+                      }
+                    }),
+                    fileModel: aadharFront,
+                    head: "Aadhar Card Front",
+                  ),
+                SizedBox(height: 25),
+                if (aadharBack == null)
+                  DocContainer(
+                    head: "Back Side of Card",
+                    instruction: "Click to Upload Back Side of Card",
+                    onTap: (() async {
+                      FilePickerResult? result =
+                          await getFile("Upload Back Side of Aadhar Card");
+                      if (result != null) {
+                        aadharBack =
+                            FileTypeModel(path: result.files.single.path!);
+                        setState(() {});
+                      }
+                    }),
+                  ),
+                if (aadharBack != null)
+                  NotEmptyContainer(
+                    fileModel: aadharBack,
+                    head: "Aadhar Card Back",
+                    onChange: (() async {
+                      aadharBack = null;
+                      FilePickerResult? result =
+                          await getFile("Upload Back Side of Aadhar Card");
+                      if (result != null) {
+                        aadharBack =
+                            FileTypeModel(path: result.files.single.path!);
+                        setState(() {});
+                      }
+                    }),
+                  ),
+                SizedBox(height: 25),
+                DocType(head: "PAN CARD"),
+                SizedBox(height: 15),
+                if (pan == null)
+                  DocContainer(
+                    instruction: "Click to Upload Front Side of Card",
+                    onTap: (() async {
+                      FilePickerResult? result =
+                          await getFile("Upload Back Side of Aadhar Card");
+                      if (result != null) {
+                        pan = FileTypeModel(path: result.files.single.path!);
+                        setState(() {});
+                      }
+                    }),
+                  ),
+                if (pan != null)
+                  NotEmptyContainer(
+                    fileModel: pan,
+                    head: "PAN Card",
+                    onChange: (() async {
+                      pan = null;
+                      FilePickerResult? result =
+                          await getFile("Upload Back Side of Aadhar Card");
+                      if (result != null) {
+                        pan = FileTypeModel(path: result.files.single.path!);
+                        setState(() {});
+                      }
+                    }),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

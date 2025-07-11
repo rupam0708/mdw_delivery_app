@@ -64,6 +64,12 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   }
 
   @override
+  void dispose() {
+    _feedbackEditingController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,

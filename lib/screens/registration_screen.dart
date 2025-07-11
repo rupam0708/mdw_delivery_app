@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mdw/models/login_user_model.dart';
@@ -55,6 +56,22 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     addressTextController = TextEditingController();
     riderIdProofTextController = TextEditingController();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    nameTextController.dispose();
+    desTextController.dispose();
+    idProofTextController.dispose();
+    vTypeTextController.dispose();
+    vNumberTextController.dispose();
+    emailTextController.dispose();
+    passTextController.dispose();
+    confirmPassTextController.dispose();
+    phoneTextController.dispose();
+    addressTextController.dispose();
+    riderIdProofTextController.dispose();
+    super.dispose();
   }
 
   Future<void> getDocs() async {
@@ -146,6 +163,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     head: "Rider Vehicle Number",
                     hint: "xx-xx-xxx-xxxx",
                     keyboard: TextInputType.text,
+                    textCapitalization: TextCapitalization.characters,
                   ),
                   SizedBox(
                     height: 15,
@@ -155,6 +173,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     head: "Email",
                     hint: "johndoe@example.com",
                     keyboard: TextInputType.emailAddress,
+                    validator: ((val) {
+                      if (!EmailValidator.validate(
+                          emailTextController.text.trim())) {
+                        return "Please check the email";
+                      }
+                      return null;
+                    }),
                   ),
                   SizedBox(
                     height: 15,
@@ -219,6 +244,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     head: "Phone Number",
                     hint: "xxxxx-xxxxx",
                     keyboard: TextInputType.phone,
+                    validator: AppFunctions.phoneNumberValidator,
                   ),
                   SizedBox(
                     height: 15,
@@ -304,11 +330,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
               if (!loading)
                 CustomBtn(
-                  onTap: (() async {
+                  onTap: () async {
+                    // Start loading
                     setState(() {
                       loading = true;
                     });
-                    if (nameTextController.text.isNotEmpty &&
+
+                    // Basic validation: all required fields must be filled
+                    final fieldsFilled = nameTextController.text.isNotEmpty &&
                         desTextController.text.isNotEmpty &&
                         idProofTextController.text.isNotEmpty &&
                         vTypeTextController.text.isNotEmpty &&
@@ -319,84 +348,135 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         addressTextController.text.isNotEmpty &&
                         riderIdProofTextController.text.isNotEmpty &&
                         passTextController.text.trim() ==
-                            confirmPassTextController.text.trim()) {
-                      if (AppFunctions.passwordValidator(
-                              passTextController.text.trim()) !=
-                          null) {
+                            confirmPassTextController.text.trim();
+
+                    if (!fieldsFilled) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        AppSnackBar().customizedAppSnackBar(
+                          message: "Please fill all the fields correctly",
+                          context: context,
+                        ),
+                      );
+                      setState(() {
+                        loading = false;
+                      });
+                      return;
+                    }
+
+                    // Password strength check
+                    final passwordError = AppFunctions.passwordValidator(
+                        passTextController.text.trim());
+
+                    if (passwordError != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        AppSnackBar().customizedAppSnackBar(
+                          message: passwordError,
+                          context: context,
+                        ),
+                      );
+                      setState(() {
+                        loading = false;
+                      });
+                      return;
+                    }
+
+                    // T&C agreement check
+                    if (!agree) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        AppSnackBar().customizedAppSnackBar(
+                          message: "Please agree to the T&C and Privacy Policy",
+                          context: context,
+                        ),
+                      );
+                      setState(() {
+                        loading = false;
+                      });
+                      return;
+                    }
+
+                    // Proceed to register
+                    try {
+                      final http.Response res = await http.post(
+                        Uri.parse(AppKeys.apiUrlKey + AppKeys.ridersKey + "/"),
+                        headers: {
+                          "content-type": "application/json",
+                        },
+                        body: jsonEncode({
+                          'name': nameTextController.text.trim(),
+                          'email': emailTextController.text.trim(),
+                          'address': addressTextController.text.trim(),
+                          "vehicleNumber": vNumberTextController.text.trim(),
+                          "vehicleType": vTypeTextController.text.trim(),
+                          "phoneNumber": phoneTextController.text.trim(),
+                          "riderLoginPassword": passTextController.text.trim(),
+                          "idProofUrl": idProofTextController.text.trim(),
+                          "riderIdProof":
+                              riderIdProofTextController.text.trim(),
+                          "paymentReceived": 0,
+                        }),
+                      );
+
+                      final Map<String, dynamic> resJson = jsonDecode(res.body);
+                      log(res.body);
+                      log(res.statusCode.toString());
+
+                      if (resJson["success"] == 1) {
+                        final rider = Rider.fromJson(resJson["rider"]);
+
                         ScaffoldMessenger.of(context).showSnackBar(
                           AppSnackBar().customizedAppSnackBar(
-                              message: AppFunctions.passwordValidator(
-                                      passTextController.text.trim()) ??
-                                  "",
-                              context: context),
+                            message:
+                                "Rider: ${rider.name}\nRider ID: ${rider.riderId}\n${resJson["message"]}",
+                            context: context,
+                          ),
                         );
-                      } else if (!agree) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          AppSnackBar().customizedAppSnackBar(
-                              message:
-                                  "Please agree to the T&C and Privacy Policy",
-                              context: context),
+
+                        await getDocs(); // Fetch docs from storage
+
+                        // If no docs, open DocumentsScreen and wait for result
+                        if (aadharFront == null &&
+                            aadharBack == null &&
+                            pan == null) {
+                          final bool? result = await Navigator.push<bool>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (ctx) => const DocumentsScreen(type: 1),
+                            ),
+                          );
+
+                          if (result != true) {
+                            ScaffoldMessenger.of(context).clearSnackBars();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              AppSnackBar().customizedAppSnackBar(
+                                message:
+                                    "Please complete your document verification.",
+                                context: context,
+                              ),
+                            );
+                            setState(() {
+                              loading = false;
+                            });
+                            return;
+                          }
+                        }
+
+                        // All good → Navigate to LoginScreen
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (ctx) => const LoginScreen(),
+                          ),
                         );
                       } else {
-                        final http.Response res = await http.post(
-                          Uri.parse(
-                              AppKeys.apiUrlKey + AppKeys.ridersKey + "/"),
-                          headers: {
-                            "content-type": "application/json",
-                          },
-                          body: jsonEncode({
-                            'name': nameTextController.text.trim(),
-                            'email': emailTextController.text.trim(),
-                            'address': addressTextController.text.trim(),
-                            "vehicleNumber": vNumberTextController.text.trim(),
-                            "vehicleType": vTypeTextController.text.trim(),
-                            "phoneNumber": phoneTextController.text.trim(),
-                            "riderLoginPassword":
-                                passTextController.text.trim(),
-                            "idProofUrl": idProofTextController.text.trim(),
-                            "riderIdProof":
-                                riderIdProofTextController.text.trim(),
-                            "paymentReceived": 0,
-                          }),
-                        );
-                        log(res.body);
-                        final Map<String, dynamic> resJson =
-                            jsonDecode(res.body);
-                        // log(resJson.toString());
-                        Rider rider = Rider.fromJson(resJson["rider"]);
-
-                        if (resJson["success"] == 1) {
+                        if (res.statusCode == 500) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             AppSnackBar().customizedAppSnackBar(
-                              message: "Rider: ${rider.name}" +
-                                  "\n" +
-                                  "Rider ID: ${rider.riderId}" +
-                                  "\n" +
-                                  resJson["message"],
+                              message:
+                                  resJson["message"] + "\n" + resJson["error"],
                               context: context,
                             ),
                           );
-                          await getDocs();
-                          if (aadharFront == null &&
-                              aadharBack == null &&
-                              pan == null) {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (ctx) => DocumentsScreen(),
-                              ),
-                            );
-                          }
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (ctx) => LoginScreen(),
-                            ),
-                          );
                         } else {
-                          setState(() {
-                            loading = false;
-                          });
                           ScaffoldMessenger.of(context).showSnackBar(
                             AppSnackBar().customizedAppSnackBar(
                               message: resJson["message"],
@@ -405,21 +485,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           );
                         }
                       }
-                    } else {
-                      setState(() {
-                        loading = false;
-                      });
+                    } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         AppSnackBar().customizedAppSnackBar(
-                          message: "Please fill all the fields correctly",
+                          message:
+                              "Registration failed. Please try again later.",
                           context: context,
                         ),
                       );
                     }
+
+                    // Stop loading at the end
                     setState(() {
                       loading = false;
                     });
-                  }),
+                  },
                   text: "Register",
                 ),
               if (loading) CustomLoadingIndicator(),

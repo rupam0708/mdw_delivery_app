@@ -672,6 +672,12 @@ class _RotatingIconState extends State<RotatingIcon>
     );
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   void _toggleRotation() {
     setState(() {
       if (_isRotated) {
@@ -700,11 +706,5 @@ class _RotatingIconState extends State<RotatingIcon>
         },
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 }
