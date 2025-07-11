@@ -10,6 +10,7 @@ import 'package:mdw/styles.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constant.dart';
+import '../services/app_keys.dart';
 import 'code_verification_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -196,7 +197,10 @@ class _MainScreenState extends State<MainScreen> {
                   });
                   _scaffoldKey.currentState?.closeDrawer();
                   final pref = await SharedPreferences.getInstance();
-                  await pref.clear();
+                  await pref.remove(AppKeys.signInStatusKey);
+                  await pref.remove(AppKeys.attendanceStatusKey);
+                  await pref.remove(AppKeys.loginKey);
+                  await pref.remove(AppKeys.profilePicKey);
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
