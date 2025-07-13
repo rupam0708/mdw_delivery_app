@@ -5,12 +5,254 @@ import 'package:flutter/material.dart';
 // import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:mdw/models/login_user_model.dart';
+import 'package:mdw/models/rider_docs_model.dart';
+import 'package:mdw/services/storage_services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/feedback_model.dart';
+import '../models/file_type_model.dart';
 import '../models/orders_model.dart';
 
 class AppFunctions {
+  static Future<void> removeAllDocsForPhone(String phone) async {
+    await StorageServices.removeAadharFront(phone);
+    await StorageServices.removeAadharBack(phone);
+    await StorageServices.removePan(phone);
+    await StorageServices.removeDLFront(phone);
+    await StorageServices.removeDLBack(phone);
+    await StorageServices.removeRCFront(phone);
+    await StorageServices.removeRCBack(phone);
+  }
+
+  static Future<RiderDocsModel> getDocs(String? phone) async {
+    String? user = await StorageServices.getLoginUserDetails();
+    LoginUserModel? u;
+
+    if (user != null) {
+      u = LoginUserModel.fromRawJson(user!);
+
+      return await getDocumentsWithMigration(
+        key: u.rider.phoneNumber,
+        migrateTo: u.rider.riderId,
+      );
+    } else if (phone != null) {
+      return await getDocumentsWithMigration(
+        key: phone,
+      );
+    }
+
+    // No user or email found, return empty documents
+    return RiderDocsModel(
+      aadharFront: null,
+      aadharBack: null,
+      pan: null,
+      dlFront: null,
+      dlBack: null,
+      rcFront: null,
+      rcBack: null,
+    );
+  }
+
+  static Future<RiderDocsModel> getDocumentsWithMigration({
+    required String key, // phoneNumber or email
+    String? migrateTo, // Optional migration target (e.g. riderId)
+  }) async {
+    FileTypeModel? aadharFront = await StorageServices.getAadharFront(key);
+    FileTypeModel? aadharBack = await StorageServices.getAadharBack(key);
+    FileTypeModel? pan = await StorageServices.getPan(key);
+    FileTypeModel? dlFront = await StorageServices.getDLFront(key);
+    FileTypeModel? dlBack = await StorageServices.getDLBack(key);
+    FileTypeModel? rcFront = await StorageServices.getRCFront(key);
+    FileTypeModel? rcBack = await StorageServices.getRCBack(key);
+
+    // If documents exist under `key` and we want to migrate
+    if (migrateTo != null &&
+        (aadharFront != null ||
+            aadharBack != null ||
+            pan != null ||
+            rcFront != null ||
+            rcBack != null ||
+            dlFront != null ||
+            dlBack != null)) {
+      if (aadharFront != null) {
+        await StorageServices.setAadharFront(aadharFront, migrateTo);
+        await StorageServices.removeAadharFront(key);
+      }
+      if (aadharBack != null) {
+        await StorageServices.setAadharBack(aadharBack, migrateTo);
+        await StorageServices.removeAadharBack(key);
+      }
+      if (pan != null) {
+        await StorageServices.setPan(pan, migrateTo);
+        await StorageServices.removePan(key);
+      }
+      if (dlFront != null) {
+        await StorageServices.setDLFront(dlFront, migrateTo);
+        await StorageServices.removeDLFront(key);
+      }
+      if (dlBack != null) {
+        await StorageServices.setDLBack(dlBack, migrateTo);
+        await StorageServices.removeDLBack(key);
+      }
+      if (rcFront != null) {
+        await StorageServices.setRCFront(rcFront, migrateTo);
+        await StorageServices.removeRCFront(key);
+      }
+      if (rcBack != null) {
+        await StorageServices.setRCBack(rcBack, migrateTo);
+        await StorageServices.removeRCBack(key);
+      }
+
+      // Load the migrated docs from new key
+      aadharFront = await StorageServices.getAadharFront(migrateTo);
+      aadharBack = await StorageServices.getAadharBack(migrateTo);
+      pan = await StorageServices.getPan(migrateTo);
+      rcFront = await StorageServices.getRCFront(migrateTo);
+      rcBack = await StorageServices.getRCBack(migrateTo);
+      dlFront = await StorageServices.getDLFront(migrateTo);
+      dlBack = await StorageServices.getDLBack(migrateTo);
+    }
+
+    return RiderDocsModel(
+      aadharFront: aadharFront,
+      aadharBack: aadharBack,
+      pan: pan,
+      dlFront: dlFront,
+      dlBack: dlBack,
+      rcFront: rcFront,
+      rcBack: rcBack,
+    );
+  }
+
+  static String? riderIdProofTypeValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Please enter your ID proof type";
+    }
+
+    final validProofs = [
+      "aadhaar",
+      "pan",
+      "driving license",
+      "voter id",
+      "passport",
+      "ration card",
+      "employee id",
+      "college id",
+    ];
+
+    final input = value.trim().toLowerCase();
+    if (!validProofs.contains(input)) {
+      return "Invalid ID proof type. Ex: ${validProofs.map((e) => e[0].toUpperCase() + e.substring(1)).join(", ")}";
+    }
+
+    return null; // valid
+  }
+
+  static String? indianVehicleNumberValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Vehicle number is required";
+    }
+
+    final vehicleNumber = value.trim().toUpperCase();
+
+    final pattern = r'^[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{4}$';
+    final regExp = RegExp(pattern);
+
+    if (!regExp.hasMatch(vehicleNumber)) {
+      return "Enter a valid Indian vehicle number (e.g., MH12AB1234)";
+    }
+
+    return null;
+  }
+
+  static String? riderVehicleTypeValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Vehicle type is required";
+    }
+
+    final type = value.trim().toLowerCase();
+
+    // List of accepted vehicle types
+    final validTypes = [
+      "bike",
+      "scooter",
+      "bicycle",
+      "e-bike",
+      "car",
+      "auto",
+      "pickup truck",
+      "mini truck",
+      "tempo",
+      "delivery van",
+      "lorry",
+      "truck",
+      "3-wheeler",
+      "4-wheeler",
+      "cargo van"
+    ];
+
+    if (!validTypes.contains(type)) {
+      return "Invalid vehicle type. Ex: ${validTypes.map((e) => e[0].toUpperCase() + e.substring(1)).join(", ")}";
+    }
+
+    return null;
+  }
+
+  static String? addressValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Address is required";
+    }
+
+    final address = value.trim();
+
+    if (address.length < 5) {
+      return "Address is too short";
+    }
+
+    // Optional: disallow certain characters
+    final addressPattern = r"^[a-zA-Z0-9\s,.'-/#()]+$";
+    final regex = RegExp(addressPattern);
+
+    if (!regex.hasMatch(address)) {
+      return "Enter a valid address without special characters";
+    }
+
+    return null;
+  }
+
+  static String? nameValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Name is required";
+    }
+
+    final name = value.trim();
+    final namePattern = r"^[a-zA-Z\s.'-]{2,}$";
+    final regex = RegExp(namePattern);
+
+    if (!regex.hasMatch(name)) {
+      return "Please enter a valid name";
+    }
+
+    return null;
+  }
+
+  static String? urlValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Please enter a URL";
+    }
+
+    final pattern =
+        r"^(https?:\/\/)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,}(:\d+)?(\/\S*)?$";
+    final regex = RegExp(pattern);
+
+    if (!regex.hasMatch(value.trim())) {
+      return "Please enter a valid URL";
+    }
+
+    return null; // Valid URL
+  }
+
   static String? phoneNumberValidator(String? value) {
     if (value == null || value.trim().isEmpty) {
       return "Phone number is required";

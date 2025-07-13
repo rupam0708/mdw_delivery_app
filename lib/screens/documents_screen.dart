@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 // import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mdw/models/file_type_model.dart';
+import 'package:mdw/models/rider_docs_model.dart';
 import 'package:mdw/screens/onboarding_screen.dart';
 import 'package:mdw/screens/orders_screen.dart';
+import 'package:mdw/services/app_function_services.dart';
 import 'package:mdw/services/app_keys.dart';
 import 'package:mdw/services/storage_services.dart';
 import 'package:mdw/styles.dart';
@@ -19,18 +21,19 @@ import '../models/login_user_model.dart';
 import '../utils/snack_bar_utils.dart';
 
 class DocumentsScreen extends StatefulWidget {
-  const DocumentsScreen({super.key, this.type});
+  const DocumentsScreen({super.key, this.type, this.phone});
 
   final int? type;
+  final String? phone;
 
   @override
   State<DocumentsScreen> createState() => _DocumentsScreenState();
 }
 
 class _DocumentsScreenState extends State<DocumentsScreen> {
-  FileTypeModel? aadharFront, aadharBack, pan;
+  FileTypeModel? aadharFront, aadharBack, pan, dlFront, dlBack, rcFront, rcBack;
   String? user;
-  late LoginUserModel u;
+  LoginUserModel? u;
 
   Future<FilePickerResult?> getFile(String title) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -52,16 +55,21 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
     return null;
   }
 
-  getDocs() async {
-    user = await StorageServices.getLoginUserDetails();
-    if (user != null) {
-      u = LoginUserModel.fromRawJson(user!);
-      aadharFront = await StorageServices.getAadharFront(u.rider.riderId);
-      aadharBack = await StorageServices.getAadharBack(u.rider.riderId);
-      pan = await StorageServices.getPan(u.rider.riderId);
-    }
-    setState(() {});
-  }
+  // getDocs() async {
+  //   user = await StorageServices.getLoginUserDetails();
+  //   if (user != null) {
+  //     u = LoginUserModel.fromRawJson(user!);
+  //     aadharFront =
+  //         await StorageServices.getAadharFront(u?.rider.riderId ?? "");
+  //     aadharBack = await StorageServices.getAadharBack(u?.rider.riderId ?? "");
+  //     pan = await StorageServices.getPan(u?.rider.riderId ?? "");
+  //   } else if (widget.email != null) {
+  //     aadharFront = await StorageServices.getAadharFront(widget.email ?? "");
+  //     aadharBack = await StorageServices.getAadharBack(widget.email ?? "");
+  //     pan = await StorageServices.getPan(widget.email ?? "");
+  //   }
+  //   setState(() {});
+  // }
 
   // getStoragePermission() async {
   //   var status = await Permission.storage.request();
@@ -73,19 +81,44 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   @override
   void initState() {
     // getStoragePermission();
-    getDocs();
+    // getDocs();
+    getData();
     super.initState();
+  }
+
+  getData() async {
+    RiderDocsModel docs = await AppFunctions.getDocs(widget.phone);
+    aadharFront = docs.aadharFront;
+    aadharBack = docs.aadharBack;
+    pan = docs.pan;
+    dlFront = docs.dlFront;
+    dlBack = docs.dlBack;
+    rcFront = docs.rcFront;
+    rcBack = docs.rcBack;
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: widget.type != 1 ||
-          (aadharFront != null && aadharBack != null && pan != null),
+          (aadharFront != null &&
+              aadharBack != null &&
+              pan != null &&
+              dlFront != null &&
+              dlBack != null &&
+              rcFront != null &&
+              rcBack != null),
       onPopInvokedWithResult: (bool result, Object? returnValue) {
         if (!result &&
             widget.type == 1 &&
-            (aadharFront == null || aadharBack == null || pan == null)) {
+            (aadharFront == null ||
+                aadharBack == null ||
+                pan == null ||
+                dlFront == null ||
+                dlBack == null ||
+                rcFront == null ||
+                rcBack == null)) {
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(
             AppSnackBar().customizedAppSnackBar(
@@ -112,7 +145,13 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
               height: 40,
               onTap: () async {
                 // If no documents uploaded, show SnackBar and return early
-                if (aadharFront == null && aadharBack == null && pan == null) {
+                if (aadharFront == null &&
+                    aadharBack == null &&
+                    pan == null &&
+                    dlFront == null &&
+                    dlBack == null &&
+                    rcFront == null &&
+                    rcBack == null) {
                   ScaffoldMessenger.of(context).clearSnackBars();
                   ScaffoldMessenger.of(context).showSnackBar(
                     AppSnackBar().customizedAppSnackBar(
@@ -124,23 +163,85 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                 }
 
                 // Save uploaded documents
-                if (aadharFront != null) {
-                  await StorageServices.setAadharFront(
-                      aadharFront!, u.rider.riderId);
-                }
-                if (aadharBack != null) {
-                  await StorageServices.setAadharBack(
-                      aadharBack!, u.rider.riderId);
-                }
-                if (pan != null) {
-                  await StorageServices.setPan(pan!, u.rider.riderId);
+                if (u != null) {
+                  if (aadharFront != null) {
+                    await StorageServices.setAadharFront(
+                        aadharFront!, u?.rider.riderId ?? "");
+                  }
+                  if (aadharBack != null) {
+                    await StorageServices.setAadharBack(
+                        aadharBack!, u?.rider.riderId ?? "");
+                  }
+                  if (pan != null) {
+                    await StorageServices.setPan(pan!, u?.rider.riderId ?? "");
+                  }
+                  if (dlFront != null) {
+                    await StorageServices.setDLFront(
+                        dlFront!, u?.rider.riderId ?? "");
+                  }
+                  if (dlBack != null) {
+                    await StorageServices.setDLBack(
+                        dlBack!, u?.rider.riderId ?? "");
+                  }
+                  if (rcFront != null) {
+                    await StorageServices.setRCFront(
+                        rcFront!, u?.rider.riderId ?? "");
+                  }
+                  if (rcBack != null) {
+                    await StorageServices.setRCBack(
+                        rcBack!, u?.rider.riderId ?? "");
+                  }
+                } else if (widget.phone != null) {
+                  if (aadharFront != null) {
+                    await StorageServices.setAadharFront(
+                        aadharFront!, widget.phone ?? "");
+                  }
+                  if (aadharBack != null) {
+                    await StorageServices.setAadharBack(
+                        aadharBack!, widget.phone ?? "");
+                  }
+                  if (pan != null) {
+                    await StorageServices.setPan(pan!, widget.phone ?? "");
+                  }
+                  if (dlFront != null) {
+                    await StorageServices.setDLFront(
+                        dlFront!, widget.phone ?? "");
+                  }
+                  if (dlBack != null) {
+                    await StorageServices.setDLBack(
+                        dlBack!, widget.phone ?? "");
+                  }
+                  if (rcFront != null) {
+                    await StorageServices.setRCFront(
+                        rcFront!, widget.phone ?? "");
+                  }
+                  if (rcBack != null) {
+                    await StorageServices.setRCBack(
+                        rcBack!, widget.phone ?? "");
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).clearSnackBars();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    AppSnackBar().customizedAppSnackBar(
+                      message:
+                          "Can't upload documents now.\nPlease try again later.",
+                      context: context,
+                    ),
+                  );
+                  return;
                 }
 
                 // Pop with result only if it's a verification flow
                 if (widget.type == 0 || widget.type == null) {
                   Navigator.pop(
                     context,
-                    aadharFront != null && aadharBack != null && pan != null,
+                    aadharFront != null &&
+                        aadharBack != null &&
+                        pan != null &&
+                        dlFront != null &&
+                        dlBack != null &&
+                        rcFront != null &&
+                        rcBack != null,
                   );
                 }
 
@@ -148,11 +249,21 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                 if (widget.type == 1 &&
                     aadharFront != null &&
                     aadharBack != null &&
-                    pan != null) {
+                    pan != null &&
+                    dlFront != null &&
+                    dlBack != null &&
+                    rcFront != null &&
+                    rcBack != null) {
                   Navigator.pop(context, true);
                 }
               },
-              text: (aadharFront != null || aadharBack != null || pan != null)
+              text: (aadharFront != null ||
+                      aadharBack != null ||
+                      pan != null ||
+                      dlFront != null ||
+                      dlBack != null ||
+                      rcFront != null ||
+                      rcBack != null)
                   ? "Update"
                   : "Save",
             ),
@@ -254,6 +365,127 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                       }
                     }),
                   ),
+                SizedBox(height: 25),
+                DocType(head: "DRIVING LICENCE"),
+                SizedBox(height: 25),
+                if (dlFront == null)
+                  DocContainer(
+                    head: "Front Side of Card",
+                    instruction: "Click to Upload Front Side of Card",
+                    onTap: (() async {
+                      FilePickerResult? result =
+                          await getFile("Upload Front Side of Driving Licence");
+                      if (result != null) {
+                        dlFront =
+                            FileTypeModel(path: result.files.single.path!);
+                        setState(() {});
+                      }
+                    }),
+                  ),
+                if (dlFront != null)
+                  NotEmptyContainer(
+                    onChange: (() async {
+                      dlFront = null;
+                      FilePickerResult? result =
+                          await getFile("Upload Front Side of Driving Licence");
+                      if (result != null) {
+                        dlFront =
+                            FileTypeModel(path: result.files.single.path!);
+                        setState(() {});
+                      }
+                    }),
+                    fileModel: dlFront,
+                    head: "Driving Licence Front",
+                  ),
+                SizedBox(height: 25),
+                if (dlBack == null)
+                  DocContainer(
+                    head: "Back Side of Card",
+                    instruction: "Click to Upload Back Side of Card",
+                    onTap: (() async {
+                      FilePickerResult? result =
+                          await getFile("Upload Back Side of Aadhar Card");
+                      if (result != null) {
+                        dlBack = FileTypeModel(path: result.files.single.path!);
+                        setState(() {});
+                      }
+                    }),
+                  ),
+                if (dlBack != null)
+                  NotEmptyContainer(
+                    fileModel: dlBack,
+                    head: "Driving Licence Back",
+                    onChange: (() async {
+                      dlBack = null;
+                      FilePickerResult? result =
+                          await getFile("Upload Back Side of Driving Licence");
+                      if (result != null) {
+                        dlBack = FileTypeModel(path: result.files.single.path!);
+                        setState(() {});
+                      }
+                    }),
+                  ),
+                SizedBox(height: 25),
+                DocType(head: "REGISTRATION CERTIFICATE"),
+                SizedBox(height: 25),
+                if (rcFront == null)
+                  DocContainer(
+                    head: "Front Side of Card",
+                    instruction: "Click to Upload Front Side of Card",
+                    onTap: (() async {
+                      FilePickerResult? result = await getFile(
+                          "Upload Front Side of Registration Certificate");
+                      if (result != null) {
+                        rcFront =
+                            FileTypeModel(path: result.files.single.path!);
+                        setState(() {});
+                      }
+                    }),
+                  ),
+                if (rcFront != null)
+                  NotEmptyContainer(
+                    onChange: (() async {
+                      rcFront = null;
+                      FilePickerResult? result =
+                          await getFile("Upload Front Side of Aadhar Card");
+                      if (result != null) {
+                        rcFront =
+                            FileTypeModel(path: result.files.single.path!);
+                        setState(() {});
+                      }
+                    }),
+                    fileModel: rcFront,
+                    head: "Registration Certificate Front",
+                  ),
+                SizedBox(height: 25),
+                if (rcBack == null)
+                  DocContainer(
+                    head: "Back Side of Card",
+                    instruction: "Click to Upload Back Side of Card",
+                    onTap: (() async {
+                      FilePickerResult? result = await getFile(
+                          "Upload Back Side of Registration Certificate");
+                      if (result != null) {
+                        rcBack = FileTypeModel(path: result.files.single.path!);
+                        setState(() {});
+                      }
+                    }),
+                  ),
+                if (rcBack != null)
+                  NotEmptyContainer(
+                    fileModel: rcBack,
+                    head: "Registration Certificate Back",
+                    onChange: (() async {
+                      rcBack = null;
+                      FilePickerResult? result = await getFile(
+                          "Upload Back Side of Registration Certificate");
+                      if (result != null) {
+                        rcBack = FileTypeModel(path: result.files.single.path!);
+                        setState(() {});
+                      }
+                    }),
+                  ),
+                SizedBox(height: 25),
               ],
             ),
           ),

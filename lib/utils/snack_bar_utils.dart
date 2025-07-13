@@ -19,6 +19,7 @@ class AppSnackBar {
       backgroundColor: AppColors.white,
       content: Text(
         message,
+        textAlign: TextAlign.center,
         style: const TextStyle(
           color: AppColors.green,
           fontWeight: FontWeight.bold,
