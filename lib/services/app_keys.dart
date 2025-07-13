@@ -13,6 +13,10 @@ class AppKeys {
   static const String aadharFrontKey = "/aadhar/front";
   static const String aadharBackKey = "/aadhar/back";
   static const String panKey = "/pan";
+  static const String rcFrontKey = "/rc/front";
+  static const String rcBackKey = "/rc/back";
+  static const String dlFrontKey = "/dl/front";
+  static const String dlBackKey = "/dl/back";
   static const String profilePicKey = "/profile-pic";
   static const int maxFileSizeInBytes = 25 * 1024 * 1024; //25mb
 }

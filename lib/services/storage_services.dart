@@ -5,6 +5,41 @@ import 'package:mdw/services/app_keys.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageServices {
+  static Future<void> removeRCFront(String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.remove(AppKeys.rcFrontKey + "/" + uname);
+  }
+
+  static Future<void> removeRCBack(String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.remove(AppKeys.rcBackKey + "/" + uname);
+  }
+
+  static Future<void> removeDLFront(String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.remove(AppKeys.dlFrontKey + "/" + uname);
+  }
+
+  static Future<void> removeDLBack(String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.remove(AppKeys.dlBackKey + "/" + uname);
+  }
+
+  static Future<void> removeAadharFront(String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    await pref.remove(AppKeys.aadharFrontKey + "/" + uname);
+  }
+
+  static Future<void> removeAadharBack(String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    await pref.remove(AppKeys.aadharBackKey + "/" + uname);
+  }
+
+  static Future<void> removePan(String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    await pref.remove(AppKeys.panKey + "/" + uname);
+  }
+
   static Future<void> setSignInStatus(bool status) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     pref.setBool(AppKeys.signInStatusKey, status);
@@ -18,6 +53,26 @@ class StorageServices {
   static Future<void> setLoginUserDetails(Map<String, dynamic> user) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     pref.setString(AppKeys.loginKey, jsonEncode(user));
+  }
+
+  static Future<void> setRCFront(FileTypeModel file, String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString(AppKeys.rcFrontKey + "/" + uname, file.toJsonString());
+  }
+
+  static Future<void> setRCBack(FileTypeModel file, String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString(AppKeys.rcBackKey + "/" + uname, file.toJsonString());
+  }
+
+  static Future<void> setDLFront(FileTypeModel file, String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString(AppKeys.dlFrontKey + "/" + uname, file.toJsonString());
+  }
+
+  static Future<void> setDLBack(FileTypeModel file, String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString(AppKeys.dlBackKey + "/" + uname, file.toJsonString());
   }
 
   static Future<void> setAadharFront(FileTypeModel file, String uname) async {
@@ -76,6 +131,46 @@ class StorageServices {
     if (data != null) {
       print(jsonDecode(data).runtimeType);
 
+      return FileTypeModel.fromJson(jsonDecode(data));
+    } else {
+      return null;
+    }
+  }
+
+  static Future<FileTypeModel?> getRCFront(String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    final data = pref.getString(AppKeys.rcFrontKey + "/" + uname);
+    if (data != null) {
+      return FileTypeModel.fromJson(jsonDecode(data));
+    } else {
+      return null;
+    }
+  }
+
+  static Future<FileTypeModel?> getRCBack(String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    final data = pref.getString(AppKeys.rcBackKey + "/" + uname);
+    if (data != null) {
+      return FileTypeModel.fromJson(jsonDecode(data));
+    } else {
+      return null;
+    }
+  }
+
+  static Future<FileTypeModel?> getDLFront(String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    final data = pref.getString(AppKeys.dlFrontKey + "/" + uname);
+    if (data != null) {
+      return FileTypeModel.fromJson(jsonDecode(data));
+    } else {
+      return null;
+    }
+  }
+
+  static Future<FileTypeModel?> getDLBack(String uname) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    final data = pref.getString(AppKeys.dlBackKey + "/" + uname);
+    if (data != null) {
       return FileTypeModel.fromJson(jsonDecode(data));
     } else {
       return null;
