@@ -307,7 +307,7 @@ CMAKE_C_STANDARD_LIBRARIES-ADVANCED:INTERNAL=1
 CMAKE_DLLTOOL-ADVANCED:INTERNAL=1
 //Path to cache edit program executable.
 CMAKE_EDIT_COMMAND:INTERNAL=/Users/rupamkarmakar/Library/Android/sdk/cmake/3.22.1/bin/ccmake
-//Whether to issue deprecation errors for macros and functions.
+//Whether to issue deprecation errors for macros and services.
 CMAKE_ERROR_DEPRECATED:INTERNAL=FALSE
 //Executable file format
 CMAKE_EXECUTABLE_FORMAT:INTERNAL=ELF
