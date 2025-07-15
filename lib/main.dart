@@ -1,22 +1,37 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:mdw/models/login_user_model.dart';
-import 'package:mdw/screens/code_verification_screen.dart';
-import 'package:mdw/screens/documents_screen.dart';
-import 'package:mdw/screens/main_screen.dart';
-import 'package:mdw/screens/onboarding_screen.dart';
-import 'package:mdw/screens/splash_screen.dart';
-import 'package:mdw/services/app_function_services.dart';
-import 'package:mdw/services/storage_services.dart';
-import 'package:mdw/utils/snack_bar_utils.dart';
+import 'package:mdw/core/services/app_function_services.dart';
+import 'package:mdw/core/services/storage_services.dart';
+import 'package:mdw/features/auth/models/login_user_model.dart';
+import 'package:mdw/features/auth/screens/code_verification_screen.dart';
+import 'package:mdw/features/auth/screens/onboarding_screen.dart';
+import 'package:mdw/features/auth/screens/splash_screen.dart';
+import 'package:mdw/features/delivery/controller/home_controller.dart';
+import 'package:mdw/features/delivery/controller/main_controller.dart';
+import 'package:mdw/features/delivery/controller/orders_controller.dart';
+import 'package:mdw/features/delivery/screens/main_screen.dart';
+import 'package:mdw/features/documents/screens/documents_screen.dart';
+import 'package:mdw/shared/utils/snack_bar_utils.dart';
+import 'package:provider/provider.dart';
 
-import 'models/file_type_model.dart';
+import 'features/auth/controllers/login_controller.dart';
+import 'features/auth/controllers/registration_controller.dart';
+import 'features/documents/models/file_type_model.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => RegistrationController()),
+      ChangeNotifierProvider(create: (_) => LoginController()),
+      ChangeNotifierProvider(create: (_) => HomeController(_)),
+      ChangeNotifierProvider(create: (_) => MainController()),
+      ChangeNotifierProvider(create: (_) => OrdersController(_)),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatefulWidget {
