@@ -104,6 +104,27 @@ class StorageServices {
     pref.setString(AppKeys.profilePicKey, file.toJsonString());
   }
 
+  static Future<void> setLastOrderIDs(List<String> orderIDs) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setStringList(AppKeys.lastOrderIdKey, orderIDs);
+  }
+
+  static Future<void> clearLastOrderIDs() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.remove(AppKeys.lastOrderIdKey);
+  }
+
+  static Future<bool> hasLastOrderIDs() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    return pref.containsKey(AppKeys.lastOrderIdKey);
+  }
+
+  static Future<List<String>?> getLastOrderIDs() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    // log(pref.getKeys().toString());
+    return pref.getStringList(AppKeys.lastOrderIdKey);
+  }
+
   static Future<FileTypeModel?> getProfilePic() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     final data = pref.getString(AppKeys.profilePicKey);

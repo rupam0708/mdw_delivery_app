@@ -48,6 +48,25 @@ class OrdersController extends ChangeNotifier {
     }
   }
 
+  int getStatusRank(String status) {
+    switch (status.toLowerCase()) {
+      case "received":
+        return 1;
+      case "packing":
+        return 2;
+      case "packed":
+        return 3;
+      case "out for delivery":
+        return 4;
+      case "delivered":
+        return 5;
+      case "arrived at warehouse":
+        return 6;
+      default:
+        return 999; // unknown status goes last
+    }
+  }
+
   Future<void> getOrders() async {
     String url = "";
     if (isPrevious) {
@@ -72,6 +91,19 @@ class OrdersController extends ChangeNotifier {
           prevOrdersListEmpty = prevOrdersList!.data.isEmpty;
         } else {
           ordersList = OrdersListModel.fromJson(resJson);
+          // Sort orders after parsing
+          ordersList!.orders.sort((a, b) {
+            // 1. Compare by status rank
+            int statusComparison =
+                getStatusRank(a.status).compareTo(getStatusRank(b.status));
+
+            if (statusComparison != 0) {
+              return statusComparison; // lower rank comes first
+            }
+
+            // 2. If same status → compare by date (latest first)
+            return b.orderDate.compareTo(a.orderDate);
+          });
           ordersListEmpty = ordersList!.orders.isEmpty;
         }
       } catch (e) {

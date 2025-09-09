@@ -32,6 +32,7 @@ class AppFunctions {
     pref.remove(AppKeys.loginKey);
     pref.remove(AppKeys.attendanceStatusKey);
     pref.remove(AppKeys.signInStatusKey);
+    pref.remove(AppKeys.lastOrderIdKey);
   }
 
   static StepState getStepState(RegistrationController controller, int step) {

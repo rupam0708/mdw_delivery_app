@@ -10,6 +10,7 @@ class AppKeys {
   static const String ridersKey = "/riders";
   static const String salaryHistoryKey = "/salary-history";
   static const String verifyOTPKey = "/verify-otp";
+  static const String statusKey = "/status";
   static const String aadharFrontKey = "/aadhar/front";
   static const String aadharBackKey = "/aadhar/back";
   static const String panKey = "/pan";
@@ -18,5 +19,6 @@ class AppKeys {
   static const String dlFrontKey = "/dl/front";
   static const String dlBackKey = "/dl/back";
   static const String profilePicKey = "/profile-pic";
+  static const String lastOrderIdKey = "/order-id/last";
   static const int maxFileSizeInBytes = 25 * 1024 * 1024; //25mb
 }

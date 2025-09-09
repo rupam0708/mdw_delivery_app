@@ -38,6 +38,7 @@ dependencies:
   #  native_exif:
   provider:
   connectivity_plus:
+  geolocator:
 #  pdf_render: ^1.4.12
 
 dev_dependencies:
