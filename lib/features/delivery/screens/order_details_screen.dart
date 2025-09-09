@@ -1,5 +1,8 @@
 // import 'package:camera/camera.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:mdw/features/auth/models/login_user_model.dart';
 import 'package:mdw/features/delivery/controller/order_details_controller.dart';
 import 'package:mdw/features/delivery/models/orders_model.dart';
@@ -7,6 +10,7 @@ import 'package:mdw/features/delivery/models/prev_orders_model.dart';
 import 'package:mdw/features/delivery/widgets/build_mark_as_arrived_button.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/constants/app_keys.dart';
 import '../../../core/constants/constant.dart';
 import '../../../core/themes/styles.dart';
 import '../../auth/screens/code_verification_screen.dart';
@@ -64,7 +68,23 @@ class _OrderDetailsView extends StatelessWidget {
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
             buildProductDetails(controller),
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
-            buildMarkAsArrivedButton(context, controller),
+            MarkAsArrivedButton(
+              onApiCall: (() async {
+                http.Response res = await http.patch(
+                  Uri.parse(AppKeys.apiUrlKey +
+                      AppKeys.ordersKey +
+                      AppKeys.statusKey),
+                  headers: <String, String>{
+                    'Content-Type': 'application/json; charset=UTF-8',
+                    // "authorization": "Bearer ${rider!.token}",
+                  },
+                  body: jsonEncode(<String, dynamic>{
+                    "orderId": controller.orderId,
+                    "status": "Arrived",
+                  }),
+                );
+              }),
+            ),
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
             if (controller.isCurrentOrder)
               buildEnterCodeButton(context, controller),

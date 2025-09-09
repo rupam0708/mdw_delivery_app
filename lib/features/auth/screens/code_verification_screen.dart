@@ -45,6 +45,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
     final String? temp = await StorageServices.getLoginUserDetails();
     if (temp != null) {
       rider = LoginUserModel.fromRawJson(temp);
+      log(rider!.token);
       setState(() {});
     }
   }
@@ -52,6 +53,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
   @override
   void initState() {
     otpController = TextEditingController();
+    getRider();
     super.initState();
   }
 
@@ -149,8 +151,9 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                           }),
                         );
                         log(res.body.toString());
+                        Map<String, dynamic> resJson = jsonDecode(res.body);
+
                         if (res.statusCode == 200) {
-                          Map<String, dynamic> resJson = jsonDecode(res.body);
                           ScaffoldMessenger.of(context).showSnackBar(
                             AppSnackBar().customizedAppSnackBar(
                               message: resJson["message"],
@@ -158,6 +161,13 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                             ),
                           );
                           Navigator.pop(context);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            AppSnackBar().customizedAppSnackBar(
+                              message: resJson["message"],
+                              context: context,
+                            ),
+                          );
                         }
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
