@@ -11,6 +11,8 @@ import 'package:mdw/core/themes/styles.dart';
 import 'package:mdw/features/auth/models/login_user_model.dart';
 import 'package:mdw/features/auth/models/rider_model.dart';
 import 'package:mdw/features/documents/screens/documents_screen.dart';
+import 'package:mdw/shared/utils/snack_bar_utils.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/app_keys.dart';
@@ -132,6 +134,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<bool> _requestPermissions(BuildContext context) async {
+    Permission permission = Permission.camera;
+    PermissionStatus cameraStatus = await permission.status;
+    if (cameraStatus.isGranted) {
+      return true;
+    } else {
+      cameraStatus = await permission.request();
+      if (cameraStatus.isGranted) {
+        return true;
+      } else {
+        openAppSettings();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            AppSnackBar().customizedAppSnackBar(
+              message: "Camera permission denied",
+              context: context,
+            ),
+          );
+        }
+        return false;
+      }
+    }
+  }
+
+  Future<void> captureAndUploadProfilePic({
+    required ImagePicker imagePicker,
+    required Future<void> Function(FileTypeModel file) uploadPic,
+    required Future<void> Function() refreshProfile,
+    required BuildContext context,
+  }) async {
+    try {
+      // 1. Request permissions
+      bool granted = await _requestPermissions(context);
+      if (!granted) return;
+
+      // 2. Pick from camera
+      XFile? pic = await imagePicker.pickImage(source: ImageSource.camera);
+
+      if (pic != null) {
+        // 3. Upload
+        await uploadPic(FileTypeModel(path: pic.path));
+
+        // 4. Refresh profile
+        await refreshProfile();
+
+        ScaffoldMessenger.of(context)
+            .showSnackBar(AppSnackBar().customizedAppSnackBar(
+          message: "Profile picture updated successfully",
+          context: context,
+        ));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -154,22 +216,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             children: [
                               if (profilePic == null)
                                 GestureDetector(
-                                  onTap: (() async {
-                                    XFile? pic = await imagePicker.pickImage(
-                                        source: ImageSource.camera);
-                                    if (pic != null) {
-                                      await StorageServices.setProfilePic(
-                                          FileTypeModel(path: pic.path));
-                                      await getProfile();
-                                    }
-                                  }),
-                                  child: CircleAvatar(
+                                  onTap: () async {
+                                    await captureAndUploadProfilePic(
+                                      imagePicker: imagePicker,
+                                      uploadPic: StorageServices.setProfilePic,
+                                      refreshProfile: getProfile,
+                                      context: context,
+                                    );
+                                  },
+                                  child: const CircleAvatar(
                                     radius: 30,
                                     backgroundImage:
                                         AssetImage("assets/person.png"),
                                   ),
-                                ),
-                              if (profilePic != null)
+                                )
+                              else
                                 CircleAvatar(
                                   radius: 30,
                                   backgroundImage:

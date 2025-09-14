@@ -26,9 +26,9 @@ void main() {
     providers: [
       ChangeNotifierProvider(create: (_) => RegistrationController()),
       ChangeNotifierProvider(create: (_) => LoginController()),
-      ChangeNotifierProvider(create: (_) => HomeController(_)),
       ChangeNotifierProvider(create: (_) => MainController()),
-      ChangeNotifierProvider(create: (_) => OrdersController(_)),
+      ChangeNotifierProvider(create: (context) => HomeController(context)),
+      ChangeNotifierProvider(create: (context) => OrdersController(context)),
     ],
     child: const MyApp(),
   ));
@@ -110,9 +110,15 @@ class _MyAppState extends State<MyApp> {
           ScaffoldMessenger.of(nav.context).showSnackBar(
             AppSnackBar().customizedAppSnackBar(
               message: "Please complete your document verification.",
-              context: context,
+              context: nav.context,
             ),
           );
+          // ScaffoldMessenger.of(nav.context).showSnackBar(
+          //   AppSnackBar().customizedAppSnackBar(
+          //     message: "Please complete your document verification.",
+          //     context: context,
+          //   ),
+          // );
         }
       });
     } else {
@@ -152,6 +158,9 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       home: const SplashScreen(), // Always show splash while preparing
+      // home: splashShow
+      //     ? SplashScreen()
+      //     : Container(), // Container avoids double splash
     );
   }
 }

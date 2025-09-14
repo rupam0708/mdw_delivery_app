@@ -115,8 +115,15 @@ class StorageServices {
   }
 
   static Future<bool> hasLastOrderIDs() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    return pref.containsKey(AppKeys.lastOrderIdKey);
+    final lastIds = await getLastOrderIDs();
+    log(lastIds.toString());
+    if (lastIds == null) {
+      return false;
+    } else if (lastIds.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   static Future<List<String>?> getLastOrderIDs() async {
@@ -209,7 +216,7 @@ class StorageServices {
 
   static Future<String?> getLoginUserDetails() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    log(pref.getKeys().toString());
+    // log(pref.getKeys().toString());
     return pref.getString(AppKeys.loginKey);
   }
 

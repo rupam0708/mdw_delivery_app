@@ -7,6 +7,10 @@
 			<string>sms</string>
 			<string>tel</string>
 		</array>
+		<key>NSLocationAlwaysUsageDescription</key>
+        <string>This app needs access to your location always.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+        <string>This app needs access to your location when in use.</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>This app needs access to microphone for capturing audio.</string>
 		<key>NSCameraUsageDescription</key>

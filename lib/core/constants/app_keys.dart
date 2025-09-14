@@ -2,15 +2,27 @@ class AppKeys {
   static const String signInStatusKey = "sign-in-status-key";
   static const String attendanceStatusKey = "attendance-status-key";
   static const String apiUrlKey = "https://backend-2ske.onrender.com";
+  static const String apiKey = "/api";
+  static const String versionKey = "/v1";
+  static const String shiftsKey = "/shifts";
+  static const String earningsKey = "/earnings";
+  static const String dailyKey = "/daily";
+  static const String statusKey = "/status";
+  static const String otpKey = "/otp";
+  static const String startOTPKey = "/start-otp";
+  static const String startShiftKey = "/start";
+  static const String endOTPKey = "/end-otp";
+  static const String endShiftKey = "/end";
   static const String loginKey = "/riders/login";
   static const String ordersKey = "/orders";
   static const String todayKey = "/gettodaysorders";
   static const String prevKey = "/getpreviousorders";
   static const String allottedOrdersKey = "/allotted-orders";
+  static const String attendanceKey = "/attendance";
+  static const String markKey = "/mark";
   static const String ridersKey = "/riders";
   static const String salaryHistoryKey = "/salary-history";
   static const String verifyOTPKey = "/verify-otp";
-  static const String statusKey = "/status";
   static const String aadharFrontKey = "/aadhar/front";
   static const String aadharBackKey = "/aadhar/back";
   static const String panKey = "/pan";
@@ -20,5 +32,7 @@ class AppKeys {
   static const String dlBackKey = "/dl/back";
   static const String profilePicKey = "/profile-pic";
   static const String lastOrderIdKey = "/order-id/last";
+  static const String googleMapsApiKey =
+      "AIzaSyCQhix2xH2uswBZOpcU7YQQwDVxWKx6Pm0";
   static const int maxFileSizeInBytes = 25 * 1024 * 1024; //25mb
 }

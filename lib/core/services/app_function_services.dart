@@ -33,6 +33,8 @@ class AppFunctions {
     pref.remove(AppKeys.attendanceStatusKey);
     pref.remove(AppKeys.signInStatusKey);
     pref.remove(AppKeys.lastOrderIdKey);
+    pref.remove(AppKeys.profilePicKey);
+    // pref.remove(AppKeys.);
   }
 
   static StepState getStepState(RegistrationController controller, int step) {
@@ -53,7 +55,7 @@ class AppFunctions {
 
   static Future<RiderDocsModel> getDocs(String? phone) async {
     String? user = await StorageServices.getLoginUserDetails();
-    log(user ?? "USER NULL");
+    // log(user ?? "USER NULL");
     LoginUserModel? u;
 
     if (user != null) {

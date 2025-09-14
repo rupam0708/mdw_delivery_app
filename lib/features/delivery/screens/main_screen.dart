@@ -26,9 +26,12 @@ class MainScreen extends StatelessWidget {
               )
             : Text(mainController.currentTab.title),
         centerTitle: mainController.currentTab == MainTab.home,
-        showShiftButton: mainController.currentTab == MainTab.orders,
-        attendanceStatus: mainController.attendanceStatus,
-        onShiftTap: () => mainController.toggleAttendance(context),
+        // showShiftButton: false,
+        // showShiftButton: mainController.currentTab == MainTab.home,
+        attendanceStatus: mainController.isShiftActive,
+        // onShiftTap: () => mainController.init(),
+        // onShiftTap: () => mainController.toggleShift(context),
+        onShiftTap: () => {},
       ),
       drawer: MainDrawer(
         currentTab: mainController.currentTab,

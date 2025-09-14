@@ -6,13 +6,16 @@ import 'dart:math' show asin, cos, pi, sin, sqrt;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:mdw/core/services/storage_services.dart';
+import 'package:mdw/features/delivery/models/earnings_model.dart';
 import 'package:mdw/features/delivery/models/rider_details_model.dart';
 import 'package:mdw/shared/utils/snack_bar_utils.dart';
 
 import '../../../core/constants/app_keys.dart';
 import '../../../core/services/app_function_services.dart';
 import '../../auth/models/login_user_model.dart';
+import '../../auth/screens/code_verification_screen.dart';
 import '../models/orders_model.dart';
 
 class HomeController extends ChangeNotifier {
@@ -26,7 +29,7 @@ class HomeController extends ChangeNotifier {
   Timer? _countdownTimer;
   Position? _currentPosition;
   StreamSubscription<Position>? _positionStream;
-  bool arrivedLoading = false, packedLoading = false;
+  bool arrivedLoading = false, packedLoading = false, earningsLoading = false;
 
   Position? get currentPosition => _currentPosition;
 
@@ -42,6 +45,11 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleEarningsLoading() {
+    earningsLoading = !earningsLoading;
+    notifyListeners();
+  }
+
   Future<void> initialize() async {
     isLoading = true;
     notifyListeners();
@@ -52,17 +60,53 @@ class HomeController extends ChangeNotifier {
         rider = LoginUserModel.fromRawJson(user);
         await getRiderDetails();
         await getOrders();
+        await getShiftStatus();
+        await getEarnings();
       }
     } catch (e) {
-      log(e.toString());
+      log("Initialize error: $e");
       message = "Failed to load rider info.";
-      showMessage();
     }
 
     await startLocationStream();
 
     isLoading = false;
     notifyListeners();
+  }
+
+  EarningsModel? earnings;
+
+  Future<void> getEarnings() async {
+    toggleEarningsLoading();
+    DateTime dateTime = DateTime.now();
+    try {
+      final response = await http.get(
+        Uri.parse(AppKeys.apiUrlKey +
+            AppKeys.apiKey +
+            AppKeys.versionKey +
+            AppKeys.earningsKey +
+            AppKeys.dailyKey +
+            "/${rider!.rider.riderId}" +
+            "/${DateFormat("yyyy-MM-dd").format(dateTime)}"),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          "authorization": "Bearer ${rider!.token}",
+        },
+      );
+
+      Map<String, dynamic> resJson = jsonDecode(response.body);
+      log("get earnings" + response.statusCode.toString());
+      if (response.statusCode == 200) {
+        earnings = EarningsModel.fromJson(resJson);
+        notifyListeners();
+      } else {
+        print("Failed: ${response.statusCode} → ${response.body}");
+      }
+    } catch (e) {
+      print("Exception: $e");
+    } finally {
+      toggleEarningsLoading();
+    }
   }
 
   Future<http.Response?> markOrderAsPacked(String orderId) async {
@@ -126,7 +170,7 @@ class HomeController extends ChangeNotifier {
 
   /// Start listening to location updates
   Future<void> startLocationStream() async {
-    bool serviceEnabled;
+    // bool serviceEnabled;
     LocationPermission permission;
 
     // ✅ Check if location services are enabled
@@ -167,7 +211,7 @@ class HomeController extends ChangeNotifier {
     http.Response res = await http.get(Uri.parse(
         "${AppKeys.apiUrlKey}${AppKeys.ridersKey}/${rider!.rider.riderId}"));
 
-    log(res.body);
+    log("getRiderDetails " + res.statusCode.toString());
 
     if (res.statusCode == 200) {
       final resJson = jsonDecode(res.body);
@@ -224,41 +268,111 @@ class HomeController extends ChangeNotifier {
         "/${rider?.rider.riderId}" +
         AppKeys.allottedOrdersKey;
 
+    // try {
+    final res = await http.get(
+      Uri.parse(url),
+      headers: {"authorization": "Bearer ${rider?.token}"},
+    );
+
+    final resJson = jsonDecode(res.body);
+
+    log("getOrders ${res.statusCode}");
+
+    if (res.statusCode == 200) {
+      if (resJson["orders"].isEmpty) {
+        ordersListEmpty = true;
+        message = resJson["message"] ?? "No orders found";
+        notifyListeners();
+      } else {
+        ordersListEmpty = false;
+        ordersList = OrdersListModel.fromJson(resJson);
+        message = "";
+        notifyListeners();
+      }
+    } else if (res.statusCode == 401) {
+      ordersListEmpty = true;
+      tokenInvalid = true;
+      startTimer();
+    } else {
+      ordersListEmpty = true;
+      tokenInvalid = true;
+      message = resJson["message"] ?? "Token invalid or expired.";
+      notifyListeners();
+
+      startTimer();
+    }
+    // } catch (e) {
+    //   ordersListEmpty = true;
+    //   message = "Error fetching orders.";
+    //   notifyListeners();
+    // }
+  }
+
+  bool isShiftActive = false;
+
+  Future<void> toggleShift(BuildContext context) async {
+    if (isShiftActive) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CodeVerificationScreen(
+            head: "End Shift",
+            upperText: "Please enter your OTP to end your shift.",
+            type: 3,
+            btnText: "Confirm Shift",
+          ),
+        ),
+      ).whenComplete(() async {
+        await getShiftStatus();
+      });
+      // isShiftActive = false;
+    } else {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CodeVerificationScreen(
+            head: "Start Shift",
+            upperText: "Please enter your OTP to start your shift.",
+            type: 2,
+            btnText: "Confirm Shift",
+          ),
+        ),
+      ).whenComplete(() async {
+        await getShiftStatus();
+      });
+    }
+    notifyListeners();
+  }
+
+  Future<void> getShiftStatus() async {
+    final url =
+        "${AppKeys.apiUrlKey}${AppKeys.apiKey}${AppKeys.shiftsKey}${AppKeys.statusKey}/${rider!.rider.riderId}";
+
     try {
       final res = await http.get(
         Uri.parse(url),
-        headers: {"authorization": "Bearer ${rider?.token}"},
+        headers: {"authorization": "Bearer ${rider!.token}"},
       );
 
-      final resJson = jsonDecode(res.body);
-
-      log(resJson.toString());
+      log("getShiftStatus ${res.body}");
 
       if (res.statusCode == 200) {
-        if (resJson["orders"].isEmpty) {
-          ordersListEmpty = true;
-          message = resJson["message"] ?? "No orders found";
-        } else {
-          ordersListEmpty = false;
-          ordersList = OrdersListModel.fromJson(resJson);
-          message = "";
-        }
-      } else {
-        ordersListEmpty = true;
-        tokenInvalid = true;
-        message = resJson["message"] ?? "Token invalid or expired.";
+        final resJson = jsonDecode(res.body);
+        isShiftActive = resJson["data"]["hasActiveShift"];
+        log(resJson.toString());
+      } else if (res.statusCode != 401) {
         startTimer();
       }
-    } catch (_) {
-      ordersListEmpty = true;
-      message = "Error fetching orders.";
+    } catch (e) {
+      log("getShiftStatus error: $e");
     }
 
     notifyListeners();
-    if (message.isNotEmpty) showMessage();
   }
 
   /// Starts logout countdown when token is invalid
+  VoidCallback? onSessionExpired;
+
   void startTimer() {
     _countdownTimer?.cancel();
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -267,7 +381,14 @@ class HomeController extends ChangeNotifier {
         notifyListeners();
       } else {
         timer.cancel();
+        this.timer = 5;
         logout();
+
+        onSessionExpired?.call();
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (_) => const LoginScreen()),
+        // );
       }
     });
   }

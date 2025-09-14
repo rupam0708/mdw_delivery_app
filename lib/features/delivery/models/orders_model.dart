@@ -170,7 +170,7 @@ class Address {
   String street;
   String city;
   String state;
-  int postalCode;
+  int? postalCode;
 
   Address({
     required this.street,
