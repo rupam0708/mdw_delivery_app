@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
@@ -37,11 +38,14 @@ class CodeVerificationScreen extends StatefulWidget {
 }
 
 class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
-  bool isPinVerified = false, loading = false;
+  bool isPinVerified = false, loading = false, isSendingOTP = false;
   late TextEditingController otpController;
   late LoginUserModel? rider;
+  String otp = "";
+  Timer? _resendTimer;
+  int _resendSeconds = 30; // cooldown duration
 
-  getRider() async {
+  Future<void> getRider() async {
     final String? temp = await StorageServices.getLoginUserDetails();
     if (temp != null) {
       rider = LoginUserModel.fromRawJson(temp);
@@ -50,16 +54,210 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
     }
   }
 
+  Future<void> sendStartShiftOTP() async {
+    setState(() {
+      isSendingOTP = true;
+    });
+    http.Response res = await http.post(
+      Uri.parse(AppKeys.apiUrlKey +
+          AppKeys.apiKey +
+          AppKeys.shiftsKey +
+          AppKeys.startOTPKey),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        "authorization": "Bearer ${rider!.token}",
+      },
+      body: jsonEncode(<String, dynamic>{
+        "riderId": rider!.rider.riderId,
+      }),
+    );
+
+    Map<String, dynamic> resJson = jsonDecode(res.body);
+
+    if (res.statusCode == 200) {
+      otp = resJson["otp"];
+      log("OTP " + otp);
+      ScaffoldMessenger.of(context).showSnackBar(
+        AppSnackBar().customizedAppSnackBar(
+          message: resJson["message"],
+          context: context,
+        ),
+      );
+      startResendCooldown();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        AppSnackBar().customizedAppSnackBar(
+          message: res.statusCode.toString(),
+          context: context,
+        ),
+      );
+    }
+    setState(() {
+      isSendingOTP = false;
+    });
+  }
+
+  Future<void> sendEndShiftOTP() async {
+    setState(() {
+      isSendingOTP = true;
+    });
+    http.Response res = await http.post(
+      Uri.parse(AppKeys.apiUrlKey +
+          AppKeys.apiKey +
+          AppKeys.shiftsKey +
+          AppKeys.endOTPKey),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        "authorization": "Bearer ${rider!.token}",
+      },
+      body: jsonEncode(<String, dynamic>{
+        "riderId": rider!.rider.riderId,
+      }),
+    );
+
+    Map<String, dynamic> resJson = jsonDecode(res.body);
+
+    if (res.statusCode == 200) {
+      otp = resJson["otp"];
+      log("OTP " + otp);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        AppSnackBar().customizedAppSnackBar(
+          message: resJson["message"],
+          context: context,
+        ),
+      );
+      startResendCooldown();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        AppSnackBar().customizedAppSnackBar(
+          message: res.statusCode.toString(),
+          context: context,
+        ),
+      );
+    }
+    setState(() {
+      isSendingOTP = false;
+    });
+  }
+
+  Future<void> sendAttendanceOTP() async {
+    setState(() {
+      isSendingOTP = true;
+    });
+    http.Response res = await http.post(
+      Uri.parse(AppKeys.apiUrlKey + AppKeys.attendanceKey + AppKeys.otpKey),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        "authorization": "Bearer ${rider!.token}",
+      },
+      body: jsonEncode(<String, dynamic>{
+        "riderId": rider!.rider.riderId,
+      }),
+    );
+
+    Map<String, dynamic> resJson = jsonDecode(res.body);
+
+    if (res.statusCode == 200) {
+      otp = resJson["otp"];
+      log("OTP " + otp);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        AppSnackBar().customizedAppSnackBar(
+          message: resJson["message"] + "\nExpires in ${resJson["expiresIn"]}",
+          context: context,
+        ),
+      );
+      startResendCooldown();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        AppSnackBar().customizedAppSnackBar(
+          message: res.statusCode.toString(),
+          context: context,
+        ),
+      );
+    }
+    setState(() {
+      isSendingOTP = false;
+    });
+  }
+
+  Future<void> toggleShift(String pin) async {
+    Uri uri = Uri.parse(
+      '${AppKeys.apiUrlKey}${AppKeys.apiKey}${AppKeys.shiftsKey}${widget.type == 2 ? AppKeys.startShiftKey : AppKeys.endShiftKey}',
+    );
+    log(uri.toString());
+    http.Response res = await http.post(
+      uri,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        "authorization": "Bearer ${rider!.token}",
+      },
+      body: jsonEncode(<String, dynamic>{
+        "riderId": rider!.rider.riderId,
+        "otp": pin,
+      }),
+    );
+    Map<String, dynamic> resJson = jsonDecode(res.body);
+    if (res.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        AppSnackBar().customizedAppSnackBar(
+            message:
+                "Shift ${widget.type == 2 ? "started" : "ended"} successfully",
+            context: context),
+      );
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        AppSnackBar()
+            .customizedAppSnackBar(message: resJson["error"], context: context),
+      );
+    }
+  }
+
+  getData() async {
+    //0 = Attendance
+    //1 = Confirm Delivery
+    //2 = Start Shift
+    //3= End Shift
+    await getRider();
+    if (widget.type == 0) {
+      await sendAttendanceOTP();
+    } else if (widget.type == 2) {
+      await sendStartShiftOTP();
+    } else if (widget.type == 3) {
+      await sendEndShiftOTP();
+    }
+  }
+
+  // 🔹 Start cooldown timer
+  void startResendCooldown() {
+    setState(() {
+      _resendSeconds = 30;
+    });
+    _resendTimer?.cancel();
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendSeconds > 0) {
+        setState(() {
+          _resendSeconds--;
+        });
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
   @override
   void initState() {
     otpController = TextEditingController();
-    getRider();
+    getData();
     super.initState();
   }
 
   @override
   void dispose() {
     otpController.dispose();
+    _resendTimer?.cancel();
     super.dispose();
   }
 
@@ -81,11 +279,34 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
               CustomUpperPortion(
                 head: widget.upperText,
               ),
+              SizedBox(height: 15),
+              if (isSendingOTP)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 10,
+                      width: 10,
+                      child: CustomLoadingIndicator(
+                        strokeWidth: 1.5,
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      "Sending OTP to your phone number",
+                    ),
+                  ],
+                ),
               SizedBox(
                 height: MediaQuery.of(context).size.height / 7,
               ),
               CustomPinputField(
                 otpController: otpController,
+                pin: otp,
+                length:
+                    (widget.type == 0 || widget.type == 2 || widget.type == 3)
+                        ? 6
+                        : 4,
               ),
               SizedBox(
                 height: 30,
@@ -97,7 +318,12 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                       loading = true;
                     });
                     // log(otpController.text.trim().length.toString());
-                    if (otpController.text.trim().length != 4) {
+                    if (otpController.text.trim().length !=
+                        ((widget.type == 0 ||
+                                widget.type == 2 ||
+                                widget.type == 3)
+                            ? 6
+                            : 4)) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         AppSnackBar().customizedAppSnackBar(
                           message: "Please enter the valid pin.",
@@ -105,7 +331,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                         ),
                       );
                     } else {
-                      if (widget.type == 0 || widget.type == 2) {
+                      if (widget.type == 0) {
                         // http.Response res = await http.put(
                         //   Uri.parse(AppKeys.apiUrlKey +
                         //       AppKeys.ridersKey +
@@ -120,19 +346,11 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                         //         int.parse(otpController.text.trim()),
                         //   }),
                         // );
-                        await StorageServices.setAttendanceStatus(true)
-                            .whenComplete(() {
-                          if (widget.type == 0) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: ((ctx) => MainScreen()),
-                              ),
-                            );
-                          } else {
-                            Navigator.pop(context);
-                          }
-                        });
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (ctx) => MainScreen()),
+                        );
                       } else if (widget.type == 1 &&
                           widget.orderId != null &&
                           rider != null) {
@@ -150,10 +368,14 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                                 int.parse(otpController.text.trim()),
                           }),
                         );
-                        log(res.body.toString());
+                        // log(res.body.toString());
                         Map<String, dynamic> resJson = jsonDecode(res.body);
 
                         if (res.statusCode == 200) {
+                          List<String> lastOrderIds =
+                              await StorageServices.getLastOrderIDs() ?? [];
+                          lastOrderIds.add(widget.orderId ?? "");
+                          await StorageServices.setLastOrderIDs(lastOrderIds);
                           ScaffoldMessenger.of(context).showSnackBar(
                             AppSnackBar().customizedAppSnackBar(
                               message: resJson["message"],
@@ -169,6 +391,10 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                             ),
                           );
                         }
+                      } else if (widget.type == 2 && rider != null) {
+                        await toggleShift(otpController.text.trim());
+                      } else if (widget.type == 3 && rider != null) {
+                        await toggleShift(otpController.text.trim());
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           AppSnackBar().customizedAppSnackBar(
@@ -185,6 +411,32 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                   text: widget.btnText,
                 ),
               if (loading) CustomLoadingIndicator(),
+              SizedBox(height: 20),
+              if (_resendSeconds > 0)
+                Text(
+                  "Resend available in $_resendSeconds sec",
+                  style: TextStyle(color: Colors.grey),
+                )
+              else
+                TextButton(
+                  onPressed: () async {
+                    if (widget.type == 0) {
+                      await sendAttendanceOTP();
+                    } else if (widget.type == 1) {
+                    } else if (widget.type == 2) {
+                      await sendStartShiftOTP();
+                    } else if (widget.type == 3) {
+                      await sendEndShiftOTP();
+                    }
+                  },
+                  child: Text(
+                    "Resend OTP",
+                    style: TextStyle(
+                      color: AppColors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -220,13 +472,16 @@ class CustomPinputField extends StatelessWidget {
   const CustomPinputField({
     super.key,
     required this.otpController,
-    // required this.pin,
+    required this.length,
+    required this.pin,
     // required this.onCompleted,
   });
 
-  // final int pin;
+  final String pin;
+
   // final void Function(bool) onCompleted;
   final TextEditingController otpController;
+  final int length;
 
   @override
   Widget build(BuildContext context) {
@@ -267,7 +522,7 @@ class CustomPinputField extends StatelessWidget {
     );
 
     return Pinput(
-      length: 4,
+      length: length,
       controller: otpController,
       defaultPinTheme: defaultPinTheme,
       focusedPinTheme: focusedPinTheme,
@@ -275,11 +530,14 @@ class CustomPinputField extends StatelessWidget {
       errorPinTheme: errorPinTheme,
       pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
       showCursor: true,
-      // validator: (enteredPin) {
-      //   final isValid = enteredPin == pin.toString();
-      //   onCompleted(isValid);
-      //   return isValid ? null : 'Pin is incorrect';
-      // },
+      validator: (enteredPin) {
+        if (pin.isNotEmpty) {
+          final isValid = enteredPin == pin;
+          // onCompleted(isValid);
+          return isValid ? null : 'Pin is incorrect';
+        }
+        return null;
+      },
     );
   }
 }

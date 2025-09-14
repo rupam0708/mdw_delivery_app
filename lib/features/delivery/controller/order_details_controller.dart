@@ -1,11 +1,15 @@
+import 'dart:developer' as dev;
+
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart' as geocoding;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:mdw/core/services/app_function_services.dart';
+import 'package:location/location.dart';
 import 'package:mdw/features/auth/models/login_user_model.dart';
 import 'package:mdw/features/delivery/models/orders_model.dart' as current;
 import 'package:mdw/features/delivery/models/prev_orders_model.dart'
     as previousart;
+import 'package:mdw/features/delivery/screens/maps_screen.dart';
 
 class OrderDetailsController extends ChangeNotifier {
   final current.Order? order;
@@ -17,6 +21,7 @@ class OrderDetailsController extends ChangeNotifier {
 
   bool isPinVerified = false;
   bool isLoading = false;
+  bool isLocationLoading = false;
   List<XFile> selectedImages = [];
 
   bool get isCurrentOrder => order != null;
@@ -55,10 +60,39 @@ class OrderDetailsController extends ChangeNotifier {
   List<dynamic> get items => isCurrentOrder ? order!.items : prevOrder!.items;
 
   Future<void> viewOnMap(BuildContext context) async {
-    final address = isCurrentOrder
-        ? order!.customer.address.toString()
-        : prevOrder!.customer.address.toString();
-    await AppFunctions.launchMap(context, address);
+    isLocationLoading = true;
+    notifyListeners();
+    try {
+      final address = isCurrentOrder
+          ? order!.customer.address.toString()
+          : prevOrder!.customer.address.toString();
+      // await AppFunctions.launchMap(context, address);
+      // log(address);
+      final Location _location = Location();
+      LocationData currLoc = await _location.getLocation();
+      List<geocoding.Location> location =
+          await geocoding.locationFromAddress(address);
+      final loc = location.last;
+
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: ((ctx) => MapsScreen(
+                  address: address,
+                  name: customerName,
+                  srcLocationData: currLoc,
+                  destLocationData: LocationData.fromMap({
+                    "latitude": loc.latitude,
+                    "longitude": loc.longitude,
+                  }),
+                )),
+          ));
+    } catch (e) {
+      dev.log(e.toString());
+    } finally {
+      isLocationLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> _init() async {

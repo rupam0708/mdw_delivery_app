@@ -21,7 +21,7 @@ dependencies:
   #  currency_formatter:
   intl:
   permission_handler:
-  shared_preferences:
+  shared_preferences: ^2.5.3
   flutter_native_splash:
   flutter_launcher_icons:
   #  geolocator:
@@ -39,6 +39,11 @@ dependencies:
   provider:
   connectivity_plus:
   geolocator:
+  google_maps_flutter:
+  flutter_polyline_points:
+  location:
+  geocoding:
+  flutter_compass:
 #  pdf_render: ^1.4.12
 
 dev_dependencies:

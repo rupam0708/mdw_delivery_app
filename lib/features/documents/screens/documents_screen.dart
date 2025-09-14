@@ -36,8 +36,8 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
   Future<FilePickerResult?> getFile(String title) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['jpg', 'jpeg', 'png'],
+      type: FileType.image,
+      // allowedExtensions: ['jpg', 'jpeg', 'png'],
     );
 
     if (result != null) {

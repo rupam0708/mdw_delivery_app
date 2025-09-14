@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -101,6 +102,8 @@ class AuthController {
       headers: {"Content-Type": "application/json"},
       body: jsonEncode(data),
     );
+
+    log(response.body);
 
     return jsonDecode(response.body);
   }

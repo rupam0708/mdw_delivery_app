@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mdw/core/services/app_function_services.dart';
 import 'package:mdw/features/delivery/screens/earnings_screen.dart';
 
 import '../controller/home_controller.dart';
@@ -12,19 +11,15 @@ class EarningsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final amount =
-        AppFunctions.sumTodayDeliveredAmounts(controller.ordersList!.orders);
     return CustomContainer(
       head: "Earnings",
-      value: "₹ $amount",
+      value: "₹ ${controller.earnings!.data.totalEarnings}",
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: ((_) => EarningsScreen(
-                  currentMonthRange: AppFunctions.getCurrentMonthRange(),
-                  currentMonthEarnings: 0,
-                  previousMonthEarnings: 6000,
+                  homeController: controller,
                 )),
           ),
         );

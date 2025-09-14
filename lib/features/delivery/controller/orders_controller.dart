@@ -14,6 +14,7 @@ import 'package:mdw/features/delivery/models/prev_orders_model.dart';
 
 import '../../../core/services/app_function_services.dart';
 import '../../../shared/utils/snack_bar_utils.dart';
+import '../../auth/screens/login/login_screen.dart';
 
 class OrdersController extends ChangeNotifier {
   final int? type;
@@ -82,7 +83,7 @@ class OrdersController extends ChangeNotifier {
         headers: {"authorization": "Bearer ${rider!.token}"});
 
     final resJson = jsonDecode(res.body);
-    log(resJson.toString());
+    // log(resJson.toString());
 
     if (res.statusCode == 200) {
       try {
@@ -91,6 +92,7 @@ class OrdersController extends ChangeNotifier {
           prevOrdersListEmpty = prevOrdersList!.data.isEmpty;
         } else {
           ordersList = OrdersListModel.fromJson(resJson);
+          // log(ordersList!.success.toString());
           // Sort orders after parsing
           ordersList!.orders.sort((a, b) {
             // 1. Compare by status rank
@@ -136,6 +138,10 @@ class OrdersController extends ChangeNotifier {
       } else {
         timer.cancel();
         logout();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
       }
     });
   }
