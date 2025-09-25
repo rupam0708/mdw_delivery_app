@@ -42,7 +42,7 @@ class OrderDetailsScreen extends StatelessWidget {
 }
 
 class _OrderDetailsView extends StatelessWidget {
-  const _OrderDetailsView({super.key});
+  const _OrderDetailsView();
 
   @override
   Widget build(BuildContext context) {

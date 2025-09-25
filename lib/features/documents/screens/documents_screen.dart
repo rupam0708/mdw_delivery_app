@@ -184,30 +184,26 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                 if (u != null) {
                   if (aadharFront != null) {
                     await StorageServices.setAadharFront(
-                        aadharFront!, u?.rider.riderId ?? "");
+                        aadharFront!, u.rider.riderId);
                   }
                   if (aadharBack != null) {
                     await StorageServices.setAadharBack(
-                        aadharBack!, u?.rider.riderId ?? "");
+                        aadharBack!, u.rider.riderId);
                   }
                   if (pan != null) {
-                    await StorageServices.setPan(pan!, u?.rider.riderId ?? "");
+                    await StorageServices.setPan(pan!, u.rider.riderId);
                   }
                   if (dlFront != null) {
-                    await StorageServices.setDLFront(
-                        dlFront!, u?.rider.riderId ?? "");
+                    await StorageServices.setDLFront(dlFront!, u.rider.riderId);
                   }
                   if (dlBack != null) {
-                    await StorageServices.setDLBack(
-                        dlBack!, u?.rider.riderId ?? "");
+                    await StorageServices.setDLBack(dlBack!, u.rider.riderId);
                   }
                   if (rcFront != null) {
-                    await StorageServices.setRCFront(
-                        rcFront!, u?.rider.riderId ?? "");
+                    await StorageServices.setRCFront(rcFront!, u.rider.riderId);
                   }
                   if (rcBack != null) {
-                    await StorageServices.setRCBack(
-                        rcBack!, u?.rider.riderId ?? "");
+                    await StorageServices.setRCBack(rcBack!, u.rider.riderId);
                   }
                 } else if (widget.phone != null) {
                   if (aadharFront != null) {

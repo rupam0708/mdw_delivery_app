@@ -167,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (hasOrders)
           SliverToBoxAdapter(
             child: OrdersCard(
-              controller: controller,
+              // controller: controller,
               onTap: () => widget.onChangeIndex(1),
             ),
           ),

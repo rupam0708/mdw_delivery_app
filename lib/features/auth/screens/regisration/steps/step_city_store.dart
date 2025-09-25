@@ -28,7 +28,7 @@ class StepCityAndStore extends StatelessWidget {
 
             return ChoiceChip(
               selectedColor: AppColors.btnColor,
-              disabledColor: AppColors.containerBorderColor.withOpacity(0.3),
+              disabledColor: AppColors.containerBorderColor.withAlpha(77),
               checkmarkColor: AppColors.white,
               labelStyle: TextStyle(
                 color: controller.selectedCity == city
@@ -58,7 +58,7 @@ class StepCityAndStore extends StatelessWidget {
 
             return ChoiceChip(
               selectedColor: AppColors.btnColor,
-              disabledColor: AppColors.containerBorderColor.withOpacity(0.3),
+              disabledColor: AppColors.containerBorderColor.withAlpha(77),
               checkmarkColor: AppColors.white,
               labelStyle: TextStyle(
                 color: controller.selectedStore == store

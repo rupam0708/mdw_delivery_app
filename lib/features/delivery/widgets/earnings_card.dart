@@ -13,7 +13,7 @@ class EarningsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomContainer(
       head: "Earnings",
-      value: "₹ ${controller.earnings!.data.totalEarnings}",
+      // value: "₹ ${controller.earnings!.data.totalEarnings}",
       onTap: () {
         Navigator.push(
           context,

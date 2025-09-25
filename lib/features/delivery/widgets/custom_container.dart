@@ -6,12 +6,11 @@ class CustomContainer extends StatelessWidget {
   const CustomContainer({
     super.key,
     required this.head,
-    required this.value,
     required this.onTap,
     this.showArrow,
   });
 
-  final String head, value;
+  final String head;
   final VoidCallback onTap;
   final bool? showArrow;
 
@@ -25,26 +24,13 @@ class CustomContainer extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppColors.containerBorderColor),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              head,
-              style: TextStyle(
-                color: AppColors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 17,
-              ),
-            ),
-            Text(
-              value,
-              style: TextStyle(
-                color: AppColors.green,
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-              ),
-            ),
-          ],
+        child: Text(
+          head,
+          style: TextStyle(
+            color: AppColors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 17,
+          ),
         ),
       ),
     );

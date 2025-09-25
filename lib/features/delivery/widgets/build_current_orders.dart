@@ -28,7 +28,7 @@ SliverList buildCurrentOrders(OrdersController controller) {
             phone: order.customer.phoneNumber.toString(),
             address: order.customer.address.toString(),
             date: DateFormat("dd/MM/yyyy").format(order.orderDate),
-            time: order.turnaroundTime ?? "",
+            time: order.turnaroundTime,
             status: order.status,
             amount: order.amount.toString(),
             onTapContainer: open,

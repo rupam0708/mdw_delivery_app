@@ -31,7 +31,7 @@ class MainDrawer extends StatelessWidget {
               leading: Icon(Icons.logout, color: AppColors.grey),
               title: Text(
                 "Logout",
-                style: TextStyle(color: AppColors.red.withOpacity(0.7)),
+                style: TextStyle(color: AppColors.red.withAlpha(178)),
               ),
             ),
           ],
@@ -43,7 +43,7 @@ class MainDrawer extends StatelessWidget {
   Widget _buildTile(BuildContext context, MainTab tab, IconData icon) {
     return ListTile(
       selected: currentTab == tab,
-      selectedTileColor: AppColors.green.withOpacity(0.3),
+      selectedTileColor: AppColors.green.withAlpha(77),
       onTap: () {
         onTabSelected(tab);
         Navigator.pop(context);
@@ -51,7 +51,7 @@ class MainDrawer extends StatelessWidget {
       leading: Icon(icon, color: AppColors.grey),
       title: Text(
         tab.title,
-        style: TextStyle(color: AppColors.black.withOpacity(0.7)),
+        style: TextStyle(color: AppColors.black.withAlpha(178)),
       ),
     );
   }

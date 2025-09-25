@@ -129,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           loginController.obscurePassword
                               ? Icons.visibility
                               : Icons.visibility_off,
-                          color: AppColors.black.withOpacity(0.5),
+                          color: AppColors.black.withAlpha(128),
                         ),
                       ),
                       textEditingController: _passwordTextController,
