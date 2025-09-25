@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -126,6 +127,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           AppKeys.apiUrlKey + AppKeys.ridersKey + "/${rider!.rider.riderId}"));
       if (res.statusCode == 200) {
         Map<String, dynamic> resJson = jsonDecode(res.body);
+        log(resJson.toString());
         if (resJson["success"] == 1) {
           newRider = RiderModel.fromJson(resJson);
           setState(() {});
@@ -248,6 +250,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       fontSize: 15,
                                     ),
                                   ),
+                                  SizedBox(height: 3),
+                                  Text(
+                                    "Rider ID: " + newRider!.rider.riderId,
+                                    style: TextStyle(
+                                      color: AppColors.black,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  SizedBox(height: 3),
                                   Text(
                                     "Ph. No. : +91 ${newRider!.rider.phoneNumber.toString().substring(0, 5)} ${newRider!.rider.phoneNumber.toString().substring(5)}",
                                     style: TextStyle(

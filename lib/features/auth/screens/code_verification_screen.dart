@@ -357,7 +357,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                         http.Response res = await http.put(
                           Uri.parse(AppKeys.apiUrlKey +
                               AppKeys.ridersKey +
-                              AppKeys.verifyOTPKey),
+                              AppKeys.markDAKey),
                           headers: <String, String>{
                             'Content-Type': 'application/json; charset=UTF-8',
                             "authorization": "Bearer ${rider!.token}",
@@ -368,7 +368,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                                 int.parse(otpController.text.trim()),
                           }),
                         );
-                        // log(res.body.toString());
+                        log(res.body.toString());
                         Map<String, dynamic> resJson = jsonDecode(res.body);
 
                         if (res.statusCode == 200) {

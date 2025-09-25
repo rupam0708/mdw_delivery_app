@@ -7,17 +7,20 @@ import '../controller/order_details_controller.dart';
 Widget buildViewMapButton(
     BuildContext context, OrderDetailsController controller) {
   return SliverToBoxAdapter(
-    child: SizedBox(
-      height: 45,
-      child: controller.isLocationLoading
-          ? CustomLoadingIndicator()
-          : CustomBtn(
-              text: "View On Map",
-              horizontalMargin: 0,
-              horizontalPadding: 0,
-              verticalPadding: 10,
-              onTap: () => controller.viewOnMap(context),
-            ),
-    ),
+    child: ((controller.order!.status) != "Delivered" ||
+            (controller.order!.status) != "Arrived at Warehouse")
+        ? SizedBox(
+            height: 45,
+            child: controller.isLocationLoading
+                ? CustomLoadingIndicator()
+                : CustomBtn(
+                    text: "View On Map",
+                    horizontalMargin: 0,
+                    horizontalPadding: 0,
+                    verticalPadding: 10,
+                    onTap: () => controller.viewOnMap(context),
+                  ),
+          )
+        : SizedBox(),
   );
 }

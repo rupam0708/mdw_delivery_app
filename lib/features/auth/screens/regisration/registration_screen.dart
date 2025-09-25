@@ -184,6 +184,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             message:
                 "Rider: ${rider.name}\nRider ID: ${rider.riderId}\n${result["message"]}",
             context: context,
+            duration: 10000,
           ),
         );
 

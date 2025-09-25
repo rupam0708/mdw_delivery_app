@@ -5,10 +5,12 @@ import '../../core/themes/styles.dart';
 class AppSnackBar {
   SnackBar customizedAppSnackBar({
     required String message,
+    int? duration,
     required BuildContext context,
   }) {
     ScaffoldMessenger.of(context).clearSnackBars();
     return SnackBar(
+      duration: Duration(milliseconds: duration ?? 4000),
       margin: EdgeInsets.only(
         bottom: 30,
         left: MediaQuery.of(context).size.width / 10,
