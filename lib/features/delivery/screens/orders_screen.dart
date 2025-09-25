@@ -31,7 +31,7 @@ class OrdersScreen extends StatelessWidget {
 }
 
 class _OrderScreenBody extends StatelessWidget {
-  const _OrderScreenBody({super.key});
+  const _OrderScreenBody();
 
   @override
   Widget build(BuildContext context) {

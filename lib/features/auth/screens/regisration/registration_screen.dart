@@ -111,11 +111,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   String PRIVACY_POLICY_LINK =
       "https://3vra7mgrlh.ufs.sh/f/b8iVQa6UTCDinfEtogAsJ2h95gpP4froiO6IYxwBQSM3qduW";
 
-  void _launchURL(String url) async {
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
-    }
-  }
+  // void _launchURL(String url) async {
+  //   if (await canLaunchUrl(Uri.parse(url))) {
+  //     await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
+  //   }
+  // }
 
   // void _trimAllFields() {
   //   nameTextController.text = nameTextController.text.trim();

@@ -83,7 +83,7 @@ class _MarkAsArrivedButtonState extends State<MarkAsArrivedButton> {
               height: 45,
               text: _isArrived ? "ARRIVED" : "Mark as arrived",
               color: _isArrived
-                  ? AppColors.grey.withOpacity(0.5)
+                  ? AppColors.grey.withAlpha(128)
                   : AppColors.lightGreen,
               textColor: AppColors.black,
               onTap: _isArrived

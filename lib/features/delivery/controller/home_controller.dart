@@ -142,14 +142,13 @@ class HomeController extends ChangeNotifier {
     toggleArrivedLoading(); // ✅ start loading
     try {
       final response = await http.patch(
-        Uri.parse(AppKeys.apiUrlKey + AppKeys.ordersKey + AppKeys.statusKey),
+        Uri.parse(AppKeys.apiUrlKey + AppKeys.ridersKey + AppKeys.markDAKey),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           // "authorization": "Bearer ${rider!.token}", // add token if required
         },
         body: jsonEncode(<String, dynamic>{
           "orderId": orderId,
-          "status": "Arrived at Warehouse",
         }),
       );
 

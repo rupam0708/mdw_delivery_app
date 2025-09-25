@@ -25,7 +25,7 @@ Widget buildOrderDetailsCard(OrderDetailsController controller) {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.green.withOpacity(0.6),
+                  color: AppColors.green.withAlpha(153),
                   spreadRadius: 2,
                   blurRadius: 5,
                 ),

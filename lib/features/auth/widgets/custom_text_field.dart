@@ -71,15 +71,15 @@ class _CustomTextFieldState extends State<CustomTextField> {
             contentPadding: const EdgeInsets.all(15),
             hintText: widget.hint,
             border: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.black.withOpacity(0.1)),
+              borderSide: BorderSide(color: AppColors.black.withAlpha(26)),
               borderRadius: BorderRadius.circular(15),
             ),
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.black.withOpacity(0.2)),
+              borderSide: BorderSide(color: AppColors.black.withAlpha(26)),
               borderRadius: BorderRadius.circular(15),
             ),
             focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.green.withOpacity(0.7)),
+              borderSide: BorderSide(color: AppColors.green.withAlpha(178)),
               borderRadius: BorderRadius.circular(15),
             ),
             errorBorder: OutlineInputBorder(
