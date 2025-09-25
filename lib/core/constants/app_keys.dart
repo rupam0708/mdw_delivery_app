@@ -23,6 +23,7 @@ class AppKeys {
   static const String ridersKey = "/riders";
   static const String salaryHistoryKey = "/salary-history";
   static const String verifyOTPKey = "/verify-otp";
+  static const String markDAKey = "/mark-da";
   static const String aadharFrontKey = "/aadhar/front";
   static const String aadharBackKey = "/aadhar/back";
   static const String panKey = "/pan";

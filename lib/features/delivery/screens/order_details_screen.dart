@@ -64,29 +64,40 @@ class _OrderDetailsView extends StatelessWidget {
           slivers: [
             buildOrderDetailsCard(controller),
             const SliverToBoxAdapter(child: SizedBox(height: 15)),
-            buildViewMapButton(context, controller),
-            const SliverToBoxAdapter(child: SizedBox(height: 20)),
+            if ((controller.order!.status) != "Delivered" &&
+                (controller.order!.status) != "Arrived at Warehouse")
+              buildViewMapButton(context, controller),
+            if ((controller.order!.status) != "Delivered" &&
+                (controller.order!.status) != "Arrived at Warehouse")
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
             buildProductDetails(controller),
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
-            MarkAsArrivedButton(
-              onApiCall: (() async {
-                http.Response res = await http.patch(
-                  Uri.parse(AppKeys.apiUrlKey +
-                      AppKeys.ordersKey +
-                      AppKeys.statusKey),
-                  headers: <String, String>{
-                    'Content-Type': 'application/json; charset=UTF-8',
-                    // "authorization": "Bearer ${rider!.token}",
-                  },
-                  body: jsonEncode(<String, dynamic>{
-                    "orderId": controller.orderId,
-                    "status": "Arrived",
-                  }),
-                );
-              }),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 20)),
-            if (controller.isCurrentOrder)
+            if ((controller.order!.status) != "Delivered" &&
+                (controller.order!.status) != "Arrived at Warehouse" &&
+                (controller.order!.status) != "Arrived")
+              MarkAsArrivedButton(
+                onApiCall: (() async {
+                  return await http.patch(
+                    Uri.parse(AppKeys.apiUrlKey +
+                        AppKeys.ordersKey +
+                        AppKeys.statusKey),
+                    headers: <String, String>{
+                      'Content-Type': 'application/json; charset=UTF-8',
+                      // "authorization": "Bearer ${rider!.token}",
+                    },
+                    body: jsonEncode(<String, dynamic>{
+                      "orderId": controller.orderId,
+                      "status": "Arrived",
+                    }),
+                  );
+                }),
+              ),
+            if ((controller.order!.status) != "Delivered" &&
+                (controller.order!.status) != "Arrived at Warehouse")
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+            if (controller.isCurrentOrder &&
+                controller.order!.status != "Delivered" &&
+                controller.order!.status != "Arrived at Warehouse")
               buildEnterCodeButton(context, controller),
             const SliverToBoxAdapter(child: SizedBox(height: 40)),
           ],

@@ -28,7 +28,7 @@ SliverList buildPreviousOrders(OrdersController controller) {
             address: order.customer.address.toString(),
             date: "${date.day}/${date.month}/${date.year}",
             time: order.turnaroundTime?.name ?? "",
-            distance: order.status.name,
+            status: order.status.name,
             amount: order.amount.toString(),
             onTapContainer: open,
           ),

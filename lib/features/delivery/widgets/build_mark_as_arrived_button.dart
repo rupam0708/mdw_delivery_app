@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:mdw/shared/utils/snack_bar_utils.dart';
 
 import '../../../core/themes/styles.dart';
 import '../../../shared/widgets/custom_btn.dart';
 
 class MarkAsArrivedButton extends StatefulWidget {
-  final Future<void> Function() onApiCall;
+  final Future<http.Response> Function() onApiCall;
 
   const MarkAsArrivedButton({super.key, required this.onApiCall});
 
@@ -14,16 +18,45 @@ class MarkAsArrivedButton extends StatefulWidget {
 
 class _MarkAsArrivedButtonState extends State<MarkAsArrivedButton> {
   bool _loading = false;
+  bool _isArrived = false;
 
   Future<void> _handleTap() async {
     setState(() => _loading = true);
 
     try {
-      await widget.onApiCall(); // your API call here
+      final res = await widget.onApiCall();
+
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Marked as arrived successfully")),
-      );
+
+      if (res.statusCode == 200) {
+        final resJson = jsonDecode(res.body);
+        final success = resJson["success"] == true ||
+            resJson["message"]?.toString().toLowerCase().contains("arrived") ==
+                true;
+
+        if (success) {
+          setState(() {
+            _isArrived = true;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            AppSnackBar().customizedAppSnackBar(
+              message: "Marked as arrived successfully",
+              context: context,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text("Failed: ${resJson["message"] ?? "Unknown error"}")),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${res.statusCode}")),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -48,10 +81,21 @@ class _MarkAsArrivedButtonState extends State<MarkAsArrivedButton> {
             )
           : CustomBtn(
               height: 45,
-              text: "Mark as arrived",
-              color: AppColors.lightGreen,
+              text: _isArrived ? "ARRIVED" : "Mark as arrived",
+              color: _isArrived
+                  ? AppColors.grey.withOpacity(0.5)
+                  : AppColors.lightGreen,
               textColor: AppColors.black,
-              onTap: _handleTap,
+              onTap: _isArrived
+                  ? (() {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        AppSnackBar().customizedAppSnackBar(
+                          message: "Status was already updated to arrived",
+                          context: context,
+                        ),
+                      );
+                    })
+                  : () => _handleTap(),
               horizontalMargin: 0,
               verticalPadding: 7,
               fontSize: 12,

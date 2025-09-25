@@ -18,14 +18,14 @@ class CustomOrderContainer extends StatelessWidget {
     required this.id,
     required this.date,
     required this.time,
-    required this.distance,
+    required this.status,
     required this.amount,
   });
 
   final VoidCallback onTapContainer;
   final int? index, maxLines;
   final Widget? middleWidget, buttons;
-  final String name, phone, address, id, date, time, distance, amount;
+  final String name, phone, address, id, date, time, status, amount;
   final double? height;
 
   @override
@@ -133,7 +133,7 @@ class CustomOrderContainer extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    distance.replaceAll("_", " "),
+                    status.replaceAll("_", " "),
                     style: TextStyle(
                       color: AppColors.black,
                       fontSize: 13,

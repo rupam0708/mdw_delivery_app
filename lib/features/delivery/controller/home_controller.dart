@@ -408,8 +408,30 @@ class HomeController extends ChangeNotifier {
 
   @override
   void dispose() {
+    // Cancel countdown timer if active
     _countdownTimer?.cancel();
-    stopLocationStream();
+    _countdownTimer = null;
+
+    // Cancel location stream subscription if active
+    _positionStream?.cancel();
+    _positionStream = null;
+
+    // Clear rider & orders related objects
+    rider = null;
+    rider2 = null;
+    ordersList = null;
+    earnings = null;
+
+    // Reset flags and messages
+    ordersListEmpty = false;
+    tokenInvalid = false;
+    message = "";
+    isLoading = false;
+    arrivedLoading = false;
+    packedLoading = false;
+    earningsLoading = false;
+    isShiftActive = false;
+
     super.dispose();
   }
 }
