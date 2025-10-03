@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mdw/core/constants/app_keys.dart';
 import 'package:mdw/core/services/app_function_services.dart';
 import 'package:mdw/core/services/storage_services.dart';
@@ -34,23 +35,92 @@ class DocumentsScreen extends StatefulWidget {
 class _DocumentsScreenState extends State<DocumentsScreen> {
   FileTypeModel? aadharFront, aadharBack, pan, dlFront, dlBack, rcFront, rcBack;
 
-  Future<FilePickerResult?> getFile(String title) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      // allowedExtensions: ['jpg', 'jpeg', 'png'],
+  Future<String?> getFile(BuildContext context, String title) async {
+    // show popup to choose between Camera or Gallery
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(title),
+          backgroundColor: AppColors.white,
+          titleTextStyle: TextStyle(
+            color: AppColors.btnColor,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+          ),
+          shape: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: SizedBox(
+                    height: 40,
+                    width: 40,
+                    child: SvgPicture.asset("assets/1.svg")),
+                title: const Text("Camera"),
+                onTap: () => Navigator.pop(ctx, "camera"),
+              ),
+              ListTile(
+                leading: SizedBox(
+                    height: 40,
+                    width: 40,
+                    child: SvgPicture.asset("assets/2.svg")),
+                title: const Text("Gallery"),
+                onTap: () => Navigator.pop(ctx, "gallery"),
+              ),
+            ],
+          ),
+        );
+      },
     );
 
-    if (result != null) {
-      int fileSize = result.files.single.size; // File size in bytes
-      if (fileSize > AppKeys.maxFileSizeInBytes) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          AppSnackBar().customizedAppSnackBar(
-              message: "File size is too large", context: context),
-        );
-        return null;
+    if (choice == "gallery") {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+      );
+
+      if (result != null) {
+        int fileSize = result.files.single.size; // ✅ safe
+        if (fileSize > AppKeys.maxFileSizeInBytes) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            AppSnackBar().customizedAppSnackBar(
+              message: "File size is too large",
+              context: context,
+            ),
+          );
+          return null;
+        }
+        return result.files.single.path;
       }
-      return result;
+    } else if (choice == "camera") {
+      try {
+        XFile? image = await ImagePicker().pickImage(
+          source: ImageSource.camera,
+        );
+
+        if (image != null) {
+          // ✅ Correct way: use File(image.path).length()
+          final file = File(image.path);
+          int fileSize = await file.length();
+
+          if (fileSize > AppKeys.maxFileSizeInBytes) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              AppSnackBar().customizedAppSnackBar(
+                message: "File size is too large",
+                context: context,
+              ),
+            );
+            return null;
+          }
+          return image.path;
+        }
+      } catch (e) {
+        log(e.toString());
+      }
     }
+
     return null;
   }
 
@@ -296,11 +366,13 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                     head: "Front Side of Card",
                     instruction: "Click to Upload Front Side of Card",
                     onTap: (() async {
-                      FilePickerResult? result =
-                          await getFile("Upload Front Side of Aadhar Card");
-                      if (result != null) {
-                        aadharFront =
-                            FileTypeModel(path: result.files.single.path!);
+                      final filePath = await getFile(
+                        context,
+                        "Upload Front Side of Aadhar Card",
+                      );
+
+                      if (filePath != null) {
+                        aadharFront = FileTypeModel(path: filePath);
                         setState(() {});
                       }
                     }),
@@ -309,11 +381,13 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                   NotEmptyContainer(
                     onChange: (() async {
                       aadharFront = null;
-                      FilePickerResult? result =
-                          await getFile("Upload Front Side of Aadhar Card");
-                      if (result != null) {
-                        aadharFront =
-                            FileTypeModel(path: result.files.single.path!);
+                      final filePath = await getFile(
+                        context,
+                        "Upload Front Side of Aadhar Card",
+                      );
+
+                      if (filePath != null) {
+                        aadharFront = FileTypeModel(path: filePath);
                         setState(() {});
                       }
                     }),
@@ -326,11 +400,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                     head: "Back Side of Card",
                     instruction: "Click to Upload Back Side of Card",
                     onTap: (() async {
-                      FilePickerResult? result =
-                          await getFile("Upload Back Side of Aadhar Card");
+                      final result = await getFile(
+                          context, "Upload Back Side of Aadhar Card");
                       if (result != null) {
-                        aadharBack =
-                            FileTypeModel(path: result.files.single.path!);
+                        aadharBack = FileTypeModel(path: result);
                         setState(() {});
                       }
                     }),
@@ -341,11 +414,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                     head: "Aadhar Card Back",
                     onChange: (() async {
                       aadharBack = null;
-                      FilePickerResult? result =
-                          await getFile("Upload Back Side of Aadhar Card");
+                      final result = await getFile(
+                          context, "Upload Back Side of Aadhar Card");
                       if (result != null) {
-                        aadharBack =
-                            FileTypeModel(path: result.files.single.path!);
+                        aadharBack = FileTypeModel(path: result);
                         setState(() {});
                       }
                     }),
@@ -357,10 +429,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                   DocContainer(
                     instruction: "Click to Upload Front Side of Card",
                     onTap: (() async {
-                      FilePickerResult? result =
-                          await getFile("Upload Back Side of Aadhar Card");
+                      final result = await getFile(
+                          context, "Upload Back Side of Aadhar Card");
                       if (result != null) {
-                        pan = FileTypeModel(path: result.files.single.path!);
+                        pan = FileTypeModel(path: result);
                         setState(() {});
                       }
                     }),
@@ -371,10 +443,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                     head: "PAN Card",
                     onChange: (() async {
                       pan = null;
-                      FilePickerResult? result =
-                          await getFile("Upload Back Side of Aadhar Card");
+                      final result = await getFile(
+                          context, "Upload Back Side of Aadhar Card");
                       if (result != null) {
-                        pan = FileTypeModel(path: result.files.single.path!);
+                        pan = FileTypeModel(path: result);
                         setState(() {});
                       }
                     }),
@@ -387,11 +459,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                     head: "Front Side of Card",
                     instruction: "Click to Upload Front Side of Card",
                     onTap: (() async {
-                      FilePickerResult? result =
-                          await getFile("Upload Front Side of Driving Licence");
+                      final result = await getFile(
+                          context, "Upload Front Side of Driving Licence");
                       if (result != null) {
-                        dlFront =
-                            FileTypeModel(path: result.files.single.path!);
+                        dlFront = FileTypeModel(path: result);
                         setState(() {});
                       }
                     }),
@@ -400,11 +471,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                   NotEmptyContainer(
                     onChange: (() async {
                       dlFront = null;
-                      FilePickerResult? result =
-                          await getFile("Upload Front Side of Driving Licence");
+                      final result = await getFile(
+                          context, "Upload Front Side of Driving Licence");
                       if (result != null) {
-                        dlFront =
-                            FileTypeModel(path: result.files.single.path!);
+                        dlFront = FileTypeModel(path: result);
                         setState(() {});
                       }
                     }),
@@ -417,10 +487,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                     head: "Back Side of Card",
                     instruction: "Click to Upload Back Side of Card",
                     onTap: (() async {
-                      FilePickerResult? result =
-                          await getFile("Upload Back Side of Aadhar Card");
+                      final result = await getFile(
+                          context, "Upload Back Side of Aadhar Card");
                       if (result != null) {
-                        dlBack = FileTypeModel(path: result.files.single.path!);
+                        dlBack = FileTypeModel(path: result);
                         setState(() {});
                       }
                     }),
@@ -431,10 +501,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                     head: "Driving Licence Back",
                     onChange: (() async {
                       dlBack = null;
-                      FilePickerResult? result =
-                          await getFile("Upload Back Side of Driving Licence");
+                      final result = await getFile(
+                          context, "Upload Back Side of Driving Licence");
                       if (result != null) {
-                        dlBack = FileTypeModel(path: result.files.single.path!);
+                        dlBack = FileTypeModel(path: result);
                         setState(() {});
                       }
                     }),
@@ -447,11 +517,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                     head: "Front Side of Card",
                     instruction: "Click to Upload Front Side of Card",
                     onTap: (() async {
-                      FilePickerResult? result = await getFile(
+                      final result = await getFile(context,
                           "Upload Front Side of Registration Certificate");
                       if (result != null) {
-                        rcFront =
-                            FileTypeModel(path: result.files.single.path!);
+                        rcFront = FileTypeModel(path: result);
                         setState(() {});
                       }
                     }),
@@ -460,11 +529,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                   NotEmptyContainer(
                     onChange: (() async {
                       rcFront = null;
-                      FilePickerResult? result =
-                          await getFile("Upload Front Side of Aadhar Card");
+                      final result = await getFile(
+                          context, "Upload Front Side of Aadhar Card");
                       if (result != null) {
-                        rcFront =
-                            FileTypeModel(path: result.files.single.path!);
+                        rcFront = FileTypeModel(path: result);
                         setState(() {});
                       }
                     }),
@@ -477,10 +545,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                     head: "Back Side of Card",
                     instruction: "Click to Upload Back Side of Card",
                     onTap: (() async {
-                      FilePickerResult? result = await getFile(
+                      final result = await getFile(context,
                           "Upload Back Side of Registration Certificate");
                       if (result != null) {
-                        rcBack = FileTypeModel(path: result.files.single.path!);
+                        rcBack = FileTypeModel(path: result);
                         setState(() {});
                       }
                     }),
@@ -491,10 +559,13 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                     head: "Registration Certificate Back",
                     onChange: (() async {
                       rcBack = null;
-                      FilePickerResult? result = await getFile(
-                          "Upload Back Side of Registration Certificate");
-                      if (result != null) {
-                        rcBack = FileTypeModel(path: result.files.single.path!);
+                      final filePath = await getFile(
+                        context,
+                        "Upload Back Side of Registration Certificate",
+                      );
+
+                      if (filePath != null) {
+                        rcBack = FileTypeModel(path: filePath);
                         setState(() {});
                       }
                     }),
