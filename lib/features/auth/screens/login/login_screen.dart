@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mdw/core/services/app_function_services.dart';
 import 'package:mdw/core/themes/styles.dart';
+import 'package:mdw/features/auth/screens/code_verification_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/constant.dart';
+import '../../../../shared/utils/snack_bar_utils.dart';
 import '../../../../shared/widgets/custom_btn.dart';
 import '../../../../shared/widgets/custom_loading_indicator.dart';
 import '../../controllers/auth_controller.dart';
@@ -139,7 +141,46 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(
-                height: 50,
+                height: 10,
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: (() {
+                    if (_usernameTextController.text.trim().isNotEmpty) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: ((ctx) => CodeVerificationScreen(
+                                head: "Password Reset",
+                                upperText:
+                                    "Password reset OTP has been sent to your mobile number.",
+                                type: 4,
+                                btnText: "Confirm OTP",
+                                riderId: _usernameTextController.text.trim(),
+                              )),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        AppSnackBar().customizedAppSnackBar(
+                          message: "Please enter your username",
+                          context: context,
+                        ),
+                      );
+                    }
+                  }),
+                  child: Text(
+                    "Forgot Password",
+                    style: TextStyle(
+                      color: AppColors.green,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 10,
               ),
               if (!loginController.isLoading)
                 CustomBtn(
