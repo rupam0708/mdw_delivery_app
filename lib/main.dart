@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mdw/core/services/app_function_services.dart';
 import 'package:mdw/core/services/storage_services.dart';
+import 'package:mdw/features/auth/controllers/new_password_controller.dart';
 import 'package:mdw/features/auth/models/login_user_model.dart';
 import 'package:mdw/features/auth/screens/code_verification_screen.dart';
 import 'package:mdw/features/auth/screens/onboarding_screen.dart';
@@ -26,6 +27,7 @@ void main() {
     providers: [
       ChangeNotifierProvider(create: (_) => RegistrationController()),
       ChangeNotifierProvider(create: (_) => LoginController()),
+      ChangeNotifierProvider(create: (_) => NewPasswordController()),
       ChangeNotifierProvider(create: (_) => MainController()),
       ChangeNotifierProvider(create: (context) => HomeController(context)),
       ChangeNotifierProvider(create: (context) => OrdersController(context)),

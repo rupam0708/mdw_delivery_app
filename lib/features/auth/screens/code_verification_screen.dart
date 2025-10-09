@@ -7,14 +7,17 @@ import 'package:http/http.dart' as http;
 import 'package:mdw/core/constants/app_keys.dart';
 import 'package:mdw/core/services/storage_services.dart';
 import 'package:mdw/core/themes/styles.dart';
+import 'package:mdw/features/auth/screens/new_password_screen.dart';
 import 'package:mdw/features/delivery/screens/main_screen.dart';
 import 'package:mdw/shared/utils/snack_bar_utils.dart';
 import 'package:pinput/pinput.dart';
 
 import '../../../core/constants/constant.dart';
+import '../../../core/services/app_function_services.dart';
 import '../../../shared/widgets/custom_btn.dart';
 import '../../../shared/widgets/custom_loading_indicator.dart';
 import '../models/login_user_model.dart';
+import 'login/login_screen.dart';
 
 class CodeVerificationScreen extends StatefulWidget {
   const CodeVerificationScreen({
@@ -24,12 +27,13 @@ class CodeVerificationScreen extends StatefulWidget {
     required this.type,
     required this.btnText,
     this.orderId,
+    this.riderId,
     // this.rider,
   });
 
   final String head, upperText, btnText;
   final int type;
-  final String? orderId;
+  final String? orderId, riderId;
 
   // final LoginUserModel? rider;
 
@@ -141,6 +145,82 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
     });
   }
 
+  Future<void> sendPasswordResetOTP() async {
+    setState(() {
+      isSendingOTP = true;
+    });
+    http.Response res = await http.post(
+      Uri.parse(AppKeys.apiUrlKey + AppKeys.ridersKey + AppKeys.sendPassOTPKey),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        "riderId": widget.riderId,
+      }),
+    );
+
+    Map<String, dynamic> resJson = jsonDecode(res.body);
+
+    if (res.statusCode == 200) {
+      otp = resJson["otp"];
+      log("OTP " + otp);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        AppSnackBar().customizedAppSnackBar(
+          message: resJson["message"],
+          context: context,
+        ),
+      );
+      startResendCooldown();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        AppSnackBar().customizedAppSnackBar(
+          message: res.statusCode.toString(),
+          context: context,
+        ),
+      );
+    }
+    setState(() {
+      isSendingOTP = false;
+    });
+  }
+
+  Timer? _countdownTimer;
+  int timer = 5;
+
+  void startTimer() {
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (this.timer > 0) {
+        this.timer--;
+        setState(() {});
+      } else {
+        timer.cancel();
+        this.timer = 5;
+        logout();
+
+        // onSessionExpired?.call();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      }
+    });
+  }
+
+  /// Logs out user and clears data
+  Future<void> logout() async => await AppFunctions.logout();
+
+  /// Displays snackbar message
+  void showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      AppSnackBar().customizedAppSnackBar(
+        message: message,
+        context: context,
+      ),
+    );
+  }
+
   Future<void> sendAttendanceOTP() async {
     setState(() {
       isSendingOTP = true;
@@ -169,10 +249,13 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
         ),
       );
       startResendCooldown();
+    } else if (res.statusCode == 401) {
+      startTimer();
+      showMessage(resJson["message"] + " " + "Logging out in 5 seconds");
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         AppSnackBar().customizedAppSnackBar(
-          message: res.statusCode.toString(),
+          message: res.statusCode.toString() + " " + resJson["message"],
           context: context,
         ),
       );
@@ -219,7 +302,8 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
     //0 = Attendance
     //1 = Confirm Delivery
     //2 = Start Shift
-    //3= End Shift
+    //3 = End Shift
+    //4 = Password Reset
     await getRider();
     if (widget.type == 0) {
       await sendAttendanceOTP();
@@ -227,6 +311,8 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
       await sendStartShiftOTP();
     } else if (widget.type == 3) {
       await sendEndShiftOTP();
+    } else if (widget.type == 4 && widget.riderId != null) {
+      await sendPasswordResetOTP();
     }
   }
 
@@ -303,10 +389,12 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
               CustomPinputField(
                 otpController: otpController,
                 pin: otp,
-                length:
-                    (widget.type == 0 || widget.type == 2 || widget.type == 3)
-                        ? 6
-                        : 4,
+                length: (widget.type == 0 ||
+                        widget.type == 2 ||
+                        widget.type == 3 ||
+                        widget.type == 4)
+                    ? 6
+                    : 4,
               ),
               SizedBox(
                 height: 30,
@@ -321,7 +409,8 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                     if (otpController.text.trim().length !=
                         ((widget.type == 0 ||
                                 widget.type == 2 ||
-                                widget.type == 3)
+                                widget.type == 3 ||
+                                widget.type == 4)
                             ? 6
                             : 4)) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -354,7 +443,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                       } else if (widget.type == 1 &&
                           widget.orderId != null &&
                           rider != null) {
-                        http.Response res = await http.put(
+                        http.Response res = await http.patch(
                           Uri.parse(AppKeys.apiUrlKey +
                               AppKeys.ridersKey +
                               AppKeys.markDAKey),
@@ -395,6 +484,16 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                         await toggleShift(otpController.text.trim());
                       } else if (widget.type == 3 && rider != null) {
                         await toggleShift(otpController.text.trim());
+                      } else if (widget.type == 4 && widget.riderId != null) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: ((ctx) => NewPasswordScreen(
+                                  otp: otp,
+                                  riderId: widget.riderId ?? "",
+                                )),
+                          ),
+                        );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           AppSnackBar().customizedAppSnackBar(
@@ -427,6 +526,8 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                       await sendStartShiftOTP();
                     } else if (widget.type == 3) {
                       await sendEndShiftOTP();
+                    } else if (widget.type == 4) {
+                      await sendPasswordResetOTP();
                     }
                   },
                   child: Text(

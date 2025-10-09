@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -28,8 +29,10 @@ class _MarkAsArrivedButtonState extends State<MarkAsArrivedButton> {
 
       if (!mounted) return;
 
+      log(res.body);
+      final resJson = jsonDecode(res.body);
+
       if (res.statusCode == 200) {
-        final resJson = jsonDecode(res.body);
         final success = resJson["success"] == true ||
             resJson["message"]?.toString().toLowerCase().contains("arrived") ==
                 true;
@@ -47,20 +50,25 @@ class _MarkAsArrivedButtonState extends State<MarkAsArrivedButton> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content:
-                    Text("Failed: ${resJson["message"] ?? "Unknown error"}")),
+            AppSnackBar().customizedAppSnackBar(
+              message: "Failed: ${resJson["message"] ?? "Unknown error"}",
+              context: context,
+            ),
           );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: ${res.statusCode}")),
+          AppSnackBar().customizedAppSnackBar(
+              message: "${resJson["message"] ?? ""}", context: context),
         );
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
+        AppSnackBar().customizedAppSnackBar(
+          message: "Error: $e",
+          context: context,
+        ),
       );
     } finally {
       if (mounted) {
