@@ -23,6 +23,10 @@ class AppKeys {
   static const String ridersKey = "/riders";
   static const String salaryHistoryKey = "/salary-history";
   static const String verifyOTPKey = "/verify-otp";
+  static const String cashCollectionKey = "/cash-collection";
+  static const String selectPaymentMethodKey = "/select-payment-method";
+  static const String markCashCollectedKey = "/mark-cash-collected";
+  static const String markCashSubmittedKey = "/mark-cash-submitted";
   static const String markDAKey = "/mark-da";
   static const String sendPassOTPKey = "/send-reset-otp";
   static const String resetPassKey = "/reset-pass";
@@ -35,6 +39,7 @@ class AppKeys {
   static const String dlBackKey = "/dl/back";
   static const String profilePicKey = "/profile-pic";
   static const String lastOrderIdKey = "/order-id/last";
+  static const String toSubmitCashOrderIdKey = "/order-id/to-submit-cash";
   static const String googleMapsApiKey =
       "AIzaSyCQhix2xH2uswBZOpcU7YQQwDVxWKx6Pm0";
   static const int maxFileSizeInBytes = 25 * 1024 * 1024; //25mb

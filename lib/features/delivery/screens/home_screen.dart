@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:mdw/core/themes/styles.dart';
 import 'package:mdw/features/delivery/screens/go_to_bin_screen.dart';
+import 'package:mdw/features/delivery/widgets/custom_container.dart';
 import 'package:mdw/shared/utils/snack_bar_utils.dart';
 import 'package:mdw/shared/widgets/custom_btn.dart';
 import 'package:mdw/shared/widgets/custom_loading_indicator.dart';
@@ -20,7 +21,7 @@ import '../widgets/welcome_card.dart';
 
 extension OrdersListModelX on OrdersListModel {
   /// Returns only today's orders with status: Received, Confirmed, or Packing
-  List<Order> getTodayOrders() {
+  List<Order> getTodayNormalOrders() {
     final now = DateTime.now();
     const allowedStatuses = ["Received", "Confirmed", "Packing", "Packed"];
 
@@ -30,7 +31,28 @@ extension OrdersListModelX on OrdersListModel {
           date.month == now.month &&
           date.day == now.day;
 
-      return isToday && allowedStatuses.contains(order.status);
+      final isNormalOrder =
+          order.scheduledDelivery == null || order.scheduledDelivery == false;
+
+      return isToday && allowedStatuses.contains(order.status) && isNormalOrder;
+    }).toList();
+  }
+
+  List<Order> getTodayScheduledOrders() {
+    final now = DateTime.now();
+    const allowedStatuses = ["Received", "Confirmed", "Packing", "Packed"];
+
+    return orders.where((order) {
+      final date = order.createdAt; // or order.orderDate if you prefer
+      final isToday = date.year == now.year &&
+          date.month == now.month &&
+          date.day == now.day;
+
+      final isScheduledOrder = order.scheduledDelivery == true;
+
+      return isToday &&
+          allowedStatuses.contains(order.status) &&
+          isScheduledOrder;
     }).toList();
   }
 }
@@ -106,8 +128,14 @@ class _HomeScreenState extends State<HomeScreen> {
         controller.ordersList != null &&
         controller.earnings != null;
     final List<Order> activeOrders =
-        hasOrders ? controller.ordersList!.getTodayOrders() : [];
+        hasOrders ? controller.ordersList!.getTodayNormalOrders() : [];
 
+    final List<Order> scheduledOrders =
+        hasOrders ? controller.ordersList!.getTodayScheduledOrders() : [];
+
+    // activeOrders.forEach((val) {
+    //   log(val.toJson().toString());
+    // });
     final currentPosition = controller.currentPosition;
     int distance = 0;
     if (currentPosition != null) {
@@ -171,7 +199,8 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () => widget.onChangeIndex(1),
             ),
           ),
-        const SliverToBoxAdapter(child: SizedBox(height: 15)),
+        if (!hasLastIDs && activeOrders.isNotEmpty)
+          const SliverToBoxAdapter(child: SizedBox(height: 15)),
         if (!hasLastIDs && activeOrders.isNotEmpty)
           SliverToBoxAdapter(
             child: GestureDetector(
@@ -180,8 +209,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: ((ctx) => GoToBinScreen(
-                          activeOrders: activeOrders,
+                          orders: activeOrders,
                           controller: controller,
+                          isScheduledOrders: false,
                         )),
                   ),
                 );
@@ -207,6 +237,57 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         Text(
                           activeOrders.length.toString(),
+                          style: TextStyle(
+                            color: AppColors.green,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        if (scheduledOrders.isNotEmpty)
+          const SliverToBoxAdapter(child: SizedBox(height: 15)),
+        if (scheduledOrders.isNotEmpty)
+          SliverToBoxAdapter(
+            child: GestureDetector(
+              onTap: (() {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: ((ctx) => GoToBinScreen(
+                          orders: scheduledOrders,
+                          controller: controller,
+                          isScheduledOrders: true,
+                        )),
+                  ),
+                );
+              }),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.containerBorderColor),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Scheduled ${scheduledOrders.length <= 1 ? "Order" : "Orders"}",
+                          style: TextStyle(
+                            color: AppColors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                          ),
+                        ),
+                        Text(
+                          scheduledOrders.length.toString(),
                           style: TextStyle(
                             color: AppColors.green,
                             fontWeight: FontWeight.bold,
@@ -323,6 +404,99 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         if (controller.arrivedLoading) CustomLoadingIndicator(),
+        if (controller.cashToBeSubmittedIds.isNotEmpty)
+          CustomContainer(
+            head: "Cash to submit",
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (ctx) {
+                  // Filter orders that match IDs to be submitted
+                  final List<Order> cashOrders = controller.ordersList!.orders
+                      .where((order) => controller.cashToBeSubmittedIds
+                          .contains(order.orderId))
+                      .toList();
+
+                  // Calculate total cash amount
+                  final double totalAmount = cashOrders.fold(
+                    0.0,
+                    (sum, order) => sum + (order.amount ?? 0),
+                  );
+
+                  return AlertDialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    title: const Text(
+                      "Cash to be Submitted",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    content: SizedBox(
+                      width: double.maxFinite,
+                      child: cashOrders.isEmpty
+                          ? const Text("No cash orders to submit.")
+                          : Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // List of orders
+                                Flexible(
+                                  child: ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: cashOrders.length,
+                                    itemBuilder: (context, index) {
+                                      final order = cashOrders[index];
+                                      return ListTile(
+                                        dense: true,
+                                        contentPadding: EdgeInsets.zero,
+                                        title: Text(
+                                          "Order ID: ${order.orderId}",
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          "Amount: ₹${order.amount.toStringAsFixed(2) ?? '0.00'}",
+                                          style: const TextStyle(
+                                              color: Colors.green),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const Divider(),
+                                // Total cash
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      "Total Cash:",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      "₹${totalAmount.toStringAsFixed(2)}",
+                                      style: const TextStyle(
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text("Close"),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
       ],
     );
   }

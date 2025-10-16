@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -14,7 +12,7 @@ SliverList buildCurrentOrders(OrdersController controller) {
     delegate: SliverChildBuilderDelegate(
       (context, index) {
         final order = controller.ordersList!.orders[index];
-        log(order.status);
+        // log(order.status);
         return OpenContainer(
           transitionType: ContainerTransitionType.fade,
           closedElevation: 0,

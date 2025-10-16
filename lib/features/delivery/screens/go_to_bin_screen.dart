@@ -1,7 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:mdw/features/delivery/models/orders_model.dart';
+import 'package:intl/intl.dart';
+import 'package:mdw/core/services/app_function_services.dart';
 
 import '../../../core/services/storage_services.dart';
 import '../../../core/themes/styles.dart';
@@ -9,16 +10,19 @@ import '../../../shared/utils/snack_bar_utils.dart';
 import '../../../shared/widgets/custom_btn.dart';
 import '../../../shared/widgets/custom_loading_indicator.dart';
 import '../controller/home_controller.dart';
+import '../models/orders_model.dart';
 
 class GoToBinScreen extends StatefulWidget {
   const GoToBinScreen({
     super.key,
-    required this.activeOrders,
+    required this.orders,
     required this.controller,
+    required this.isScheduledOrders,
   });
 
-  final List<Order> activeOrders;
+  final List<Order> orders;
   final HomeController controller;
+  final bool isScheduledOrders;
 
   @override
   State<GoToBinScreen> createState() => _GoToBinScreenState();
@@ -37,6 +41,20 @@ class _GoToBinScreenState extends State<GoToBinScreen> {
         88.360297,
       );
     }
+
+    // 🧩 Group orders by delivery date & time range if scheduled
+    Map<String, List<Order>> groupedOrders = {};
+    if (widget.isScheduledOrders) {
+      for (final order in widget.orders) {
+        final deliveryDate =
+            order.scheduledDeliveryDate ?? "Unknown Date"; // e.g. "2025-10-16"
+        final deliveryTime = order.scheduledDeliveryTimeRange ??
+            "Unknown Time"; // e.g. "10AM - 12PM"
+        final key = "$deliveryDate | $deliveryTime";
+        groupedOrders.putIfAbsent(key, () => []).add(order);
+      }
+    }
+
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBar(
@@ -46,17 +64,16 @@ class _GoToBinScreenState extends State<GoToBinScreen> {
       ),
       bottomNavigationBar: Container(
         height: 75,
-        padding: EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.only(bottom: 20),
         child: !widget.controller.packedLoading
             ? CustomBtn(
                 onTap: (distance <= 100)
                     ? (() async {
-                        widget.controller
-                            .togglePackedLoading(); // explicitly set to true
+                        widget.controller.togglePackedLoading();
 
                         List<String> ids = [];
 
-                        for (final order in widget.activeOrders) {
+                        for (final order in widget.orders) {
                           final success = await widget.controller
                               .markOrderAsPacked(order.orderId);
                           if (success != null) {
@@ -64,38 +81,42 @@ class _GoToBinScreenState extends State<GoToBinScreen> {
                               ids.add(order.orderId);
                               ScaffoldMessenger.of(context).clearSnackBars();
                               ScaffoldMessenger.of(context).showSnackBar(
-                                  AppSnackBar().customizedAppSnackBar(
-                                      message: "${order.orderId} is successful",
-                                      context: context));
+                                AppSnackBar().customizedAppSnackBar(
+                                  message: "${order.orderId} is successful",
+                                  context: context,
+                                ),
+                              );
                             } else {
                               Map<String, dynamic> resJson =
                                   jsonDecode(success.body);
                               ScaffoldMessenger.of(context).clearSnackBars();
                               ScaffoldMessenger.of(context).showSnackBar(
-                                  AppSnackBar().customizedAppSnackBar(
-                                      message: resJson["message"],
-                                      context: context));
+                                AppSnackBar().customizedAppSnackBar(
+                                  message: resJson["message"],
+                                  context: context,
+                                ),
+                              );
                             }
                           }
                         }
 
                         await StorageServices.setLastOrderIDs(ids);
-                        if (mounted) {
-                          widget.controller.togglePackedLoading();
-                        }
+                        if (mounted) widget.controller.togglePackedLoading();
                         Navigator.pop(context);
                       })
                     : (() {
                         ScaffoldMessenger.of(context).clearSnackBars();
-                        ScaffoldMessenger.of(context).showSnackBar(AppSnackBar()
-                            .customizedAppSnackBar(
-                                message: "Go nearer to the warehouse",
-                                context: context));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          AppSnackBar().customizedAppSnackBar(
+                            message: "Go nearer to the warehouse",
+                            context: context,
+                          ),
+                        );
                       }),
                 horizontalMargin: 20,
                 text: "Start Delivery",
               )
-            : CustomLoadingIndicator(),
+            : const CustomLoadingIndicator(),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -104,365 +125,198 @@ class _GoToBinScreenState extends State<GoToBinScreen> {
             SliverToBoxAdapter(
               child: Center(
                 child: Text(
-                  "${widget.activeOrders.length <= 1 ? "Order" : "Orders"} is getting packed",
-                  style: TextStyle(
+                  widget.isScheduledOrders
+                      ? "Scheduled Orders grouped by delivery slot"
+                      : "${widget.orders.length <= 1 ? "Order" : "Orders"} is getting packed",
+                  style: const TextStyle(
                     color: AppColors.black,
                     fontSize: 15,
                   ),
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: SizedBox(height: 5),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (ctx, idx) {
-                  final Order order = widget.activeOrders[idx];
+            const SliverToBoxAdapter(child: SizedBox(height: 5)),
 
-                  return Container(
-                    padding: EdgeInsets.all(15),
-                    margin: EdgeInsets.only(top: 10),
-                    decoration: BoxDecoration(
-                      // color: AppColors.containerColor,
-                      border: Border.all(color: AppColors.containerBorderColor),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "OrderID: ",
-                              style: TextStyle(
-                                color: AppColors.black,
-                                fontSize: 15,
-                              ),
-                            ),
-                            Text(
-                              order.orderId,
-                              style: TextStyle(
-                                color: AppColors.green,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 5),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Name: ",
-                              style: TextStyle(
-                                color: AppColors.black,
-                                fontSize: 15,
-                              ),
-                            ),
-                            Text(
-                              order.customer.name,
-                              style: TextStyle(
-                                color: AppColors.green,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 5),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Phone No.: ",
-                              style: TextStyle(
-                                color: AppColors.black,
-                                fontSize: 15,
-                              ),
-                            ),
-                            Text(
-                              order.customer.phoneNumber.toString(),
-                              style: TextStyle(
-                                color: AppColors.green,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 5),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Address: ",
-                              style: TextStyle(
-                                color: AppColors.black,
-                                fontSize: 15,
-                              ),
-                            ),
-                            Text(
-                              order.customer.address
-                                  .toString()
-                                  .replaceAll(', ', '\n'),
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                color: AppColors.green,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 5),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Bin Number: ",
-                              style: TextStyle(
-                                color: AppColors.black,
-                                fontSize: 15,
-                              ),
-                            ),
-                            Text(
-                              order.binNumber.toString(),
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                color: AppColors.green,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 5),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Bin Color: ",
-                              style: TextStyle(
-                                color: AppColors.black,
-                                fontSize: 15,
-                              ),
-                            ),
-                            Text(
-                              order.binColor,
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                color: AppColors.green,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 5),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Status: ",
-                              style: TextStyle(
-                                color: AppColors.black,
-                                fontSize: 15,
-                              ),
-                            ),
-                            Text(
-                              order.status,
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                color: AppColors.green,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 15),
-                        Container(
-                          width: double.infinity,
-                          // padding: const EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            // border: Border.all(
-                            //     color: AppColors.containerBorderColor),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text("Product Details",
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.green)),
-                              const SizedBox(height: 3),
-                              Column(
-                                children:
-                                    order.items.asMap().entries.map((entry) {
-                                  final index = entry.key;
-                                  final item = entry.value;
+            // 🧩 Show grouped or normal orders
+            if (widget.isScheduledOrders)
+              ...groupedOrders.entries.map((entry) {
+                final key = entry.key; // e.g., "2025-10-16 | 10AM - 12PM"
+                final parts = key.split('|');
+                final dateStr = parts[0].trim(); // "2025-10-16"
+                final timeRange = parts.length > 1 ? parts[1].trim() : "";
 
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // Product row
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              item.productName,
-                                              style:
-                                                  const TextStyle(fontSize: 14),
-                                            ),
-                                          ),
-                                          Text(
-                                            "₹${item.amount}",
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColors.green,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
+                DateTime parsedDate;
+                try {
+                  parsedDate = DateTime.parse(dateStr);
+                } catch (_) {
+                  parsedDate = DateTime.now(); // fallback
+                }
 
-                                      // Quantity row
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          const Text("Quantity:"),
-                                          Text(
-                                            item.quantity.toString(),
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColors.green,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                final formattedDate =
+                    DateFormat('EEEE, dd MMMM, yyyy').format(parsedDate);
+                final headerText = timeRange.isNotEmpty
+                    ? "$formattedDate | $timeRange"
+                    : formattedDate;
 
-                                      // Divider except after last item
-                                      if (index != order.items.length - 1) ...[
-                                        const SizedBox(height: 10),
-                                        Container(
-                                          height: 1,
-                                          color: AppColors.containerBorderColor,
-                                        ),
-                                        const SizedBox(height: 10),
-                                      ],
-                                    ],
-                                  );
-                                }).toList(),
-                              )
-                            ],
-                          ),
+                final orders = entry.value;
+
+                return SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 20),
+                      Text(
+                        headerText,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.green,
+                          fontSize: 14,
                         ),
-                        SizedBox(height: 25),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Total: ",
-                              style: TextStyle(
-                                color: AppColors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 17,
-                              ),
-                            ),
-                            Text(
-                              "₹${order.amount}",
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                color: AppColors.green,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 17,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                childCount: widget.activeOrders.length,
+                      ),
+                      ...orders.map((order) => _buildOrderCard(order)).toList(),
+                    ],
+                  ),
+                );
+              }).toList()
+            else
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (ctx, idx) {
+                    final order = widget.orders[idx];
+                    return _buildOrderCard(order);
+                  },
+                  childCount: widget.orders.length,
+                ),
               ),
-            ),
-            SliverToBoxAdapter(child: SizedBox(height: 15)),
-
-            // if (!widget.controller.packedLoading
-            //     // &&
-            //     // order.status != "Packed"
-            //     )
-            //   SliverToBoxAdapter(child: SizedBox(height: 15)),
-            // if (!widget.controller.packedLoading
-            //     // &&
-            //     // order.status != "Packed"
-            //     )
-            //   SliverToBoxAdapter(
-            //     child: CustomBtn(
-            //       onTap: (distance <= 100)
-            //           ? (() async {
-            //               widget.controller
-            //                   .togglePackedLoading(); // explicitly set to true
-            //
-            //               List<String> ids = [];
-            //
-            //               for (final order in widget.activeOrders) {
-            //                 final success = await widget.controller
-            //                     .markOrderAsPacked(order.orderId);
-            //                 if (success != null) {
-            //                   if (success.statusCode == 200) {
-            //                     ids.add(order.orderId);
-            //                     ScaffoldMessenger.of(context).clearSnackBars();
-            //                     ScaffoldMessenger.of(context).showSnackBar(
-            //                         AppSnackBar().customizedAppSnackBar(
-            //                             message:
-            //                                 "${order.orderId} is successful",
-            //                             context: context));
-            //                   } else {
-            //                     Map<String, dynamic> resJson =
-            //                         jsonDecode(success.body);
-            //                     ScaffoldMessenger.of(context).clearSnackBars();
-            //                     ScaffoldMessenger.of(context).showSnackBar(
-            //                         AppSnackBar().customizedAppSnackBar(
-            //                             message: resJson["message"],
-            //                             context: context));
-            //                   }
-            //                 }
-            //               }
-            //
-            //               await StorageServices.setLastOrderIDs(ids);
-            //               if (mounted) {
-            //                 widget.controller.togglePackedLoading();
-            //               }
-            //             })
-            //           : (() {
-            //               ScaffoldMessenger.of(context).clearSnackBars();
-            //               ScaffoldMessenger.of(context).showSnackBar(
-            //                   AppSnackBar().customizedAppSnackBar(
-            //                       message: "Go nearer to the warehouse",
-            //                       context: context));
-            //             }),
-            //       horizontalMargin: 0,
-            //       text: "Go to bin",
-            //     ),
-            //   ),
-            // if (widget.controller.packedLoading) CustomLoadingIndicator(),
+            const SliverToBoxAdapter(child: SizedBox(height: 15)),
           ],
         ),
+      ),
+    );
+  }
+
+  /// 🧩 Reusable widget for order details
+  Widget _buildOrderCard(Order order) {
+    return Container(
+      padding: const EdgeInsets.all(15),
+      margin: const EdgeInsets.only(top: 10),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.containerBorderColor),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          _infoRow("OrderID:", order.orderId),
+          _infoRow("Name:", order.customer.name),
+          _infoRow("Phone No.:", order.customer.phoneNumber.toString()),
+          _infoRow("Address:",
+              order.customer.address.toString().replaceAll(', ', '\n')),
+          _infoRow("Bin Number:", order.binNumber.toString()),
+          _infoRow("Bin Color:", order.binColor),
+          _infoRow("Status:", order.status),
+          _infoRow("Payment Mode:", order.paymentMode ?? ""),
+          const SizedBox(height: 15),
+          _buildProductDetails(order),
+          const SizedBox(height: 25),
+          _infoRow("Total:", "₹${order.amount}", isBold: true, fontSize: 17),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoRow(String label, String value,
+      {bool isBold = false, double fontSize = 15}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColors.black,
+              fontSize: fontSize,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: AppFunctions.getColorFromString(value),
+                fontSize: fontSize,
+                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductDetails(Order order) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Product Details",
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: AppColors.green,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Column(
+            children: order.items.asMap().entries.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(child: Text(item.productName)),
+                      Text(
+                        "₹${item.amount}",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Quantity:"),
+                      Text(
+                        item.quantity.toString(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (index != order.items.length - 1) ...[
+                    const SizedBox(height: 10),
+                    Container(height: 1, color: AppColors.containerBorderColor),
+                    const SizedBox(height: 10),
+                  ],
+                ],
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }

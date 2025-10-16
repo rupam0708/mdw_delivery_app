@@ -16,6 +16,7 @@ import '../../../core/constants/constant.dart';
 import '../../../core/services/app_function_services.dart';
 import '../../../shared/widgets/custom_btn.dart';
 import '../../../shared/widgets/custom_loading_indicator.dart';
+import '../../delivery/models/orders_model.dart';
 import '../models/login_user_model.dart';
 import 'login/login_screen.dart';
 
@@ -28,12 +29,14 @@ class CodeVerificationScreen extends StatefulWidget {
     required this.btnText,
     this.orderId,
     this.riderId,
+    this.order,
     // this.rider,
   });
 
   final String head, upperText, btnText;
   final int type;
   final String? orderId, riderId;
+  final Order? order;
 
   // final LoginUserModel? rider;
 
@@ -443,10 +446,10 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                       } else if (widget.type == 1 &&
                           widget.orderId != null &&
                           rider != null) {
-                        http.Response res = await http.patch(
+                        http.Response res = await http.put(
                           Uri.parse(AppKeys.apiUrlKey +
                               AppKeys.ridersKey +
-                              AppKeys.markDAKey),
+                              AppKeys.verifyOTPKey),
                           headers: <String, String>{
                             'Content-Type': 'application/json; charset=UTF-8',
                             "authorization": "Bearer ${rider!.token}",
@@ -511,33 +514,33 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                 ),
               if (loading) CustomLoadingIndicator(),
               SizedBox(height: 20),
-              if (_resendSeconds > 0)
-                Text(
-                  "Resend available in $_resendSeconds sec",
-                  style: TextStyle(color: Colors.grey),
-                )
-              else
-                TextButton(
-                  onPressed: () async {
-                    if (widget.type == 0) {
-                      await sendAttendanceOTP();
-                    } else if (widget.type == 1) {
-                    } else if (widget.type == 2) {
-                      await sendStartShiftOTP();
-                    } else if (widget.type == 3) {
-                      await sendEndShiftOTP();
-                    } else if (widget.type == 4) {
-                      await sendPasswordResetOTP();
-                    }
-                  },
-                  child: Text(
-                    "Resend OTP",
-                    style: TextStyle(
-                      color: AppColors.green,
-                      fontWeight: FontWeight.bold,
+              if (widget.type != 1)
+                if (_resendSeconds > 0)
+                  Text(
+                    "Resend available in $_resendSeconds sec",
+                    style: const TextStyle(color: Colors.grey),
+                  )
+                else
+                  TextButton(
+                    onPressed: () async {
+                      if (widget.type == 0) {
+                        await sendAttendanceOTP();
+                      } else if (widget.type == 2) {
+                        await sendStartShiftOTP();
+                      } else if (widget.type == 3) {
+                        await sendEndShiftOTP();
+                      } else if (widget.type == 4) {
+                        await sendPasswordResetOTP();
+                      }
+                    },
+                    child: const Text(
+                      "Resend OTP",
+                      style: TextStyle(
+                        color: AppColors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
             ],
           ),
         ),

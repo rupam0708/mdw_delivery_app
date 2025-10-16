@@ -18,6 +18,11 @@ import '../../features/feedback/models/feedback_model.dart';
 import '../constants/app_keys.dart';
 
 class AppFunctions {
+  static String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
+  }
+
   static String getCurrentMonthRange() {
     final now = DateTime.now();
     final startOfMonth = DateTime(now.year, now.month, 1);
@@ -516,7 +521,7 @@ class AppFunctions {
   static int countTodayPackedOrders(List<Order> orders) {
     final today = DateTime.now();
     return orders.where((order) {
-      final packingDate = order.orderTimestamps.packing;
+      final packingDate = order.orderTimestamps?.packing;
       return packingDate != null &&
           packingDate.year == today.year &&
           packingDate.month == today.month &&
@@ -524,10 +529,10 @@ class AppFunctions {
     }).length;
   }
 
-  static int sumTodayDeliveredAmounts(List<Order> orders) {
+  static double sumTodayDeliveredAmounts(List<Order> orders) {
     final today = DateTime.now();
-    return orders.fold(0, (sum, order) {
-      final deliveredDate = order.orderTimestamps.delivered;
+    return orders.fold(0.0, (sum, order) {
+      final deliveredDate = order.orderTimestamps?.delivered;
       if (deliveredDate != null &&
           deliveredDate.year == today.year &&
           deliveredDate.month == today.month &&
