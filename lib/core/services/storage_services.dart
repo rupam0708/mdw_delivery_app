@@ -109,9 +109,25 @@ class StorageServices {
     pref.setStringList(AppKeys.lastOrderIdKey, orderIDs);
   }
 
+  static Future<void> setToSubmitCashOrderIDs(String orderID) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    List<String>? ids = await getToSubmitCashOrderIDs();
+    List<String> newIds = [];
+    if (ids != null) {
+      newIds = ids;
+      newIds.add(orderID);
+    }
+    pref.setStringList(AppKeys.toSubmitCashOrderIdKey, newIds);
+  }
+
   static Future<void> clearLastOrderIDs() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     pref.remove(AppKeys.lastOrderIdKey);
+  }
+
+  static Future<void> clearToSubmitCashOrderIDs() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.remove(AppKeys.toSubmitCashOrderIdKey);
   }
 
   static Future<bool> hasLastOrderIDs() async {
@@ -126,10 +142,28 @@ class StorageServices {
     }
   }
 
+  static Future<bool> hasToSubmitCashOrderIDs() async {
+    final lastIds = await getToSubmitCashOrderIDs();
+    log(lastIds.toString());
+    if (lastIds == null) {
+      return false;
+    } else if (lastIds.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   static Future<List<String>?> getLastOrderIDs() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     // log(pref.getKeys().toString());
     return pref.getStringList(AppKeys.lastOrderIdKey);
+  }
+
+  static Future<List<String>?> getToSubmitCashOrderIDs() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    // log(pref.getKeys().toString());
+    return pref.getStringList(AppKeys.toSubmitCashOrderIdKey);
   }
 
   static Future<FileTypeModel?> getProfilePic() async {

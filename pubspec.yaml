@@ -44,6 +44,7 @@ dependencies:
   location:
   geocoding:
   flutter_compass:
+  qr_flutter:
 #  pdf_render: ^1.4.12
 
 dev_dependencies:

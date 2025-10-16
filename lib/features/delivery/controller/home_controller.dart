@@ -29,7 +29,11 @@ class HomeController extends ChangeNotifier {
   Timer? _countdownTimer;
   Position? _currentPosition;
   StreamSubscription<Position>? _positionStream;
-  bool arrivedLoading = false, packedLoading = false, earningsLoading = false;
+  List<String> cashToBeSubmittedIds = [];
+  bool arrivedLoading = false,
+      packedLoading = false,
+      earningsLoading = false,
+      cashSubmissionLoading = false;
 
   Position? get currentPosition => _currentPosition;
 
@@ -50,23 +54,28 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleCashSubmissionLoading() {
+    cashSubmissionLoading = !cashSubmissionLoading;
+    notifyListeners();
+  }
+
   Future<void> initialize() async {
     isLoading = true;
     notifyListeners();
 
-    try {
-      final user = await StorageServices.getLoginUserDetails();
-      if (user != null) {
-        rider = LoginUserModel.fromRawJson(user);
-        await getRiderDetails();
-        await getOrders();
-        await getShiftStatus();
-        await getEarnings();
-      }
-    } catch (e) {
-      log("Initialize error: $e");
-      message = "Failed to load rider info.";
+    // try {
+    final user = await StorageServices.getLoginUserDetails();
+    if (user != null) {
+      rider = LoginUserModel.fromRawJson(user);
+      await getRiderDetails();
+      await getOrders();
+      await getShiftStatus();
+      await getEarnings();
     }
+    // } catch (e) {
+    //   log("Initialize error: $e");
+    //   message = "Failed to load rider info.";
+    // }
 
     await startLocationStream();
 
@@ -75,6 +84,12 @@ class HomeController extends ChangeNotifier {
   }
 
   EarningsModel? earnings;
+
+  Future<void> getCashToBeSubmitted() async {
+    cashToBeSubmittedIds =
+        await StorageServices.getToSubmitCashOrderIDs() ?? [];
+    notifyListeners();
+  }
 
   Future<void> getEarnings() async {
     toggleEarningsLoading();
@@ -145,7 +160,7 @@ class HomeController extends ChangeNotifier {
         Uri.parse(AppKeys.apiUrlKey + AppKeys.ridersKey + AppKeys.markDAKey),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          // "authorization": "Bearer ${rider!.token}", // add token if required
+          "authorization": "Bearer ${rider!.token}", // add token if required
         },
         body: jsonEncode(<String, dynamic>{
           "orderId": orderId,
@@ -283,6 +298,8 @@ class HomeController extends ChangeNotifier {
         message = resJson["message"] ?? "No orders found";
         notifyListeners();
       } else {
+        log("Current Order" +
+            resJson["orders"][0]["scheduledDeliveryDate"].toString());
         ordersListEmpty = false;
         ordersList = OrdersListModel.fromJson(resJson);
         message = "";
@@ -382,6 +399,8 @@ class HomeController extends ChangeNotifier {
         timer.cancel();
         this.timer = 5;
         logout();
+        tokenInvalid = false;
+        notifyListeners();
 
         onSessionExpired?.call();
         // Navigator.pushReplacement(
