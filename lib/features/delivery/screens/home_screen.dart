@@ -142,8 +142,8 @@ class _HomeScreenState extends State<HomeScreen> {
       distance = controller.calculateDistanceInKm(
         currentPosition.latitude,
         currentPosition.longitude,
-        22.5354273,
-        88.360297,
+        22.5710644,
+        88.4716693,
       );
     }
 
