@@ -258,9 +258,11 @@ class HomeController extends ChangeNotifier {
             sin(dLon / 2);
 
     final c = 2 * asin(sqrt(a));
-    final distance = earthRadius * c; // distance in kilometers (double)
+    // final distance = ; // distance in kilometers (double)
 
-    return (distance * 1000).round(); // return integer km
+    final distance = ((earthRadius * c) * 1000).round();
+    log("Distance : " + distance.toString());
+    return distance; // return integer km
   }
 
   double _degToRad(double degree) {

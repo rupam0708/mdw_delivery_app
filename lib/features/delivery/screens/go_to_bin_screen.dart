@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -37,9 +38,10 @@ class _GoToBinScreenState extends State<GoToBinScreen> {
       distance = widget.controller.calculateDistanceInKm(
         currentPosition.latitude,
         currentPosition.longitude,
-        22.5354273,
-        88.360297,
+        22.5710644,
+        88.4716693,
       );
+      log(distance.toString());
     }
 
     // 🧩 Group orders by delivery date & time range if scheduled
