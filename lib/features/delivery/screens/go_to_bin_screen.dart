@@ -77,7 +77,7 @@ class _GoToBinScreenState extends State<GoToBinScreen> {
 
                         for (final order in widget.orders) {
                           final success = await widget.controller
-                              .markOrderAsPacked(order.orderId);
+                              .markOrderAsOutForDelivery(order.orderId);
                           if (success != null) {
                             if (success.statusCode == 200) {
                               ids.add(order.orderId);
@@ -110,7 +110,8 @@ class _GoToBinScreenState extends State<GoToBinScreen> {
                         ScaffoldMessenger.of(context).clearSnackBars();
                         ScaffoldMessenger.of(context).showSnackBar(
                           AppSnackBar().customizedAppSnackBar(
-                            message: "Go nearer to the warehouse",
+                            message:
+                                "Go nearer to the warehouse. Distance: $distance m",
                             context: context,
                           ),
                         );

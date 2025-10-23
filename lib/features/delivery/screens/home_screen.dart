@@ -390,7 +390,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ScaffoldMessenger.of(context).clearSnackBars();
                     ScaffoldMessenger.of(context).showSnackBar(AppSnackBar()
                         .customizedAppSnackBar(
-                            message: "Go nearer to the warehouse",
+                            message:
+                                "Go nearer to the warehouse. Distance: $distance m",
                             context: context));
                   }
                 }

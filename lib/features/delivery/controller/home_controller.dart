@@ -124,18 +124,17 @@ class HomeController extends ChangeNotifier {
     }
   }
 
-  Future<http.Response?> markOrderAsPacked(String orderId) async {
+  Future<http.Response?> markOrderAsOutForDelivery(String orderId) async {
     togglePackedLoading();
     try {
       final response = await http.patch(
-        Uri.parse(AppKeys.apiUrlKey + AppKeys.ordersKey + AppKeys.statusKey),
+        Uri.parse(AppKeys.apiUrlKey + AppKeys.ridersKey + AppKeys.markDAKey),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          // "authorization": "Bearer ${rider!.token}",
+          "authorization": "Bearer ${rider!.token}",
         },
         body: jsonEncode(<String, dynamic>{
           "orderId": orderId,
-          "status": "Packed",
         }),
       );
 
